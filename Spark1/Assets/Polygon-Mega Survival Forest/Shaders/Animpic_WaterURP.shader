@@ -300,7 +300,7 @@ Shader "Animpic/Animpic_WaterURP"
 				float _TessMaxDisp;
 			#endif
 			CBUFFER_END
-			uniform float4 _CameraDepthTexture_TexelSize;
+			uniform float4 _CameraDepthTexture_TexelSize0;
 			sampler2D _WavesNormal;
 
 
@@ -911,7 +911,7 @@ Shader "Animpic/Animpic_WaterURP"
 				float _TessMaxDisp;
 			#endif
 			CBUFFER_END
-			uniform float4 _CameraDepthTexture_TexelSize;
+			uniform float4 _CameraDepthTexture_TexelSize1;
 
 
 			
@@ -1185,7 +1185,7 @@ Shader "Animpic/Animpic_WaterURP"
 				float _TessMaxDisp;
 			#endif
 			CBUFFER_END
-			uniform float4 _CameraDepthTexture_TexelSize;
+			uniform float4 _CameraDepthTexture_TexelSize2;
 			sampler2D _WavesNormal;
 
 
@@ -1545,7 +1545,7 @@ Shader "Animpic/Animpic_WaterURP"
 			#endif
 			CBUFFER_END
 			sampler2D _WavesNormal;
-			uniform float4 _CameraDepthTexture_TexelSize;
+			uniform float4 _CameraDepthTexture_TexelSize3;
 
 
 			
@@ -1900,7 +1900,7 @@ Shader "Animpic/Animpic_WaterURP"
 				float _TessMaxDisp;
 			#endif
 			CBUFFER_END
-			uniform float4 _CameraDepthTexture_TexelSize;
+			uniform float4 _CameraDepthTexture_TexelSize4;
 			sampler2D _WavesNormal;
 
 
@@ -2414,7 +2414,7 @@ Shader "Animpic/Animpic_WaterURP"
 			#endif
 			CBUFFER_END
 
-			uniform float4 _CameraDepthTexture_TexelSize;
+			uniform float4 _CameraDepthTexture_TexelSize5;
 
 
 			
@@ -2643,7 +2643,7 @@ Shader "Animpic/Animpic_WaterURP"
 			#endif
 			CBUFFER_END
 
-			uniform float4 _CameraDepthTexture_TexelSize;
+			uniform float4 _CameraDepthTexture_TexelSize6;
 
 
 			
