@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 8465b474699404949a1c75a5cf83fe48
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 252281
+  packageName: Poly - Nature Pack
+  packageVersion: 1.0
+  assetPath: Assets/Polygon-Mega Survival Forest/Shaders/Shaders/ForestURP.asset
+  uploadId: 648981
