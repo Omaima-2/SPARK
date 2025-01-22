@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1b353eb888d032347b19384725b45c0b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 112000000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 252281
+  packageName: Poly - Nature Pack
+  packageVersion: 1.0
+  assetPath: Assets/Polygon-Mega Survival Forest/Shaders/Scenes/Demo/LightingData.asset
+  uploadId: 648981

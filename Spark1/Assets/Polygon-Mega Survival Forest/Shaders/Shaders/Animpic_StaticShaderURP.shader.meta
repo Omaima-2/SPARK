@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 391e8e9b293656943bc3056ea862306e
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 252281
+  packageName: Poly - Nature Pack
+  packageVersion: 1.0
+  assetPath: Assets/Polygon-Mega Survival Forest/Shaders/Shaders/Animpic_StaticShaderURP.shader
+  uploadId: 648981

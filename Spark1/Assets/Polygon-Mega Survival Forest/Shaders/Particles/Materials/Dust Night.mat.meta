@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 646bf43acb79757409c3f6703508cfe0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 252281
+  packageName: Poly - Nature Pack
+  packageVersion: 1.0
+  assetPath: Assets/Polygon-Mega Survival Forest/Shaders/Particles/Materials/Dust
+    Night.mat
+  uploadId: 648981

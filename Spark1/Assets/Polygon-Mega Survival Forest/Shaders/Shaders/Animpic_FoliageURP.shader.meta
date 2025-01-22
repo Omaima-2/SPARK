@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 2d41bc53bb801b94d8c443016b6d82f0
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 252281
+  packageName: Poly - Nature Pack
+  packageVersion: 1.0
+  assetPath: Assets/Polygon-Mega Survival Forest/Shaders/Shaders/Animpic_FoliageURP.shader
+  uploadId: 648981

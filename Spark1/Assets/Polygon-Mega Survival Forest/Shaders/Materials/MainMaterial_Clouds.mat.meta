@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 056d2575b3da9ba448605c20d7c4e06c
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 252281
+  packageName: Poly - Nature Pack
+  packageVersion: 1.0
+  assetPath: Assets/Polygon-Mega Survival Forest/Shaders/Materials/MainMaterial_Clouds.mat
+  uploadId: 648981
