@@ -14,6 +14,6 @@ public class Walk : MonoBehaviour
     void FixedUpdate()
     {
         rb.angularVelocity = Vector3.zero;
-        rb.MovePosition(transform.position + transform.forward * speed * Time.deltaTime);
+        rb.MovePosition(transform.position + speed * Time.deltaTime * transform.forward);
     }
 }
