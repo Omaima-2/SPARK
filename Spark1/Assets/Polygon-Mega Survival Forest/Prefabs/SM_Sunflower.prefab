@@ -24,15 +24,15 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3238416117921555906}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0.9848078, z: -0, w: -0.17364809}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6525000521913215578}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 200, z: 0}
 --- !u!205 &6040835775519453924
 LODGroup:
   m_ObjectHideFlags: 0
@@ -65,6 +65,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 2862876360595832696}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 1dc8e257850428c40a5009ea6dfe0958, type: 3}
@@ -112,7 +113,7 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -3373863221627136203, guid: 1dc8e257850428c40a5009ea6dfe0958, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 28945c830eb0d3a49b279207bc1df1e8, type: 2}
     - target: {fileID: 919132149155446097, guid: 1dc8e257850428c40a5009ea6dfe0958, type: 3}
@@ -120,15 +121,18 @@ PrefabInstance:
       value: SM_Sunflower_LOD
       objectReference: {fileID: 0}
     - target: {fileID: 1839311604280030502, guid: 1dc8e257850428c40a5009ea6dfe0958, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 28945c830eb0d3a49b279207bc1df1e8, type: 2}
     - target: {fileID: 5833278835620505038, guid: 1dc8e257850428c40a5009ea6dfe0958, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 28945c830eb0d3a49b279207bc1df1e8, type: 2}
     m_RemovedComponents:
     - {fileID: 4742473837712756890, guid: 1dc8e257850428c40a5009ea6dfe0958, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1dc8e257850428c40a5009ea6dfe0958, type: 3}
 --- !u!23 &876633322190903940 stripped
 MeshRenderer:
