@@ -1,62 +1,59 @@
 using Firebase.Extensions;
 using Firebase.Firestore;
-using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class Ddbmanager1 : MonoBehaviour
 {
     private FirebaseFirestore db;
-
-    // Reference to the Text UI component
-    public Text textUI;
+    public Text textUI; // Reference to the Text UI component
 
     void Start()
     {
-        // Initialize Firestore
         db = FirebaseFirestore.DefaultInstance;
+        StartCoroutine(FetchDialoguesSequentially());
+    }
 
-        // Reference the document "d1" in the "Dialogues" collection
-        DocumentReference docRef = db.Collection("d").Document("d2");
+    IEnumerator FetchDialoguesSequentially()
+    {
+        yield return FetchDialogue("D1"); // Fetch first dialogue
+        yield return new WaitForSeconds(120); // Wait 7 seconds
+        yield return FetchDialogue("D2"); // Fetch second dialogue
+    }
 
-        // Fetch the document
-        docRef.GetSnapshotAsync().ContinueWithOnMainThread(task =>
+    IEnumerator FetchDialogue(string dialogueId)
+    {
+        DocumentReference docRef = db.Collection("Dialogues").Document(dialogueId);
+        var task = docRef.GetSnapshotAsync();
+
+        yield return new WaitUntil(() => task.IsCompleted);
+
+        if (task.IsFaulted)
         {
-            if (task.IsCompleted)
+            Debug.LogError($"Failed to fetch document {dialogueId}: {task.Exception}");
+        }
+        else
+        {
+            DocumentSnapshot snapshot = task.Result;
+            if (snapshot.Exists && snapshot.TryGetValue("text", out string text))
             {
-                DocumentSnapshot snapshot = task.Result;
-                if (snapshot.Exists)
+                Debug.Log($"Text field value ({dialogueId}): {text}");
+                if (textUI != null)
                 {
-                    // Access the "text" field in the document
-                    if (snapshot.TryGetValue<string>("text", out string text))
-                    {
-                        Debug.Log("Text field value: " + text);
-
-                        // Update the Text UI component
-                        if (textUI != null)
-                        {
-                            textUI.text = text;
-                        }
-                        else
-                        {
-                            Debug.LogWarning("Text UI component is not assigned.");
-                        }
-                    }
-                    else
-                    {
-                        Debug.Log("The 'text' field is missing in the document.");
-                    }
+                    textUI.text = text;
                 }
                 else
                 {
-                    Debug.Log("Document 'd1' does not exist!");
+                    Debug.LogWarning("Text UI component is not assigned.");
                 }
             }
             else
             {
-                Debug.LogError("Failed to fetch document: " + task.Exception);
+                Debug.Log($"Document '{dialogueId}' does not exist or missing 'text' field!");
             }
-        });
+        }
     }
 }
+
 
