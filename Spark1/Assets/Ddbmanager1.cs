@@ -17,7 +17,7 @@ public class Ddbmanager1 : MonoBehaviour
         db = FirebaseFirestore.DefaultInstance;
 
         // Reference the document "d1" in the "Dialogues" collection
-        DocumentReference docRef = db.Collection("Dialogues").Document("d1");
+        DocumentReference docRef = db.Collection("d").Document("d2");
 
         // Fetch the document
         docRef.GetSnapshotAsync().ContinueWithOnMainThread(task =>
