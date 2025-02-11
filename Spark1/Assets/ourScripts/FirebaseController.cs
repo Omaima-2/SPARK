@@ -1,24 +1,24 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Firebase;
-using Firebase.Auth;  // Fix the incorrect 'using FirebaseAuth'
-using System;
 using System.Threading.Tasks;
+using Firebase;
+using Firebase.Auth;
 
 public class FirebaseController : MonoBehaviour
 {
-    private FirebaseAuth auth;  // Declare FirebaseAuth here
-    private FirebaseUser user;  // Declare FirebaseUser here
+    private FirebaseAuth auth;  
+    private FirebaseUser user;  
 
     public GameObject loginPanel, signupPanel; 
-    public InputField loginEmail, loginPassword, signupEmail, signupPassword, signupCPassword, signupUsername; 
+    public InputField loginEmail, loginPassword, signupEmail, signupPassword, signupCPassword;  
 
-void Start()
-{
-    InitializeFirebase();
-}
+    void Start()
+    {
+        InitializeFirebase();
+    }
 
     public void OpenLogin()
     {
@@ -39,13 +39,15 @@ void Start()
             Debug.Log("Login fields cannot be empty.");
             return;
         }
-        
-        signInUser(loginEmail.text, loginPassword.text);
+
+        SignInUser(loginEmail.text, loginPassword.text);
     }
 
     public void SignupUser()
     {
-        if (string.IsNullOrEmpty(signupEmail.text) || string.IsNullOrEmpty(signupPassword.text) || string.IsNullOrEmpty(signupCPassword.text))
+        if (string.IsNullOrEmpty(signupEmail.text) || 
+            string.IsNullOrEmpty(signupPassword.text) || 
+            string.IsNullOrEmpty(signupCPassword.text))
         {
             Debug.Log("Signup fields cannot be empty.");
             return;
@@ -57,120 +59,94 @@ void Start()
             return;
         }
 
-        createUser(signupEmail.text, signupPassword.text, signupUsername.text);
+        CreateUser(signupEmail.text, signupPassword.text);
     }
 
-    void createUser(string email, string password, string userName)
+    async void CreateUser(string email, string password)
     {
-      if (auth == null)
-    {
-        Debug.LogError("FirebaseAuth instance is null. Initialize Firebase first.");
-        return;
-    }
-
-        auth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWith(task => {
-            if (task.IsCanceled) {
-                Debug.LogError("CreateUserWithEmailAndPasswordAsync was canceled.");
-                return;
-            }
-            if (task.IsFaulted) {
-                Debug.LogError("CreateUserWithEmailAndPasswordAsync encountered an error: " + task.Exception);
-                return;
-            }
-
-            user = auth.CurrentUser;
-        if (user != null)
+        if (auth == null)
         {
-            Debug.LogFormat("Firebase user created successfully: {0} ({1})", user.DisplayName, user.UserId);
-            updateProfile(userName);
+            Debug.LogError("FirebaseAuth instance is null. Initialize Firebase first.");
+            return;
         }
 
-        });
+        try
+        {
+            var result = await auth.CreateUserWithEmailAndPasswordAsync(email, password);
+            user = result.User;
+
+            if (user != null)
+            {
+                Debug.LogFormat("User created successfully: {0} ({1})", user.Email, user.UserId);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error creating user: " + e.Message);
+        }
     }
 
-    public void signInUser(string email, string password)
+    async void SignInUser(string email, string password)
     {
-        auth.SignInWithEmailAndPasswordAsync(email, password).ContinueWith(task => {
-            if (task.IsCanceled) {
-                Debug.LogError("SignInWithEmailAndPasswordAsync was canceled.");
-                return;
-            }
-            if (task.IsFaulted) {
-                Debug.LogError("SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
-                return;
-            }
+        try
+        {
+            var result = await auth.SignInWithEmailAndPasswordAsync(email, password);
+            user = result.User;
 
-            FirebaseUser newUser = auth.CurrentUser;
-            Debug.LogFormat("User signed in successfully: {0} ({1})",
-                newUser.DisplayName, newUser.UserId);
-
-        });
+            if (user != null)
+            {
+                Debug.LogFormat("User signed in successfully: {0} ({1})", user.Email, user.UserId);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error signing in: " + e.Message);
+        }
     }
 
     void InitializeFirebase()
-{
-    FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
     {
-        if (task.Result == DependencyStatus.Available)
+        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
         {
-            auth = FirebaseAuth.DefaultInstance;
-            auth.StateChanged += AuthStateChanged;
-            AuthStateChanged(this, null);
-            Debug.Log("Firebase is initialized successfully.");
-        }
-        else
-        {
-            Debug.LogError("Could not resolve all Firebase dependencies: " + task.Result);
-        }
-    });
-}
+            if (task.Result == DependencyStatus.Available)
+            {
+                auth = FirebaseAuth.DefaultInstance;
+                auth.StateChanged += AuthStateChanged;
+                AuthStateChanged(this, null);
+                Debug.Log("Firebase initialized successfully.");
+            }
+            else
+            {
+                Debug.LogError("Could not resolve Firebase dependencies: " + task.Result);
+            }
+        });
+    }
 
     void AuthStateChanged(object sender, System.EventArgs eventArgs)
     {
         if (auth.CurrentUser != user)
         {
-            bool signedIn = user != auth.CurrentUser && auth.CurrentUser != null
-                && auth.CurrentUser.IsValid();
+            bool signedIn = user != auth.CurrentUser && auth.CurrentUser != null;
+
             if (!signedIn && user != null)
             {
-                Debug.Log("Signed out " + user.UserId);
+                Debug.Log("Signed out: " + user.UserId);
             }
+
             user = auth.CurrentUser;
+
             if (signedIn)
             {
-                Debug.Log("Signed in " + user.UserId);
+                Debug.Log("Signed in: " + user.UserId);
             }
         }
     }
 
     void OnDestroy()
     {
-        auth.StateChanged -= AuthStateChanged;
-        auth = null;
-    }
-
-    void updateProfile(string userName)
-    {
-        FirebaseUser user = auth.CurrentUser;
-        if (user != null)
+        if (auth != null)
         {
-            UserProfile profile = new UserProfile {
-                DisplayName = userName,
-                PhotoUrl = new Uri("https://picsum.photos/200"),
-            };
-            user.UpdateUserProfileAsync(profile).ContinueWith(task => {
-                if (task.IsCanceled) {
-                    Debug.LogError("UpdateUserProfileAsync was canceled.");
-                    return;
-                }
-                if (task.IsFaulted) {
-                    Debug.LogError("UpdateUserProfileAsync encountered an error: " + task.Exception);
-                    return;
-                }
-
-                Debug.Log("User profile updated successfully.");
-            });
+            auth.StateChanged -= AuthStateChanged;
         }
     }
 }
-
