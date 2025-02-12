@@ -10,7 +10,7 @@ public class Ddbmanager1 : MonoBehaviour
     private FirebaseFirestore db;
     public Text textUI; // Reference to the Text UI component
     public FrameTrigger frame2Trigger; // Reference to the FrameTrigger script for frame2
-    public FrameTrigger frame2Trigger; // Reference to the FrameTrigger script for frame2
+    // Reference to the FrameTrigger script for frame2
 
     void Start()
     {
