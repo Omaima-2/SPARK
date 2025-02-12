@@ -6,7 +6,7 @@ public class idleState : StateMachineBehaviour
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         // Ensure the GameObject is rotated to Y = 35 when entering idle state
-        animator.gameObject.transform.rotation = Quaternion.Euler(0, 152, 0);
+        animator.gameObject.transform.rotation = Quaternion.Euler(0, 153, 0);
     }
 
     // You can use OnStateExit if needed to reset or change the rotation when leaving the idle state
