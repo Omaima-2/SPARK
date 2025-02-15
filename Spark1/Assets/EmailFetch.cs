@@ -3,37 +3,49 @@ using Firebase;
 using Firebase.Auth;
 using UnityEngine.UI;
 
-public class EmailFetch : MonoBehaviour
+public class NameFetch : MonoBehaviour
 {
     private FirebaseAuth auth;
     private FirebaseUser user;
 
-    public Text emailText; // Assign a UI Text component in Unity
+    public Text nameText; // Assign a UI Text component in Unity
 
     void Start()
     {
         auth = FirebaseAuth.DefaultInstance;
-        FetchUserEmail();
+        FetchUserName();
     }
 
-    public void FetchUserEmail()
+    public void FetchUserName()
     {
         user = auth.CurrentUser;
         if (user != null)
         {
-            string userEmail = user.Email;
-            Debug.Log("User Email: " + userEmail);
-            if (emailText != null)
+            string userName = user.DisplayName; // Fetch user name
+            Debug.Log("User Name: " + userName);
+
+            if (!string.IsNullOrEmpty(userName))
             {
-                emailText.text = "Email: " + userEmail;
+                if (nameText != null)
+                {
+                    nameText.text = userName;
+                }
+            }
+            else
+            {
+                Debug.Log("User name is not set.");
+                if (nameText != null)
+                {
+                    nameText.text = "No name available.";
+                }
             }
         }
         else
         {
             Debug.Log("No user is currently signed in.");
-            if (emailText != null)
+            if (nameText != null)
             {
-                emailText.text = "No user signed in.";
+                nameText.text = "No user signed in.";
             }
         }
     }
