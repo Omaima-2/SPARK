@@ -10,7 +10,6 @@ public class Ddbmanager1 : MonoBehaviour
     private FirebaseFirestore db;
     public Text textUI; // Reference to the Text UI component
     public FrameTrigger frame2Trigger; // Reference to the FrameTrigger script for frame2
-    // Reference to the FrameTrigger script for frame2
 
     void Start()
     {
@@ -89,7 +88,6 @@ public class Ddbmanager1 : MonoBehaviour
         var dialogueTask = dialogueRef.GetSnapshotAsync();
 
         yield return new WaitUntil(() => dialogueTask.IsCompleted);
-
         if (dialogueTask.IsFaulted)
         {
             Debug.LogError($"Failed to fetch dialogue from {dialogueRef.Path}: {dialogueTask.Exception}");
@@ -97,24 +95,65 @@ public class Ddbmanager1 : MonoBehaviour
         else
         {
             DocumentSnapshot dialogueSnapshot = dialogueTask.Result;
-            if (dialogueSnapshot.Exists && dialogueSnapshot.TryGetValue("text", out string text))
+            if (dialogueSnapshot.Exists)
             {
-                Debug.Log($"Text field value ({dialogueRef.Path}): {text}");
-                if (textUI != null)
+                // Fetch text field
+                string text = "";
+                if (dialogueSnapshot.TryGetValue("text", out text))
                 {
-                    textUI.text = text;
+                    Debug.Log($"Text field value ({dialogueRef.Path}): {text}");
+                    if (textUI != null)
+                    {
+                        textUI.text = text;
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Text UI component is not assigned.");
+                    }
                 }
                 else
                 {
-                    Debug.LogWarning("Text UI component is not assigned.");
+                    Debug.LogError($"Dialogue document '{dialogueRef.Path}' does not contain 'text' field!");
+                }
+
+                // Fetch audio field
+                string audioUrl = "";
+                if (dialogueSnapshot.TryGetValue("Audio", out audioUrl))
+                {
+                    Debug.Log($"Audio field value ({dialogueRef.Path}): {audioUrl}");
+                    StartCoroutine(PlayAudio(audioUrl)); // Play the audio
+                }
+                else
+                {
+                    Debug.LogError($"Dialogue document '{dialogueRef.Path}' does not contain 'Audio' field!");
                 }
             }
             else
             {
-                Debug.LogError($"Dialogue document '{dialogueRef.Path}' does not exist or missing 'text' field!");
+                Debug.LogError($"Dialogue document '{dialogueRef.Path}' does not exist!");
             }
         }
     }
+    IEnumerator PlayAudio(string url)
+    {
+        using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequestMultimedia.GetAudioClip(url, AudioType.MPEG))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result == UnityEngine.Networking.UnityWebRequest.Result.ConnectionError ||
+                www.result == UnityEngine.Networking.UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogError("Error loading audio: " + www.error);
+            }
+            else
+            {
+                AudioClip clip = UnityEngine.Networking.DownloadHandlerAudioClip.GetContent(www);
+                AudioSource audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.clip = clip;
+                audioSource.Play();
+            }
+        }
+    }
+
+
 }
-
-
