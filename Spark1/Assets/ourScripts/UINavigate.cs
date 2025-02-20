@@ -3,7 +3,6 @@ using UnityEngine;
 public class UIPanelNavigation : MonoBehaviour
 {
     public GameObject loginPanel;
-   
     public GameObject welcomePanel;
 
     // Function to Show the Login Panel
@@ -12,6 +11,4 @@ public class UIPanelNavigation : MonoBehaviour
         loginPanel.SetActive(true);
         welcomePanel.SetActive(false);
     }
-
-    // Function to Show the Signup Panel
 }
