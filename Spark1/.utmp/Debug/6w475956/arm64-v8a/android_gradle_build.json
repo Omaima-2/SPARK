@@ -1,8 +1,8 @@
 {
   "buildFiles": [
-    "C:\\Spark\\SPARK\\Spark1\\Library\\Bee\\Android\\Prj\\IL2CPP\\Gradle\\unityLibrary\\src\\main\\cpp\\CMakeLists.txt",
-    "C:\\Spark\\SPARK\\Spark1\\Library\\Bee\\Android\\Prj\\IL2CPP\\Gradle\\unityLibrary\\src\\main\\cpp\\FramePacing\\CMakeLists.txt",
-    "C:\\Spark\\SPARK\\Spark1\\Library\\Bee\\Android\\Prj\\IL2CPP\\Gradle\\unityLibrary\\src\\main\\cpp\\GameActivity\\CMakeLists.txt"
+    "C:\\Spark\\SPARK\\Spark1\\Library\\PramData\\AndroidApplicationController\\Cache\\com.DefaultCompany.Spark1\\gradle-project\\unityLibrary\\src\\main\\cpp\\CMakeLists.txt",
+    "C:\\Spark\\SPARK\\Spark1\\Library\\PramData\\AndroidApplicationController\\Cache\\com.DefaultCompany.Spark1\\gradle-project\\unityLibrary\\src\\main\\cpp\\FramePacing\\CMakeLists.txt",
+    "C:\\Spark\\SPARK\\Spark1\\Library\\PramData\\AndroidApplicationController\\Cache\\com.DefaultCompany.Spark1\\gradle-project\\unityLibrary\\src\\main\\cpp\\GameActivity\\CMakeLists.txt"
   ],
   "cleanCommandsComponents": [
     [
@@ -23,14 +23,14 @@
       "toolchain": "toolchain",
       "abi": "arm64-v8a",
       "artifactName": "game",
-      "output": "C:\\Spark\\SPARK\\Spark1\\Library\\Bee\\Android\\Prj\\IL2CPP\\Gradle\\unityLibrary\\build\\intermediates\\cxx\\Debug\\6w475956\\obj\\arm64-v8a\\libgame.so",
+      "output": "C:\\Spark\\SPARK\\Spark1\\Library\\PramData\\AndroidApplicationController\\Cache\\com.DefaultCompany.Spark1\\gradle-project\\unityLibrary\\build\\intermediates\\cxx\\Debug\\6w475956\\obj\\arm64-v8a\\libgame.so",
       "runtimeFiles": []
     },
     "swappywrapper::@7e25bd1f32ce224db4e9": {
       "toolchain": "toolchain",
       "abi": "arm64-v8a",
       "artifactName": "swappywrapper",
-      "output": "C:\\Spark\\SPARK\\Spark1\\Library\\Bee\\Android\\Prj\\IL2CPP\\Gradle\\unityLibrary\\build\\intermediates\\cxx\\Debug\\6w475956\\obj\\arm64-v8a\\libswappywrapper.so",
+      "output": "C:\\Spark\\SPARK\\Spark1\\Library\\PramData\\AndroidApplicationController\\Cache\\com.DefaultCompany.Spark1\\gradle-project\\unityLibrary\\build\\intermediates\\cxx\\Debug\\6w475956\\obj\\arm64-v8a\\libswappywrapper.so",
       "runtimeFiles": []
     }
   },
