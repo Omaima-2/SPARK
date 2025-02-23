@@ -1,4 +1,4 @@
-using UnityEngine;
+using UnityEngine; 
 using UnityEngine.UI;
 using TMPro;
 using System;
@@ -16,7 +16,7 @@ public class FirebaseController : MonoBehaviour
 
     public GameObject loginPanel, signupPanel, homePanel;
     public InputField loginEmail, loginPassword, signupEmail, signupPassword, signupCPassword, signupName;
-    public TextMeshProUGUI errorText; // UI TextMesh Pro element for displaying error messages
+    public  TextMeshProUGUI errorTextSignUp ,errorTextLogin; // UI TextMesh Pro element for displaying error messages
 
     async void Start()
     {
@@ -59,7 +59,7 @@ public class FirebaseController : MonoBehaviour
     {
         if (string.IsNullOrEmpty(loginEmail.text) || string.IsNullOrEmpty(loginPassword.text))
         {
-            DisplayError("Login fields cannot be empty.");
+            DisplayError("Oops! Fill in both fields.", true);
             return;
         }
 
@@ -79,18 +79,18 @@ public class FirebaseController : MonoBehaviour
             string.IsNullOrEmpty(signupPassword.text) ||
             string.IsNullOrEmpty(signupCPassword.text))
         {
-            DisplayError("Signup fields cannot be empty.");
+            DisplayError("Oops! All fields are required.😊");
             return;
         }
         if (!IsValidEmail(signupEmail.text)) // 🔥 Validate Email Format
         {
-            DisplayError("Invalid email format. Please enter a valid email.");
+            DisplayError("Hmm..That doesn't look like a valid email.try again!✨");
             return;
         }
 
         if (signupPassword.text != signupCPassword.text)
         {
-            DisplayError("Passwords do not match.");
+            DisplayError("Oops! Your passwords don't match. Try again!");
             return;
         }
 
@@ -125,38 +125,98 @@ public class FirebaseController : MonoBehaviour
                 ShowHomePanel();
             }
         }
-        catch (Exception e)
-        {
-            DisplayError("Error creating user: " + e.Message);
-        }
-    }
+catch (FirebaseException firebaseEx)
+{
+    Debug.LogError("🔥 Firebase Auth Error: " + firebaseEx.Message);
 
-    async void SignInUser(string email, string password)
+    AuthError errorCode = (AuthError)firebaseEx.ErrorCode; // Convert to Firebase AuthError
+
+    switch (errorCode)
     {
-        try
-        {
-            var result = await auth.SignInWithEmailAndPasswordAsync(email, password);
-            user = result.User;
+        case AuthError.EmailAlreadyInUse:
+            DisplayError("Oops! This email is already taken. Try another one");
+            break;
+        case AuthError.InvalidEmail:
+            DisplayError("Hmm... That doesn't look like a valid email.try again!✨");
+            break;
+        case AuthError.WeakPassword:
+            DisplayError("Your password needs a little more strength!");
+            break;
+        default:
+            DisplayError("Something went wrong, but don't worry! Try again in a moment. 🌟");
+            break;
+    }
+}
+catch (Exception e)
+{
+    Debug.LogError("🔥 Unexpected Error: " + e.Message);
+    DisplayError("Uh-oh! Something went wrong. Give it another shot! 🚀");
+}
 
-            if (user != null)
-            {
-                string userName = user.DisplayName; // Retrieve name from Firebase Authentication
-                Debug.LogFormat("✅ User signed in successfully: {0} ({1}) - Name: {2}", user.Email, user.UserId, userName);
-                ShowHomePanel();
-            }
-        }
-        catch (FirebaseException firebaseEx)
-        {
-            Debug.LogError("🔥 Firebase Auth Error: " + firebaseEx.Message);
-            DisplayError("Authentication failed: " + firebaseEx.Message);
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Error signing in: " + e.Message);
-            DisplayError("An unexpected error occurred. Please try again.");
-        }
+
     }
 
+   async void SignInUser(string email, string password)
+{
+    try
+    {
+        var result = await auth.SignInWithEmailAndPasswordAsync(email, password);
+        user = result.User;
+
+        if (user != null)
+        {
+            Debug.LogFormat("✅ User signed in successfully: {0} ({1})", user.Email, user.UserId);
+            HideError(true);
+            ShowHomePanel();
+        }
+    }
+    catch (FirebaseException firebaseEx)
+    {
+        Debug.LogError($"🔥 Firebase Auth Error ({firebaseEx.ErrorCode}): {firebaseEx.Message}");
+
+        AuthError errorCode = (AuthError)firebaseEx.ErrorCode;
+
+        switch (errorCode)
+        {
+            case AuthError.WrongPassword:
+                DisplayError("Oops! Incorrect password. Try again. 🔑", true);
+                break;
+            case AuthError.UserNotFound:
+                Debug.LogError("🔥 ERROR: User not found! This should display in UI.");
+                DisplayError("Oh no! We couldn't find that account. Try signing up first! 📩", true);
+                break;
+            case AuthError.InvalidEmail:
+                DisplayError("That doesn’t look like a valid email. Try again! ✨", true);
+                break;
+            case AuthError.UserDisabled:
+                DisplayError("This account has been disabled. Please contact support.", true);
+                break;
+            default:
+                Debug.LogError($"🔥 Unknown Firebase Error: {errorCode} - {firebaseEx.Message}");
+                DisplayError("Something went wrong, try again later. 🌟", true);
+                break;
+        }
+    }
+    catch (Exception e)
+    {
+        Debug.LogError($"🔥 Unexpected error: {e.Message}");
+        DisplayError("An unexpected error occurred. Please try again. 🚀", true);
+    }
+}
+
+void HideError(bool isLogin)
+{
+    if (isLogin && errorTextLogin != null)
+    {
+        errorTextLogin.text = ""; // Clear the error message
+        errorTextLogin.gameObject.SetActive(false); // Hide the text
+    }
+    else if (!isLogin && errorTextSignUp != null)
+    {
+        errorTextSignUp.text = "";
+        errorTextSignUp.gameObject.SetActive(false);
+    }
+}
 
     void AuthStateChanged(object sender, EventArgs eventArgs)
     {
@@ -186,15 +246,40 @@ public class FirebaseController : MonoBehaviour
         }
     }
 
-    void DisplayError(string message)
+    void DisplayError(string message, bool isLogin = false)
+{
+    Debug.LogError("Displaying error: " + message);
+
+    if (isLogin)
     {
-        Debug.LogError(message);
-        if (errorText != null)
+        if (errorTextLogin != null)
         {
-            errorText.text = message; // Display error in UI
+            errorTextLogin.gameObject.SetActive(false); // Force refresh
+            errorTextLogin.text = message;
+            errorTextLogin.gameObject.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("⚠ errorTextLogin is NULL! Assign it in the Inspector.");
         }
     }
-    
+    else
+    {
+        if (errorTextSignUp != null)
+        {
+            errorTextSignUp.gameObject.SetActive(false);
+            errorTextSignUp.text = message;
+            errorTextSignUp.gameObject.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("⚠ errorTextSignUp is NULL! Assign it in the Inspector.");
+        }
+    }
+}
+
+
+   
     void ShowHomePanel()
     {
         loginPanel.SetActive(false);
