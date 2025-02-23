@@ -82,11 +82,11 @@ public class FirebaseController : MonoBehaviour
             DisplayError("Signup fields cannot be empty.");
             return;
         }
-         if (!IsValidEmail(signupEmail.text)) // 🔥 Validate Email Format
-    {
-        DisplayError("Invalid email format. Please enter a valid email.");
-        return;
-    }
+        if (!IsValidEmail(signupEmail.text)) // 🔥 Validate Email Format
+        {
+            DisplayError("Invalid email format. Please enter a valid email.");
+            return;
+        }
 
         if (signupPassword.text != signupCPassword.text)
         {
@@ -122,7 +122,7 @@ public class FirebaseController : MonoBehaviour
                 });
 
                 Debug.Log("✅ User information stored in Firestore.");
-                  ShowHomePanel();
+                ShowHomePanel();
             }
         }
         catch (Exception e)
@@ -132,30 +132,30 @@ public class FirebaseController : MonoBehaviour
     }
 
     async void SignInUser(string email, string password)
-{
-    try
     {
-        var result = await auth.SignInWithEmailAndPasswordAsync(email, password);
-        user = result.User;
-
-        if (user != null)
+        try
         {
-            string userName = user.DisplayName; // Retrieve name from Firebase Authentication
-            Debug.LogFormat("✅ User signed in successfully: {0} ({1}) - Name: {2}", user.Email, user.UserId, userName);
-              ShowHomePanel();
+            var result = await auth.SignInWithEmailAndPasswordAsync(email, password);
+            user = result.User;
+
+            if (user != null)
+            {
+                string userName = user.DisplayName; // Retrieve name from Firebase Authentication
+                Debug.LogFormat("✅ User signed in successfully: {0} ({1}) - Name: {2}", user.Email, user.UserId, userName);
+                ShowHomePanel();
+            }
+        }
+        catch (FirebaseException firebaseEx)
+        {
+            Debug.LogError("🔥 Firebase Auth Error: " + firebaseEx.Message);
+            DisplayError("Authentication failed: " + firebaseEx.Message);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error signing in: " + e.Message);
+            DisplayError("An unexpected error occurred. Please try again.");
         }
     }
-    catch (FirebaseException firebaseEx)
-    {
-        Debug.LogError("🔥 Firebase Auth Error: " + firebaseEx.Message);
-        DisplayError("Authentication failed: " + firebaseEx.Message);
-    }
-    catch (Exception e)
-    {
-        Debug.LogError("Error signing in: " + e.Message);
-        DisplayError("An unexpected error occurred. Please try again.");
-    }
-}
 
 
     void AuthStateChanged(object sender, EventArgs eventArgs)
@@ -193,26 +193,27 @@ public class FirebaseController : MonoBehaviour
         {
             errorText.text = message; // Display error in UI
         }
-    }void ShowHomePanel()
-{
-    loginPanel.SetActive(false);
-    signupPanel.SetActive(false);
-    homePanel.SetActive(true);
+    }
+    
+    void ShowHomePanel()
+    {
+        loginPanel.SetActive(false);
+        signupPanel.SetActive(false);
+        homePanel.SetActive(true);
+    }
 
-   
-}
-private bool IsValidEmail(string email)
-{
-    try
+    private bool IsValidEmail(string email)
     {
-        var addr = new System.Net.Mail.MailAddress(email);
-        return addr.Address == email;
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
     }
-    catch
-    {
-        return false;
-    }
-}
 
 
 }

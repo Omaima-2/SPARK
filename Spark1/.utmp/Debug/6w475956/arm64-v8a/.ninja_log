@@ -1,12 +1,12 @@
 # ninja log v5
-127	674	7607966537104607	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	e3c3bde8f5888b48
-34	3376	7607966562823406	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	c3b5ed37cf8d881b
-47	3582	7607966566152015	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	a47c074337dbe589
-83	3962	7607966569187901	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	6f56e3123c2982b9
-97	4031	7607966569415210	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	3a7e45a24d292ff3
-71	4075	7607966570606823	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	cf6b49e02ace906c
-22	4189	7607966572159476	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	91e8bddd8605b96c
-2	4238	7607966572392511	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	e008178527a8a8b7
-59	4262	7607966572806887	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	14f72ea64426fd6c
-676	4296	7607966570194964	C:/Spark/SPARK/Spark1/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/6w475956/obj/arm64-v8a/libswappywrapper.so	396574b0b8b36572
-4263	4969	7607966578426881	C:/Spark/SPARK/Spark1/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/6w475956/obj/arm64-v8a/libgame.so	e897d0e48e21f406
+95	373	7616633407571228	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	68252d5118c10d85
+375	991	7616633411063619	C:/Spark/SPARK/Spark1/Library/PramData/AndroidApplicationController/Cache/com.DefaultCompany.Spark1/gradle-project/unityLibrary/build/intermediates/cxx/Debug/6w475956/obj/arm64-v8a/libswappywrapper.so	3f013ca08a2f410c
+42	1650	7616633419689551	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	c3c356bd8721618b
+20	1825	7616633420018390	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	18ee24d3fb4aab00
+56	1836	7616633422324346	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	3a829a083ff680ef
+11	1887	7616633423158927	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	7595bc596e94e1cf
+71	1917	7616633423428799	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	23f95c03d788a436
+83	2058	7616633424940311	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	2615b48c01992554
+2	2061	7616633424940311	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	2c25083ccdc36170
+31	2168	7616633425346945	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	4e241d7749786bf2
+2169	2305	7616633427272047	C:/Spark/SPARK/Spark1/Library/PramData/AndroidApplicationController/Cache/com.DefaultCompany.Spark1/gradle-project/unityLibrary/build/intermediates/cxx/Debug/6w475956/obj/arm64-v8a/libgame.so	3bce4225442d2f38

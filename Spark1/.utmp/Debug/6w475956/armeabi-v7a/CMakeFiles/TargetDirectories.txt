@@ -1,0 +1,8 @@
+C:/Spark/SPARK/Spark1/.utmp/Debug/6w475956/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Spark/SPARK/Spark1/.utmp/Debug/6w475956/armeabi-v7a/CMakeFiles/rebuild_cache.dir
+C:/Spark/SPARK/Spark1/.utmp/Debug/6w475956/armeabi-v7a/GameActivity/CMakeFiles/game.dir
+C:/Spark/SPARK/Spark1/.utmp/Debug/6w475956/armeabi-v7a/GameActivity/CMakeFiles/edit_cache.dir
+C:/Spark/SPARK/Spark1/.utmp/Debug/6w475956/armeabi-v7a/GameActivity/CMakeFiles/rebuild_cache.dir
+C:/Spark/SPARK/Spark1/.utmp/Debug/6w475956/armeabi-v7a/FramePacing/CMakeFiles/swappywrapper.dir
+C:/Spark/SPARK/Spark1/.utmp/Debug/6w475956/armeabi-v7a/FramePacing/CMakeFiles/edit_cache.dir
+C:/Spark/SPARK/Spark1/.utmp/Debug/6w475956/armeabi-v7a/FramePacing/CMakeFiles/rebuild_cache.dir

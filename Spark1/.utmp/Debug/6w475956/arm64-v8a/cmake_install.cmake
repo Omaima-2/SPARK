@@ -1,4 +1,4 @@
-# Install script for directory: C:/Spark/SPARK/Spark1/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp
+# Install script for directory: C:/Spark/SPARK/Spark1/Library/PramData/AndroidApplicationController/Cache/com.DefaultCompany.Spark1/gradle-project/unityLibrary/src/main/cpp
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
