@@ -10,11 +10,13 @@ public class Ddbmanager : MonoBehaviour
     private FirebaseFirestore db;
     public Text textUI; // UI text element for displaying dialogue
     public FrameTrigger frame2Trigger; // Trigger for activating Frame2
-    public Button volumeButton; // Button to control volume
+    public Button soundToggleButton; // Button that toggles sound (previously mute button)
+    public Sprite soundOnSprite; // Image for sound ON
+    public Sprite soundOffSprite; // Image for sound OFF
     private AudioSource audioSource; // Audio source component
     private AudioClip loadedClip; // Currently loaded audio clip
-    private bool isPlaying = false; // Flag to prevent overlapping dialogues
-    private bool isMuted = true; // Default to muted
+    private bool isPlaying = false; // Prevents overlapping dialogues
+    private bool isMuted = true; // Starts as muted
 
     void Start()
     {
@@ -23,16 +25,37 @@ public class Ddbmanager : MonoBehaviour
         audioSource.loop = false; // Do not loop the audio
         audioSource.volume = 0f; // Start with audio muted (default)
 
-        if (volumeButton != null)
+        if (soundToggleButton != null)
         {
-            volumeButton.onClick.AddListener(ToggleVolume);
+            soundToggleButton.onClick.AddListener(ToggleSound);
+            UpdateButtonSprite(); // Ensure the button has the correct image on start
         }
         else
         {
-            Debug.LogError("Volume button is not assigned in the Inspector!");
+            Debug.LogError("Sound Toggle Button is not assigned!");
         }
 
         StartCoroutine(FetchFramesFromStory("story1"));
+    }
+
+    void ToggleSound()
+    {
+        isMuted = !isMuted; // Toggle sound state
+        audioSource.volume = isMuted ? 0f : 1f; // Apply mute/unmute
+        Debug.Log($"Sound {(isMuted ? "Muted" : "Unmuted")}");
+        UpdateButtonSprite();
+    }
+
+    void UpdateButtonSprite()
+    {
+        if (soundToggleButton != null && soundToggleButton.image != null)
+        {
+            soundToggleButton.image.sprite = isMuted ? soundOffSprite : soundOnSprite;
+        }
+        else
+        {
+            Debug.LogWarning("Sound toggle button or image component is missing!");
+        }
     }
 
     IEnumerator FetchFramesFromStory(string storyId)
@@ -174,23 +197,10 @@ public class Ddbmanager : MonoBehaviour
             {
                 loadedClip = UnityEngine.Networking.DownloadHandlerAudioClip.GetContent(www);
                 audioSource.clip = loadedClip;
-                audioSource.volume = isMuted ? 0f : 1f; // Apply mute state (muted by default)
+                audioSource.volume = isMuted ? 0f : 1f; // Apply mute state
                 audioSource.Play();
                 Debug.Log($"Audio loaded and playing with volume {(isMuted ? "muted" : "unmuted")}.");
             }
         }
-    }
-
-    void ToggleVolume()
-    {
-        if (loadedClip == null)
-        {
-            Debug.LogWarning("No audio has been loaded yet!");
-            return;
-        }
-
-        isMuted = !isMuted; // Toggle mute state
-        audioSource.volume = isMuted ? 0f : 1f; // Apply to current audio
-        Debug.Log($"Audio {(isMuted ? "muted" : "unmuted")} for all dialogues.");
     }
 }
