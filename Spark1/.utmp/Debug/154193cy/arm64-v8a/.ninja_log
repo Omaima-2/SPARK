@@ -1,0 +1,12 @@
+# ninja log v5
+520	1955	7623118360000000	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	afb7bb3e90b4fd8c
+1957	4360	7623118376600000	D:/GP2/NewSpark_v2/SPARK/Spark1/Library/PramData/AndroidApplicationController/Cache/com.DefaultCompany.Spark1/gradle-project/unityLibrary/build/intermediates/cxx/Debug/154193cy/obj/arm64-v8a/libswappywrapper.so	12ac3f4c6c9b49b6
+176	4387	7623118400000000	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	25ebc4a56a291273
+219	4403	7623118400000000	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	f75e6e5e8c8afeb9
+76	4468	7623118400000000	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	954566772053a66b
+408	4504	7623118400000000	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	954925a51e041a8e
+469	4615	7623118400000000	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	f837cdee3c4f0ad2
+128	4867	7623118400000000	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	f947fbb699ba253b
+266	4909	7623118400000000	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	f3020587cfc6d6dd
+21	5092	7623118400000000	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	1c1bdd0ae3b5c358
+5093	5763	7623118393800000	D:/GP2/NewSpark_v2/SPARK/Spark1/Library/PramData/AndroidApplicationController/Cache/com.DefaultCompany.Spark1/gradle-project/unityLibrary/build/intermediates/cxx/Debug/154193cy/obj/arm64-v8a/libgame.so	18f008e7ccefcee
