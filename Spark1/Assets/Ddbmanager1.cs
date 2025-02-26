@@ -38,7 +38,7 @@ public class Ddbmanager : MonoBehaviour
         StartCoroutine(FetchFramesFromStory("story1"));
     }
 
-    void ToggleSound()
+    public void ToggleSound()
     {
         isMuted = !isMuted; // Toggle sound state
         audioSource.volume = isMuted ? 0f : 1f; // Apply mute/unmute
