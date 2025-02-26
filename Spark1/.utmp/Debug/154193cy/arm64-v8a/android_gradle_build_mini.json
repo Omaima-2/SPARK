@@ -1,0 +1,35 @@
+{
+  "buildFiles": [
+    "D:\\GP2\\NewSpark_v2\\SPARK\\Spark1\\Library\\PramData\\AndroidApplicationController\\Cache\\com.DefaultCompany.Spark1\\gradle-project\\unityLibrary\\src\\main\\cpp\\CMakeLists.txt",
+    "D:\\GP2\\NewSpark_v2\\SPARK\\Spark1\\Library\\PramData\\AndroidApplicationController\\Cache\\com.DefaultCompany.Spark1\\gradle-project\\unityLibrary\\src\\main\\cpp\\FramePacing\\CMakeLists.txt",
+    "D:\\GP2\\NewSpark_v2\\SPARK\\Spark1\\Library\\PramData\\AndroidApplicationController\\Cache\\com.DefaultCompany.Spark1\\gradle-project\\unityLibrary\\src\\main\\cpp\\GameActivity\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "D:\\GP\\6000.0.34f1\\Editor\\Data\\PlaybackEngines\\AndroidPlayer\\SDK\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "D:\\GP2\\NewSpark_v2\\SPARK\\Spark1\\.utmp\\Debug\\154193cy\\arm64-v8a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "D:\\GP\\6000.0.34f1\\Editor\\Data\\PlaybackEngines\\AndroidPlayer\\SDK\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "D:\\GP2\\NewSpark_v2\\SPARK\\Spark1\\.utmp\\Debug\\154193cy\\arm64-v8a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "game::@d02bb112ea9f9c2ed29f": {
+      "artifactName": "game",
+      "abi": "arm64-v8a",
+      "output": "D:\\GP2\\NewSpark_v2\\SPARK\\Spark1\\Library\\PramData\\AndroidApplicationController\\Cache\\com.DefaultCompany.Spark1\\gradle-project\\unityLibrary\\build\\intermediates\\cxx\\Debug\\154193cy\\obj\\arm64-v8a\\libgame.so",
+      "runtimeFiles": []
+    },
+    "swappywrapper::@7e25bd1f32ce224db4e9": {
+      "artifactName": "swappywrapper",
+      "abi": "arm64-v8a",
+      "output": "D:\\GP2\\NewSpark_v2\\SPARK\\Spark1\\Library\\PramData\\AndroidApplicationController\\Cache\\com.DefaultCompany.Spark1\\gradle-project\\unityLibrary\\build\\intermediates\\cxx\\Debug\\154193cy\\obj\\arm64-v8a\\libswappywrapper.so",
+      "runtimeFiles": []
+    }
+  }
+}

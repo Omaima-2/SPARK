@@ -168,7 +168,7 @@ public class Ddbmanager : MonoBehaviour
                     Debug.LogError($"Dialogue '{dialogueRef.Path}' does not contain 'Audio'!");
                 }
 
-                yield return new WaitForSeconds(7);
+                yield return new WaitForSeconds(8);
 
                 audioSource.Stop();
                 textUI.text = "";
