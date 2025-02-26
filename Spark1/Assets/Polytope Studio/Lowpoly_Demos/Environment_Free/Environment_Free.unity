@@ -1301,7 +1301,7 @@ MonoBehaviour:
   textUI: {fileID: 1675725216}
   frame2Trigger: {fileID: 54277873}
   soundToggleButton: {fileID: 1318335750}
-  soundOnSprite: {fileID: 21300000, guid: 9ab485285d640466cbc743eb971badde, type: 3}
+  soundOnSprite: {fileID: 21300000, guid: 5c3980296e34a4bfcbfd7c24fe0d4e6a, type: 3}
   soundOffSprite: {fileID: 21300000, guid: 124a724fc9bcb42a4b6041863ecba1cf, type: 3}
 --- !u!1 &646788977
 GameObject:
@@ -2313,8 +2313,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -512.54987, y: 660}
-  m_SizeDelta: {x: 244.3149, y: 203.2215}
+  m_AnchoredPosition: {x: 1071, y: 714}
+  m_SizeDelta: {x: 135.9515, y: 106.66}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1318335750
 MonoBehaviour:
