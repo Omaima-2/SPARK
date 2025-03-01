@@ -1696,12 +1696,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   birdsAudioSource: {fileID: 1440869264}
   pauseMenuUI: {fileID: 0}
-<<<<<<< HEAD
-  pauseButton: {fileID: 1625490278}
-  playIcon: {fileID: 21300000, guid: 8d61d61ffb8ef490596f317e5e67f368, type: 3}
-  pauseIcon: {fileID: 21300000, guid: 6bcc5906ae2174745a7934cf5bf45711, type: 3}
-=======
->>>>>>> b5808492b89754724ac52940de1cd4c1da3de71a
 --- !u!4 &663428898
 Transform:
   m_ObjectHideFlags: 0
@@ -4772,7 +4766,4 @@ SceneRoots:
   - {fileID: 452454306}
   - {fileID: 541448876}
   - {fileID: 663428898}
-<<<<<<< HEAD
-=======
   - {fileID: 1250434363}
->>>>>>> b5808492b89754724ac52940de1cd4c1da3de71a

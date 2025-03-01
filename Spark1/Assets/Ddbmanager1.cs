@@ -178,34 +178,6 @@ public class Ddbmanager : MonoBehaviour
             }
         }
     }
-<<<<<<< HEAD
-    public void MuteAudio()
-{
-    if (audioSource != null)
-    {
-        audioSource.volume = 0f; // Mute Firebase audio
-        Debug.Log("✅ Firebase Audio Muted!");
-    }
-    else
-    {
-        Debug.LogWarning("⚠️ AudioSource is NULL, cannot mute audio!");
-    }
-}
-
-public void UnmuteAudio()
-{
-    if (audioSource != null)
-    {
-        audioSource.volume = 1f; // Unmute Firebase audio
-        Debug.Log("✅ Firebase Audio Unmuted!");
-    }
-    else
-    {
-        Debug.LogWarning("⚠️ AudioSource is NULL, cannot unmute audio!");
-    }
-}
-
-=======
 
     void PreviousDialogue()
     {
@@ -277,5 +249,4 @@ public void UnmuteAudio()
             nextButton.gameObject.SetActive(currentDialogueIndex < currentDialogues.Count - 1);
         }
     }
->>>>>>> b5808492b89754724ac52940de1cd4c1da3de71a
 }
