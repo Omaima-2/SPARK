@@ -203,4 +203,30 @@ public class Ddbmanager : MonoBehaviour
             }
         }
     }
+    public void MuteAudio()
+{
+    if (audioSource != null)
+    {
+        audioSource.volume = 0f; // Mute Firebase audio
+        Debug.Log("✅ Firebase Audio Muted!");
+    }
+    else
+    {
+        Debug.LogWarning("⚠️ AudioSource is NULL, cannot mute audio!");
+    }
+}
+
+public void UnmuteAudio()
+{
+    if (audioSource != null)
+    {
+        audioSource.volume = 1f; // Unmute Firebase audio
+        Debug.Log("✅ Firebase Audio Unmuted!");
+    }
+    else
+    {
+        Debug.LogWarning("⚠️ AudioSource is NULL, cannot unmute audio!");
+    }
+}
+
 }
