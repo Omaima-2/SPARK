@@ -8,31 +8,47 @@ using UnityEngine.UI;
 public class Ddbmanager : MonoBehaviour
 {
     private FirebaseFirestore db;
-    public Text textUI; // UI text element for displaying dialogue
-    public FrameTrigger frame2Trigger; // Trigger for activating Frame2
-    public Button soundToggleButton; // Button that toggles sound (previously mute button)
-    public Sprite soundOnSprite; // Image for sound ON
-    public Sprite soundOffSprite; // Image for sound OFF
-    private AudioSource audioSource; // Audio source component
-    private AudioClip loadedClip; // Currently loaded audio clip
-    private bool isPlaying = false; // Prevents overlapping dialogues
-    private bool isMuted = true; // Starts as muted
+    public Text textUI;
+    public FrameTrigger frame2Trigger;
+    public Button soundToggleButton;
+    public Sprite soundOnSprite;
+    public Sprite soundOffSprite;
+    private AudioSource audioSource;
+    private AudioClip loadedClip;
+    private bool isMuted = true;
+
+    public Button previousButton;
+    public Button nextButton;
+
+    private List<DocumentReference> currentDialogues = new List<DocumentReference>();
+    private int currentDialogueIndex = 0;
+    private bool isPlaying = false;
+
+    private Coroutine autoAdvanceCoroutine; // Coroutine for auto-advancing dialogues
 
     void Start()
     {
         db = FirebaseFirestore.DefaultInstance;
         audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.loop = false; // Do not loop the audio
-        audioSource.volume = 0f; // Start with audio muted (default)
+        audioSource.loop = false;
+        audioSource.volume = 0f;
 
         if (soundToggleButton != null)
         {
             soundToggleButton.onClick.AddListener(ToggleSound);
-            UpdateButtonSprite(); // Ensure the button has the correct image on start
+            UpdateButtonSprite();
         }
-        else
+
+        if (previousButton != null)
         {
-            Debug.LogError("Sound Toggle Button is not assigned!");
+            previousButton.onClick.AddListener(PreviousDialogue);
+            previousButton.gameObject.SetActive(false);
+        }
+
+        if (nextButton != null)
+        {
+            nextButton.onClick.AddListener(NextDialogue);
+            nextButton.gameObject.SetActive(false);
         }
 
         StartCoroutine(FetchFramesFromStory("story1"));
@@ -40,9 +56,8 @@ public class Ddbmanager : MonoBehaviour
 
     public void ToggleSound()
     {
-        isMuted = !isMuted; // Toggle sound state
-        audioSource.volume = isMuted ? 0f : 1f; // Apply mute/unmute
-        Debug.Log($"Sound {(isMuted ? "Muted" : "Unmuted")}");
+        isMuted = !isMuted;
+        audioSource.volume = isMuted ? 0f : 1f;
         UpdateButtonSprite();
     }
 
@@ -51,10 +66,6 @@ public class Ddbmanager : MonoBehaviour
         if (soundToggleButton != null && soundToggleButton.image != null)
         {
             soundToggleButton.image.sprite = isMuted ? soundOffSprite : soundOnSprite;
-        }
-        else
-        {
-            Debug.LogWarning("Sound toggle button or image component is missing!");
         }
     }
 
@@ -73,24 +84,17 @@ public class Ddbmanager : MonoBehaviour
         DocumentSnapshot storySnapshot = storyTask.Result;
         if (storySnapshot.Exists && storySnapshot.TryGetValue("dialogeList", out List<DocumentReference> frameList))
         {
-            Debug.Log($"Fetched frames for story {storyId}.");
-
             for (int i = 0; i < frameList.Count; i++)
             {
                 DocumentReference frameRef = frameList[i];
 
                 if (i == 1)
                 {
-                    Debug.Log("Waiting for Frame2 trigger...");
                     yield return new WaitUntil(() => frame2Trigger.isTriggered);
                 }
 
                 yield return FetchDialoguesFromFrame(frameRef);
             }
-        }
-        else
-        {
-            Debug.LogError($"Document '{storyId}' does not contain 'dialogeList'!");
         }
     }
 
@@ -108,16 +112,15 @@ public class Ddbmanager : MonoBehaviour
         DocumentSnapshot frameSnapshot = frameTask.Result;
         if (frameSnapshot.Exists && frameSnapshot.TryGetValue("listofDialoges", out List<DocumentReference> dialogueList))
         {
-            Debug.Log($"Fetched dialogues for frame {frameRef.Path}.");
+            currentDialogues = dialogueList;
+            currentDialogueIndex = 0;
 
-            foreach (DocumentReference dialogueRef in dialogueList)
+            if (currentDialogues.Count > 0)
             {
-                yield return FetchAndPlayDialogue(dialogueRef);
+                yield return FetchAndPlayDialogue(currentDialogues[currentDialogueIndex]);
             }
-        }
-        else
-        {
-            Debug.LogError($"Document '{frameRef.Path}' does not contain 'listofDialogues'!");
+
+            UpdateButtons();
         }
     }
 
@@ -129,53 +132,26 @@ public class Ddbmanager : MonoBehaviour
         var dialogueTask = dialogueRef.GetSnapshotAsync();
         yield return new WaitUntil(() => dialogueTask.IsCompleted);
 
-        if (dialogueTask.IsFaulted)
-        {
-            Debug.LogError($"Failed to load dialogue {dialogueRef.Path}: {dialogueTask.Exception}");
-        }
-        else
+        if (!dialogueTask.IsFaulted)
         {
             DocumentSnapshot dialogueSnapshot = dialogueTask.Result;
             if (dialogueSnapshot.Exists)
             {
-                string dialogueText = "";
-                string audioUrl = "";
+                string dialogueText = dialogueSnapshot.ContainsField("text") ? dialogueSnapshot.GetValue<string>("text") : "";
+                string audioUrl = dialogueSnapshot.ContainsField("Audio") ? dialogueSnapshot.GetValue<string>("Audio") : "";
 
-                if (dialogueSnapshot.TryGetValue("text", out dialogueText))
+                if (textUI != null)
                 {
-                    Debug.Log($"Fetched text ({dialogueRef.Path}): {dialogueText}");
-                    if (textUI != null)
-                    {
-                        textUI.text = dialogueText;
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Text UI element is not assigned!");
-                    }
-                }
-                else
-                {
-                    Debug.LogError($"Dialogue '{dialogueRef.Path}' does not contain 'text'!");
+                    textUI.text = dialogueText;
                 }
 
-                if (dialogueSnapshot.TryGetValue("Audio", out audioUrl))
+                if (!string.IsNullOrEmpty(audioUrl))
                 {
-                    Debug.Log($"Fetched audio URL ({dialogueRef.Path}): {audioUrl}");
                     yield return StartCoroutine(LoadAndPlayAudio(audioUrl));
                 }
-                else
-                {
-                    Debug.LogError($"Dialogue '{dialogueRef.Path}' does not contain 'Audio'!");
-                }
 
-                yield return new WaitForSeconds(8);
-
-                audioSource.Stop();
-                textUI.text = "";
-            }
-            else
-            {
-                Debug.LogError($"Dialogue '{dialogueRef.Path}' does not exist!");
+                // Start the auto-advance coroutine (7-second delay)
+                RestartAutoAdvanceCoroutine();
             }
         }
 
@@ -197,10 +173,80 @@ public class Ddbmanager : MonoBehaviour
             {
                 loadedClip = UnityEngine.Networking.DownloadHandlerAudioClip.GetContent(www);
                 audioSource.clip = loadedClip;
-                audioSource.volume = isMuted ? 0f : 1f; // Apply mute state
+                audioSource.volume = isMuted ? 0f : 1f;
                 audioSource.Play();
-                Debug.Log($"Audio loaded and playing with volume {(isMuted ? "muted" : "unmuted")}.");
             }
+        }
+    }
+
+    void PreviousDialogue()
+    {
+        if (currentDialogueIndex > 0)
+        {
+            currentDialogueIndex--;
+            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex]));
+            RestartAutoAdvanceCoroutine(); // Restart auto-advance timer
+        }
+
+        UpdateButtons();
+    }
+
+    void NextDialogue()
+    {
+        if (currentDialogueIndex < currentDialogues.Count - 1)
+        {
+            currentDialogueIndex++;
+            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex]));
+            RestartAutoAdvanceCoroutine(); // Restart auto-advance timer
+        }
+
+        UpdateButtons();
+    }
+
+    void RestartAutoAdvanceCoroutine()
+    {
+        if (autoAdvanceCoroutine != null)
+        {
+            StopCoroutine(autoAdvanceCoroutine);
+        }
+
+        autoAdvanceCoroutine = StartCoroutine(AutoAdvanceDialogue());
+    }
+
+    IEnumerator AutoAdvanceDialogue()
+    {
+        yield return new WaitForSeconds(7); // Wait 7 seconds before auto-advancing
+
+        if (currentDialogueIndex < currentDialogues.Count - 1)
+        {
+            NextDialogue(); // Move to the next dialogue automatically
+        }
+        else
+        {
+            Debug.Log("Last dialogue reached, transitioning to next frame in 10 seconds.");
+            yield return new WaitForSeconds(10);
+
+            if (frame2Trigger != null)
+            {
+                frame2Trigger.TriggerNextFrame();
+            }
+            else
+            {
+                Debug.LogError("frame2Trigger is not assigned in Ddbmanager!");
+            }
+        }
+    }
+
+    void UpdateButtons()
+    {
+        if (previousButton != null)
+        {
+            previousButton.gameObject.SetActive(currentDialogueIndex > 0);
+        }
+
+        if (nextButton != null)
+        {
+            nextButton.gameObject.SetActive(currentDialogueIndex < currentDialogues.Count - 1);
         }
     }
 }
