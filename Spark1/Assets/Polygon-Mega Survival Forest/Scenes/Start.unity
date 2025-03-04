@@ -2544,6 +2544,7 @@ GameObject:
   - component: {fileID: 501402356}
   - component: {fileID: 501402358}
   - component: {fileID: 501402357}
+  - component: {fileID: 501402359}
   m_Layer: 5
   m_Name: Text_title
   m_TagString: Untagged
@@ -2669,6 +2670,30 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 501402355}
   m_CullTransparentMesh: 1
+--- !u!114 &501402359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 501402355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9840f87219df84505803024c796e739d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 501402357}
+  usePreset: 0
+  preset: {fileID: 0}
+  tagEffects: []
+  globalEffects:
+  - triggerWhen: 0
+    effect: {fileID: 11400000, guid: d65b7550f31ef41e4b22945abf8229d6, type: 2}
+    onEffectCompleted:
+      m_PersistentCalls:
+        m_Calls: []
+    overrideTagEffects: 0
+  updatesPerSecond: 8
 --- !u!1 &544324173
 GameObject:
   m_ObjectHideFlags: 0
@@ -5572,6 +5597,7 @@ GameObject:
   - component: {fileID: 1012474434}
   - component: {fileID: 1012474436}
   - component: {fileID: 1012474435}
+  - component: {fileID: 1012474437}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -5697,6 +5723,30 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1012474433}
   m_CullTransparentMesh: 1
+--- !u!114 &1012474437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1012474433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9840f87219df84505803024c796e739d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 1012474435}
+  usePreset: 0
+  preset: {fileID: 0}
+  tagEffects: []
+  globalEffects:
+  - triggerWhen: 0
+    effect: {fileID: 11400000, guid: d9c02d2dab50c4f439c3817dd756eff3, type: 2}
+    onEffectCompleted:
+      m_PersistentCalls:
+        m_Calls: []
+    overrideTagEffects: 0
+  updatesPerSecond: 30
 --- !u!1 &1035341517
 GameObject:
   m_ObjectHideFlags: 0
@@ -6392,7 +6442,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1234030009
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7305,6 +7355,7 @@ GameObject:
   - component: {fileID: 1378468050}
   - component: {fileID: 1378468052}
   - component: {fileID: 1378468051}
+  - component: {fileID: 1378468053}
   m_Layer: 5
   m_Name: Text_title
   m_TagString: Untagged
@@ -7320,7 +7371,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1378468049}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -4.547e-12}
+  m_LocalPosition: {x: 0, y: 0, z: -4.06e-12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7328,7 +7379,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 11.621, y: 379.28}
+  m_AnchoredPosition: {x: 0.000005722, y: 379.28}
   m_SizeDelta: {x: 307.107, y: 78.781}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1378468051
@@ -7378,8 +7429,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 70
-  m_fontSizeBase: 70
+  m_fontSize: 80
+  m_fontSizeBase: 80
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -7430,6 +7481,30 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1378468049}
   m_CullTransparentMesh: 1
+--- !u!114 &1378468053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378468049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9840f87219df84505803024c796e739d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 1378468051}
+  usePreset: 0
+  preset: {fileID: 0}
+  tagEffects: []
+  globalEffects:
+  - triggerWhen: 0
+    effect: {fileID: 11400000, guid: d65b7550f31ef41e4b22945abf8229d6, type: 2}
+    onEffectCompleted:
+      m_PersistentCalls:
+        m_Calls: []
+    overrideTagEffects: 0
+  updatesPerSecond: 30
 --- !u!1 &1401211491
 GameObject:
   m_ObjectHideFlags: 0
@@ -7947,7 +8022,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1501294204
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9242,6 +9317,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   loginPanel: {fileID: 1501294203}
   welcomePanel: {fileID: 1234030008}
+  SignupPanel: {fileID: 0}
 --- !u!1 &1828599939
 GameObject:
   m_ObjectHideFlags: 0

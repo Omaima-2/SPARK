@@ -249,4 +249,35 @@ public class Ddbmanager : MonoBehaviour
             nextButton.gameObject.SetActive(currentDialogueIndex < currentDialogues.Count - 1);
         }
     }
+
+    public void MuteAudio()
+{
+    if (audioSource != null)
+    {
+        isMuted = true; // Set muted state
+        audioSource.volume = 0f; // Mute the audio
+        UpdateButtonSprite();
+        Debug.Log("✅ Firebase Audio Muted!");
+    }
+    else
+    {
+        Debug.LogWarning("⚠️ AudioSource is NULL, cannot mute audio!");
+    }
+}
+
+public void UnmuteAudio()
+{
+    if (audioSource != null)
+    {
+        isMuted = false; // Set unmuted state
+        audioSource.volume = 1f; // Unmute the audio
+        UpdateButtonSprite();
+        Debug.Log("✅ Firebase Audio Unmuted!");
+    }
+    else
+    {
+        Debug.LogWarning("⚠️ AudioSource is NULL, cannot unmute audio!");
+    }
+}
+
 }
