@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3bae7730e2fc1e9488c3e61e30f88ed7
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 267544
+  packageName: ButterFly's
+  packageVersion: 1.0
+  assetPath: Assets/ButterFly/Materials/BodyMat.mat
+  uploadId: 619127
