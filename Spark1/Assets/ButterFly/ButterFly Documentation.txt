@@ -1,0 +1,26 @@
+Butterfly Controller Documentation
+
+Experience the beauty of a low-poly butterfly that offers both simplicity and visual appeal.
+
+1. Installation
+
+    Begin by importing the butterfly assets.
+    Locate the "Butterfly" prefab under "Butterfly > Prefabs" and drag it into your Unity scene.
+
+2. Customization
+
+    Each butterfly is accompanied by a script for easy customization.
+    Body: Represents the butterfly's body.
+    Left/Right Wing: Control the motion of the butterfly's wings.
+    Flying Area Radius: Define the radius of the butterfly's flight area.
+    Base Fluttering Radius: Set the foundation for fluttering movements.
+    Fluttering Radius Multiplier: Adjust the fluttering radius as needed.
+    Fly Time: Determine the total flying time before changing directions.
+    Fly Speed: Manage the butterfly's flying velocity.
+    Rotation Speed: Specify the speed of the butterfly's rotation.
+    Flutter Time: Set the duration of fluttering within the fluttering sphere before changing direction.
+    Flutter Speed: Control the butterfly's fluttering speed.
+    Wing Max Swing: Define the maximum swing angle for the wings.
+    Wing Speed: Adjust the speed of wing flapping.
+
+Enjoy the freedom to personalize your butterfly's appearance and behavior in your Unity project.
