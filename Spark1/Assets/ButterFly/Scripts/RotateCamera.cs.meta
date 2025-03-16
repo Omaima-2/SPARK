@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 86e12dc0c078d964f93ad399caa3bb75
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 267544
+  packageName: ButterFly's
+  packageVersion: 1.0
+  assetPath: Assets/ButterFly/Scripts/RotateCamera.cs
+  uploadId: 619127
