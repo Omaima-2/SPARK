@@ -4,11 +4,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro; // Make sure to include this for TextMeshPro support
+
 
 public class Ddbmanager : MonoBehaviour
 {
     private FirebaseFirestore db;
-    public Text textUI;
+    public TMP_Text textUI;
     public FrameTrigger frame2Trigger;
     public Button soundToggleButton;
     public Sprite soundOnSprite;

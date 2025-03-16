@@ -7476,7 +7476,7 @@ Transform:
   m_GameObject: {fileID: 1619184821}
   serializedVersion: 2
   m_LocalRotation: {x: -0.22945079, y: 0.77108234, z: -0.42118385, w: -0.41879418}
-  m_LocalPosition: {x: -58.995773, y: 23.527119, z: 116.17131}
+  m_LocalPosition: {x: -1248.4736, y: -2188.7556, z: -657.67883}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9192,8 +9192,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1951150306}
-  - component: {fileID: 1951150308}
   - component: {fileID: 1951150307}
+  - component: {fileID: 1951150308}
   m_Layer: 0
   m_Name: Terrain
   m_TagString: Untagged
@@ -9236,7 +9236,7 @@ TerrainCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_TerrainData: {fileID: 15600000, guid: f4debaa77b164744aa6c3064cb6dda91, type: 2}
+  m_TerrainData: {fileID: 15600000, guid: 93c11a4f829878a4487928f5683bb0c8, type: 2}
   m_EnableTreeColliders: 1
 --- !u!218 &1951150308
 Terrain:
@@ -9247,7 +9247,7 @@ Terrain:
   m_GameObject: {fileID: 1951150305}
   m_Enabled: 1
   serializedVersion: 6
-  m_TerrainData: {fileID: 15600000, guid: f4debaa77b164744aa6c3064cb6dda91, type: 2}
+  m_TerrainData: {fileID: 15600000, guid: 93c11a4f829878a4487928f5683bb0c8, type: 2}
   m_TreeDistance: 5000
   m_TreeBillboardDistance: 50
   m_TreeCrossFadeLength: 5
@@ -9265,7 +9265,7 @@ Terrain:
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 1
-  m_MaterialTemplate: {fileID: 2100000, guid: ed22afde7d5ad4742b2808e20c40ff00, type: 2}
+  m_MaterialTemplate: {fileID: 2100000, guid: 48c26796e9175d14a9b2eccded92bb92, type: 2}
   m_BakeLightProbesForTrees: 1
   m_PreserveTreePrototypeLayers: 0
   m_DeringLightProbesForTrees: 1
@@ -9274,7 +9274,7 @@ Terrain:
   m_LightmapParameters: {fileID: 15203, guid: 0000000000000000f000000000000000, type: 0}
   m_GroupingID: 0
   m_RenderingLayerMask: 1
-  m_AllowAutoConnect: 1
+  m_AllowAutoConnect: 0
   m_EnableHeightmapRayTracing: 1
   m_EnableTreesAndDetailsRayTracing: 0
   m_TreeMotionVectorModeOverride: 3

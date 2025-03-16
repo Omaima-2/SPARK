@@ -1,7 +1,11 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\Spark1",
+    "\\Spark1\\Assets",
+    "\\Spark1\\Assets\\Polytope Studio",
+    "\\Spark1\\Assets\\Polytope Studio\\Lowpoly_Demos"
   ],
-  "SelectedNode": "\\Spark1.sln",
+  "SelectedNode": "\\Spark1\\Assets\\Polytope Studio\\Lowpoly_Demos\\Environment_Free",
   "PreviewInSolutionExplorer": false
 }

@@ -1,12 +1,62 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\GP2\\spark_git\\SPARK\\SPARK\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Spark\\SPARK\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Spark\\SPARK\\Spark1\\Assets\\Polytope Studio\\Lowpoly_Demos\\Environment_Free\\Helpers\\Ground_Layer_01.terrainlayer||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Spark1\\Assets\\Polytope Studio\\Lowpoly_Demos\\Environment_Free\\Helpers\\Ground_Layer_01.terrainlayer||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Spark\\SPARK\\Spark1\\Assets\\GoogleService-Info.plist||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Spark1\\Assets\\GoogleService-Info.plist||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Ground_Layer_01.terrainlayer",
+              "DocumentMoniker": "C:\\Spark\\SPARK\\Spark1\\Assets\\Polytope Studio\\Lowpoly_Demos\\Environment_Free\\Helpers\\Ground_Layer_01.terrainlayer",
+              "RelativeDocumentMoniker": "Spark1\\Assets\\Polytope Studio\\Lowpoly_Demos\\Environment_Free\\Helpers\\Ground_Layer_01.terrainlayer",
+              "ToolTip": "C:\\Spark\\SPARK\\Spark1\\Assets\\Polytope Studio\\Lowpoly_Demos\\Environment_Free\\Helpers\\Ground_Layer_01.terrainlayer",
+              "RelativeToolTip": "Spark1\\Assets\\Polytope Studio\\Lowpoly_Demos\\Environment_Free\\Helpers\\Ground_Layer_01.terrainlayer",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-03-15T00:42:19.087Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "GoogleService-Info.plist",
+              "DocumentMoniker": "C:\\Spark\\SPARK\\Spark1\\Assets\\GoogleService-Info.plist",
+              "RelativeDocumentMoniker": "Spark1\\Assets\\GoogleService-Info.plist",
+              "ToolTip": "C:\\Spark\\SPARK\\Spark1\\Assets\\GoogleService-Info.plist",
+              "RelativeToolTip": "Spark1\\Assets\\GoogleService-Info.plist",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-03-15T00:42:08.354Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }
