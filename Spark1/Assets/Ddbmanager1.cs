@@ -119,46 +119,115 @@ public class Ddbmanager : MonoBehaviour
 
             if (currentDialogues.Count > 0)
             {
-                yield return FetchAndPlayDialogue(currentDialogues[currentDialogueIndex]);
+yield return FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id); // ✅ Pass document ID as string
             }
 
             UpdateButtons();
         }
     }
 
-    IEnumerator FetchAndPlayDialogue(DocumentReference dialogueRef)
+  IEnumerator FetchAndPlayDialogue(string dialogueId)
+{
+    while (isPlaying) yield return null;
+    isPlaying = true;
+
+    DocumentReference dialogueRef = db.Collection("Dialogues").Document(dialogueId);
+    var dialogueTask = dialogueRef.GetSnapshotAsync();
+    yield return new WaitUntil(() => dialogueTask.IsCompleted);
+
+    if (!dialogueTask.IsFaulted)
     {
-        while (isPlaying) yield return null;
-        isPlaying = true;
-
-        var dialogueTask = dialogueRef.GetSnapshotAsync();
-        yield return new WaitUntil(() => dialogueTask.IsCompleted);
-
-        if (!dialogueTask.IsFaulted)
+        DocumentSnapshot dialogueSnapshot = dialogueTask.Result;
+        if (dialogueSnapshot.Exists)
         {
-            DocumentSnapshot dialogueSnapshot = dialogueTask.Result;
-            if (dialogueSnapshot.Exists)
+            string dialogueText = dialogueSnapshot.ContainsField("text") ? dialogueSnapshot.GetValue<string>("text") : "";
+            string highlightedWord = dialogueSnapshot.ContainsField("word") ? dialogueSnapshot.GetValue<string>("word") : "";
+            string wordMeaning = dialogueSnapshot.ContainsField("meaning") ? dialogueSnapshot.GetValue<string>("meaning") : "";
+
+            if (textUI != null)
             {
-                string dialogueText = dialogueSnapshot.ContainsField("text") ? dialogueSnapshot.GetValue<string>("text") : "";
-                string audioUrl = dialogueSnapshot.ContainsField("Audio") ? dialogueSnapshot.GetValue<string>("Audio") : "";
+                textUI.text = HighlightWord(dialogueText, highlightedWord);
+            }
 
-                if (textUI != null)
-                {
-                    textUI.text = dialogueText;
-                }
+            if (!string.IsNullOrEmpty(highlightedWord) && !string.IsNullOrEmpty(wordMeaning))
+            {
+                wordDefinitions[highlightedWord] = wordMeaning;
+            }
 
-                if (!string.IsNullOrEmpty(audioUrl))
-                {
-                    yield return StartCoroutine(LoadAndPlayAudio(audioUrl));
-                }
+            Debug.Log("🔄 Restarting auto-advance...");
+            RestartAutoAdvanceCoroutine(); // ✅ Restart the auto-advance timer
+        }
+    }
+    else
+    {
+        Debug.LogError($"Failed to fetch dialogue {dialogueId}: {dialogueTask.Exception}");
+    }
 
-                // Start the auto-advance coroutine (7-second delay)
-                RestartAutoAdvanceCoroutine();
+    isPlaying = false;
+}
+
+
+string HighlightWord(string dialogue, string word)
+{
+    if (!string.IsNullOrEmpty(word) && dialogue.Contains(word))
+    {
+        return dialogue.Replace(word, $"<link=\"{word}\"><color=yellow><b>{word}</b></color></link>");
+    }
+    return dialogue;
+}
+
+void Update()
+{
+    if (Input.GetMouseButtonDown(0)) // Detect mouse click
+    {
+        int linkIndex = TMP_TextUtilities.FindIntersectingLink(textUI, Input.mousePosition, Camera.main);
+        if (linkIndex != -1)
+        {
+            TMP_LinkInfo linkInfo = textUI.textInfo.linkInfo[linkIndex];
+            string clickedWord = linkInfo.GetLinkID();
+            Debug.Log("✅ Clicked Word: " + clickedWord);
+            
+            // Fetch meaning from dictionary instead of Firestore
+            if (wordDefinitions.ContainsKey(clickedWord))
+            {
+                ShowDefinitionPopup(clickedWord, wordDefinitions[clickedWord]);
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ No definition found for: " + clickedWord);
             }
         }
-
-        isPlaying = false;
     }
+}
+
+public TMP_Text definitionText;
+public GameObject definitionPanel;
+private Dictionary<string, string> wordDefinitions = new Dictionary<string, string>();
+
+void ShowDefinitionPopup(string word, string meaning)
+{
+    definitionPanel.SetActive(true);
+    definitionText.text = $"<b>{word}</b>\n{meaning}";
+}
+
+public void CloseDefinitionPopup()
+{
+    definitionPanel.SetActive(false);
+}
+
+
+void RestartAutoAdvanceCoroutine()
+{
+    if (autoAdvanceCoroutine != null)
+    {
+        Debug.Log("⏹️ Stopping previous auto-advance...");
+        StopCoroutine(autoAdvanceCoroutine);
+    }
+
+    Debug.Log("▶️ Starting new auto-advance...");
+    autoAdvanceCoroutine = StartCoroutine(AutoAdvanceDialogue());
+}
+
 
     IEnumerator LoadAndPlayAudio(string url)
     {
@@ -186,71 +255,65 @@ public class Ddbmanager : MonoBehaviour
         if (currentDialogueIndex > 0)
         {
             currentDialogueIndex--;
-            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex]));
+            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id));
             RestartAutoAdvanceCoroutine(); // Restart auto-advance timer
         }
 
         UpdateButtons();
     }
 
-    void NextDialogue()
+ void NextDialogue()
+{
+    if (currentDialogueIndex < currentDialogues.Count - 1) // ✅ Ensure it is not the last dialogue
     {
-        if (currentDialogueIndex < currentDialogues.Count - 1)
-        {
-            currentDialogueIndex++;
-            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex]));
-            RestartAutoAdvanceCoroutine(); // Restart auto-advance timer
-        }
+        currentDialogueIndex++; // ✅ Move to next dialogue
+        Debug.Log($"➡️ Moving to dialogue {currentDialogueIndex}...");
 
-        UpdateButtons();
+        StopAllCoroutines(); // ✅ Stop any ongoing dialogue fetch
+        StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id)); // ✅ Fetch next dialogue
+    }
+    else
+    {
+        Debug.Log("✅ Last dialogue reached!");
     }
 
-    void RestartAutoAdvanceCoroutine()
+    UpdateButtons();
+}
+
+
+
+
+
+IEnumerator AutoAdvanceDialogue()
+{
+    Debug.Log("⏳ Waiting to auto-advance...");
+
+    yield return new WaitForSeconds(7); // ✅ Wait 7 seconds
+
+    if (currentDialogueIndex < currentDialogues.Count - 1)
     {
-        if (autoAdvanceCoroutine != null)
-        {
-            StopCoroutine(autoAdvanceCoroutine);
-        }
-
-        autoAdvanceCoroutine = StartCoroutine(AutoAdvanceDialogue());
+        Debug.Log("➡️ Auto-advancing to next dialogue...");
+        NextDialogue(); // ✅ Move to next dialogue automatically
     }
-
-    IEnumerator AutoAdvanceDialogue()
+    else
     {
-        yield return new WaitForSeconds(7); // Wait 7 seconds before auto-advancing
-
-        if (currentDialogueIndex < currentDialogues.Count - 1)
-        {
-            NextDialogue(); // Move to the next dialogue automatically
-        }
-        else
-        {
-            Debug.Log("Last dialogue reached, transitioning to next frame in 10 seconds.");
-            yield return new WaitForSeconds(10);
-
-            if (frame2Trigger != null)
-            {
-                frame2Trigger.TriggerNextFrame();
-            }
-            else
-            {
-                Debug.LogError("frame2Trigger is not assigned in Ddbmanager!");
-            }
-        }
+        Debug.Log("✅ Last dialogue reached, stopping auto-advance.");
     }
+}
+
 
     void UpdateButtons()
+{
+    if (previousButton != null)
     {
-        if (previousButton != null)
-        {
-            previousButton.gameObject.SetActive(currentDialogueIndex > 0);
-        }
-
-        if (nextButton != null)
-        {
-            nextButton.gameObject.SetActive(currentDialogueIndex < currentDialogues.Count - 1);
-        }
+        previousButton.gameObject.SetActive(currentDialogueIndex > 0);
     }
+
+    if (nextButton != null)
+    {
+        nextButton.gameObject.SetActive(currentDialogueIndex < currentDialogues.Count - 1);
+    }
+}
 
     public void MuteAudio()
 {
@@ -281,5 +344,6 @@ public void UnmuteAudio()
         Debug.LogWarning("⚠️ AudioSource is NULL, cannot unmute audio!");
     }
 }
+
 
 }
