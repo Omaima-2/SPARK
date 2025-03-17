@@ -47,8 +47,6 @@ namespace ButterFly
         private Vector3 flyTargetPosition;
         private float flutterTimer;
         private Vector3 flutterTargetPosition;
-        private float t = 0f;
-        private float direction = 1f;
 
         private void Start()
         {
