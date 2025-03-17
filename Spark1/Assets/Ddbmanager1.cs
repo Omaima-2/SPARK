@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro; // Make sure to include this for TextMeshPro support
+using UnityEngine.Networking; // ✅ Required for UnityWebRequest
 
 
 public class Ddbmanager : MonoBehaviour
@@ -18,6 +19,8 @@ public class Ddbmanager : MonoBehaviour
     private AudioSource audioSource;
     private AudioClip loadedClip;
     private bool isMuted = true;
+private Dictionary<string, string> wordImages = new Dictionary<string, string>(); // ✅ Store word-to-image mappings
+private Dictionary<string, string> wordDefinitions = new Dictionary<string, string>(); // ✅ Store word-to-definition mappings
 
     public Button previousButton;
     public Button nextButton;
@@ -128,8 +131,10 @@ yield return FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id); //
 
   IEnumerator FetchAndPlayDialogue(string dialogueId)
 {
-    while (isPlaying) yield return null;
+    while (isPlaying) yield return null; // ✅ Prevents multiple fetch calls
     isPlaying = true;
+
+    Debug.Log($"📜 Fetching dialogue: {dialogueId}");
 
     DocumentReference dialogueRef = db.Collection("Dialogues").Document(dialogueId);
     var dialogueTask = dialogueRef.GetSnapshotAsync();
@@ -143,24 +148,33 @@ yield return FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id); //
             string dialogueText = dialogueSnapshot.ContainsField("text") ? dialogueSnapshot.GetValue<string>("text") : "";
             string highlightedWord = dialogueSnapshot.ContainsField("word") ? dialogueSnapshot.GetValue<string>("word") : "";
             string wordMeaning = dialogueSnapshot.ContainsField("meaning") ? dialogueSnapshot.GetValue<string>("meaning") : "";
+            string imageUrl = dialogueSnapshot.ContainsField("image") ? dialogueSnapshot.GetValue<string>("image") : "";
 
             if (textUI != null)
             {
                 textUI.text = HighlightWord(dialogueText, highlightedWord);
             }
 
-            if (!string.IsNullOrEmpty(highlightedWord) && !string.IsNullOrEmpty(wordMeaning))
+            // ✅ Store word, meaning, and image
+            if (!string.IsNullOrEmpty(highlightedWord))
             {
                 wordDefinitions[highlightedWord] = wordMeaning;
+                wordImages[highlightedWord] = imageUrl;
             }
 
-            Debug.Log("🔄 Restarting auto-advance...");
-            RestartAutoAdvanceCoroutine(); // ✅ Restart the auto-advance timer
+            Debug.Log("🔄 Dialogue loaded successfully!");
+
+            // ✅ Restart auto-advance after displaying dialogue
+            RestartAutoAdvanceCoroutine();
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Dialogue document does not exist!");
         }
     }
     else
     {
-        Debug.LogError($"Failed to fetch dialogue {dialogueId}: {dialogueTask.Exception}");
+        Debug.LogError($"❌ Failed to fetch dialogue {dialogueId}: {dialogueTask.Exception}");
     }
 
     isPlaying = false;
@@ -186,33 +200,70 @@ void Update()
             TMP_LinkInfo linkInfo = textUI.textInfo.linkInfo[linkIndex];
             string clickedWord = linkInfo.GetLinkID();
             Debug.Log("✅ Clicked Word: " + clickedWord);
-            
-            // Fetch meaning from dictionary instead of Firestore
-            if (wordDefinitions.ContainsKey(clickedWord))
+
+            if (wordDefinitions.ContainsKey(clickedWord)) // ✅ Check if the word exists
             {
-                ShowDefinitionPopup(clickedWord, wordDefinitions[clickedWord]);
+                ShowDefinitionPopup(clickedWord); // ✅ Show word definition & image
             }
             else
             {
-                Debug.LogWarning("⚠️ No definition found for: " + clickedWord);
+                Debug.LogWarning("⚠️ Word definition not found: " + clickedWord);
             }
         }
     }
 }
 
-public TMP_Text definitionText;
-public GameObject definitionPanel;
-private Dictionary<string, string> wordDefinitions = new Dictionary<string, string>();
 
-void ShowDefinitionPopup(string word, string meaning)
+public TMP_Text definitionText; // ✅ Displays the word's definition
+public GameObject definitionPanel; // ✅ The panel to show the definition
+public RawImage definitionImage; // ✅ Displays the image for the word
+
+void ShowDefinitionPopup(string word)
 {
     definitionPanel.SetActive(true);
-    definitionText.text = $"<b>{word}</b>\n{meaning}";
-}
 
+    if (wordDefinitions.ContainsKey(word))
+    {
+        definitionText.text = $"<b>{word}</b>\n{wordDefinitions[word]}"; // ✅ Show definition
+    }
+    else
+    {
+        definitionText.text = $"<b>{word}</b>\nNo definition available.";
+    }
+
+    if (wordImages.ContainsKey(word) && !string.IsNullOrEmpty(wordImages[word]))
+    {
+        StartCoroutine(LoadImage(wordImages[word])); // ✅ Load and display the image
+    }
+    else
+    {
+        definitionImage.gameObject.SetActive(false); // ✅ Hide if no image available
+    }
+}
 public void CloseDefinitionPopup()
 {
     definitionPanel.SetActive(false);
+}
+
+
+IEnumerator LoadImage(string imageUrl)
+{
+    using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(imageUrl))
+    {
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Texture2D texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+            definitionImage.texture = texture;
+            definitionImage.gameObject.SetActive(true); // ✅ Show the image
+        }
+        else
+        {
+            Debug.LogError("❌ Failed to load image: " + request.error);
+            definitionImage.gameObject.SetActive(false); // ✅ Hide if failed
+        }
+    }
 }
 
 
@@ -262,7 +313,7 @@ void RestartAutoAdvanceCoroutine()
         UpdateButtons();
     }
 
- void NextDialogue()
+void NextDialogue()
 {
     if (currentDialogueIndex < currentDialogues.Count - 1) // ✅ Ensure it is not the last dialogue
     {
@@ -279,6 +330,7 @@ void RestartAutoAdvanceCoroutine()
 
     UpdateButtons();
 }
+
 
 
 
