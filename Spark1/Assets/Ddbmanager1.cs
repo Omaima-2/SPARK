@@ -105,31 +105,41 @@ private Dictionary<string, string> wordDefinitions = new Dictionary<string, stri
 
     IEnumerator FetchDialoguesFromFrame(DocumentReference frameRef)
     {
+        Debug.Log($"🔍 Fetching dialogues from frame: {frameRef.Path}");
+
         var frameTask = frameRef.GetSnapshotAsync();
         yield return new WaitUntil(() => frameTask.IsCompleted);
 
         if (frameTask.IsFaulted)
         {
-            Debug.LogError($"Failed to load frame {frameRef.Path}: {frameTask.Exception}");
+            Debug.LogError($"❌ Failed to load frame {frameRef.Path}: {frameTask.Exception}");
             yield break;
         }
 
         DocumentSnapshot frameSnapshot = frameTask.Result;
         if (frameSnapshot.Exists && frameSnapshot.TryGetValue("listofDialoges", out List<DocumentReference> dialogueList))
         {
+            Debug.Log($"✅ Frame found: {frameRef.Path} with {dialogueList.Count} dialogues");
+
             currentDialogues = dialogueList;
             currentDialogueIndex = 0;
 
             if (currentDialogues.Count > 0)
             {
-yield return FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id); // ✅ Pass document ID as string
+                Debug.Log($"🎙️ Playing first dialogue: {currentDialogues[currentDialogueIndex].Id}");
+                yield return FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id);
             }
 
             UpdateButtons();
         }
+        else
+        {
+            Debug.LogWarning($"⚠️ No 'listofDialoges' found in {frameRef.Path}");
+        }
     }
 
-  IEnumerator FetchAndPlayDialogue(string dialogueId)
+
+    IEnumerator FetchAndPlayDialogue(string dialogueId)
 {
     while (isPlaying) yield return null; // ✅ Prevents multiple fetch calls
     isPlaying = true;
