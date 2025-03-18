@@ -11,27 +11,29 @@ public class path1 : MonoBehaviour
     private int pointsIndex;
     private bool isWalking = false; // To check if walking animation is triggered
 
-    public void Start()
+public void Start()
+{
+    if (Points == null || Points.Length == 0)
     {
-        if (Points != null && Points.Length > 0)
-        {
-            transform.position = Points[pointsIndex].position; // Set initial position
-            StartCoroutine(StartWalkingAfterDelay(5f)); // Start walking after 5 seconds
-        }
+        Debug.LogError("Points array is null or empty!");
+        return;
     }
+
+    pointsIndex = 0; // Reset index for safety
+    transform.position = Points[pointsIndex].position; // Set initial position
+    StartCoroutine(StartWalkingAfterDelay(5f)); // Start walking after 5 seconds
+}
+
 
     public void Update()
     {
         if (isWalking && pointsIndex < Points.Length)
         {
             MoveToNextPoint();
+            Debug.LogError(pointsIndex);
         }
 
-        // If character enters Idle state, set fixed rotation
-        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Idle"))
-        {
-            SetFixedIdleRotation();
-        }
+
     }
 
     public void MoveToNextPoint()
@@ -68,15 +70,9 @@ public class path1 : MonoBehaviour
             // If reached the last point, trigger "Idle" animation
             if (pointsIndex >= Points.Length)
             {
-                animator.SetTrigger("Idle");
+                //animator.SetTrigger("Idle");
             }
         }
-    }
-
-    private void SetFixedIdleRotation()
-    {
-        // Set the character's rotation to (0, 57, 0) when Idle
-        transform.rotation = Quaternion.Euler(0, 57, 0);
     }
 
     private IEnumerator StartWalkingAfterDelay(float delay)
