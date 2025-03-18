@@ -11,18 +11,25 @@ public class path1 : MonoBehaviour
     private int pointsIndex;
     private bool isWalking = false; // To check if walking animation is triggered
 
-public void Start()
+
+    void Awake()
+{
+    this.enabled = false; // Disable the script at start
+}
+
+public void StartPath()
 {
     if (Points == null || Points.Length == 0)
     {
-        Debug.LogError("Points array is null or empty!");
+        Debug.LogError("Points array is empty!");
         return;
     }
 
-    pointsIndex = 0; // Reset index for safety
-    transform.position = Points[pointsIndex].position; // Set initial position
-    StartCoroutine(StartWalkingAfterDelay(5f)); // Start walking after 5 seconds
+    pointsIndex = 0;
+    transform.position = Points[pointsIndex].position;
+    StartCoroutine(StartWalkingAfterDelay(5f)); // Or immediately if needed
 }
+
 
 
     public void Update()
@@ -30,7 +37,6 @@ public void Start()
         if (isWalking && pointsIndex < Points.Length)
         {
             MoveToNextPoint();
-            Debug.LogError(pointsIndex);
         }
 
 
@@ -70,7 +76,7 @@ public void Start()
             // If reached the last point, trigger "Idle" animation
             if (pointsIndex >= Points.Length)
             {
-                //animator.SetTrigger("Idle");
+                animator.SetTrigger("Idle");
             }
         }
     }
