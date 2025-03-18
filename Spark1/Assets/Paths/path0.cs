@@ -27,11 +27,6 @@ public class path0 : MonoBehaviour
             MoveToNextPoint();
         }
 
-        // If character enters Idle state, set fixed rotation
-        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Idle"))
-        {
-            SetFixedIdleRotation();
-        }
     }
 
     void MoveToNextPoint()
@@ -73,11 +68,6 @@ public class path0 : MonoBehaviour
         }
     }
 
-    private void SetFixedIdleRotation()
-    {
-        // Set the character's rotation to (0, 57, 0) when Idle
-        transform.rotation = Quaternion.Euler(0, 57, 0);
-    }
 
     private IEnumerator StartWalkingAfterDelay(float delay)
     {
