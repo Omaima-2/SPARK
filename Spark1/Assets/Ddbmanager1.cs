@@ -185,7 +185,8 @@ string HighlightWord(string dialogue, string word)
 {
     if (!string.IsNullOrEmpty(word) && dialogue.Contains(word))
     {
-        return dialogue.Replace(word, $"<link=\"{word}\"><color=yellow><b>{word}</b></color></link>");
+return dialogue.Replace(word, $"<link=\"{word}\"><b><color=#90EE90>{word}</color></b></link>");
+
     }
     return dialogue;
 }
