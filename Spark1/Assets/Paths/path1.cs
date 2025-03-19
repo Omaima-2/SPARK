@@ -27,7 +27,7 @@ public void StartPath()
 
     pointsIndex = 0;
     transform.position = Points[pointsIndex].position;
-    StartCoroutine(StartWalkingAfterDelay(5f)); // Or immediately if needed
+    StartCoroutine(StartWalkingAfterDelay(0)); // Or immediately if needed
 }
 
 
