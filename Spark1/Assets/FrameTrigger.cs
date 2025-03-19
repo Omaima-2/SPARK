@@ -11,7 +11,7 @@ public class FrameTrigger : MonoBehaviour
         if (other.CompareTag("Player")) // Ensure the player has the correct tag
         {
             isTriggered = true;
-            Debug.Log("✅ Frame 2 Trigger ACTIVATED! isTriggered = " + isTriggered);
+            Debug.Log("✅ Frame  Trigger ACTIVATED! isTriggered = " + isTriggered);
         }
     }
 }

@@ -12,6 +12,7 @@ public class Ddbmanager : MonoBehaviour
     private FirebaseFirestore db;
     public TMP_Text textUI;
     public FrameTrigger frame2Trigger;
+    public FrameTrigger frame3Trigger;
     public Button soundToggleButton;
     public Sprite soundOnSprite;
     public Sprite soundOffSprite;
@@ -28,6 +29,10 @@ public class Ddbmanager : MonoBehaviour
     private bool isPlaying = false;
 
     private Coroutine autoAdvanceCoroutine;
+
+    public TMP_Text definitionText;
+    public GameObject definitionPanel;
+    public RawImage definitionImage;
 
     void Start()
     {
@@ -64,6 +69,20 @@ public class Ddbmanager : MonoBehaviour
         UpdateButtonSprite();
     }
 
+    public void MuteAudio()
+    {
+        isMuted = true;
+        audioSource.volume = 0f;
+        UpdateButtonSprite();
+    }
+
+    public void UnmuteAudio()
+    {
+        isMuted = false;
+        audioSource.volume = 1f;
+        UpdateButtonSprite();
+    }
+
     void UpdateButtonSprite()
     {
         if (soundToggleButton != null && soundToggleButton.image != null)
@@ -93,7 +112,16 @@ public class Ddbmanager : MonoBehaviour
 
                 if (i == 1)
                 {
+                    Debug.Log("⏳ Waiting for Frame 2 trigger...");
                     yield return new WaitUntil(() => frame2Trigger.isTriggered);
+                    Debug.Log("✅ Frame 2 triggered! Fetching dialogues...");
+                }
+
+                if (i == 2)
+                {
+                    Debug.Log("⏳ Waiting for Frame 3 trigger...");
+                    yield return new WaitUntil(() => frame3Trigger.isTriggered);
+                    Debug.Log("✅ Frame 3 triggered! Fetching dialogues...");
                 }
 
                 yield return FetchDialoguesFromFrame(frameRef);
@@ -145,25 +173,87 @@ public class Ddbmanager : MonoBehaviour
                 string highlightedWord = dialogueSnapshot.ContainsField("word") ? dialogueSnapshot.GetValue<string>("word") : "";
                 string wordMeaning = dialogueSnapshot.ContainsField("meaning") ? dialogueSnapshot.GetValue<string>("meaning") : "";
                 string imageUrl = dialogueSnapshot.ContainsField("image") ? dialogueSnapshot.GetValue<string>("image") : "";
+                string audioUrl = dialogueSnapshot.ContainsField("audio") ? dialogueSnapshot.GetValue<string>("audio") : "";
 
-                if (textUI != null)
-                {
-                    textUI.text = HighlightWord(dialogueText, highlightedWord);
-                }
+                textUI.text = HighlightWord(dialogueText, highlightedWord);
 
                 if (!string.IsNullOrEmpty(highlightedWord))
                 {
-                    wordDefinitions[highlightedWord] = wordMeaning;
-                    wordImages[highlightedWord] = imageUrl;
+                    if (!wordDefinitions.ContainsKey(highlightedWord))
+                    {
+                        wordDefinitions[highlightedWord] = wordMeaning;
+                    }
+
+                    if (!wordImages.ContainsKey(highlightedWord))
+                    {
+                        wordImages[highlightedWord] = imageUrl;
+                    }
                 }
 
-                float waitTime = Mathf.Clamp(dialogueText.Length * 0.1f, 3f, 10f); // Adjust wait time dynamically
-                yield return new WaitForSeconds(waitTime);
+                if (!string.IsNullOrEmpty(audioUrl))
+                {
+                    StartCoroutine(LoadAndPlayAudio(audioUrl));
+                }
 
-                NextDialogue();
+                RestartAutoAdvanceCoroutine();
+            }
+
+        }
+
+        isPlaying = false;
+    }
+    void RestartAutoAdvanceCoroutine()
+    {
+        if (autoAdvanceCoroutine != null)
+        {
+            Debug.Log("⏹️ Stopping previous auto-advance...");
+            StopCoroutine(autoAdvanceCoroutine);
+        }
+
+        Debug.Log("▶️ Starting new auto-advance...");
+        autoAdvanceCoroutine = StartCoroutine(AutoAdvanceDialogue());
+    }
+
+    IEnumerator AutoAdvanceDialogue()
+    {
+        Debug.Log("⏳ Waiting to auto-advance...");
+
+        yield return new WaitForSeconds(7); // ✅ Wait 7 seconds before moving to the next dialogue
+
+        if (currentDialogueIndex < currentDialogues.Count - 1)
+        {
+            Debug.Log("➡️ Auto-advancing to next dialogue...");
+            NextDialogue();
+        }
+        else
+        {
+            Debug.Log("✅ Last dialogue reached, stopping auto-advance.");
+        }
+    }
+
+
+    IEnumerator LoadAndPlayAudio(string url)
+    {
+        using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(url, AudioType.MPEG))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result == UnityWebRequest.Result.Success)
+            {
+                audioSource.clip = DownloadHandlerAudioClip.GetContent(www);
+                audioSource.volume = isMuted ? 0f : 1f;
+                audioSource.Play();
             }
         }
-        isPlaying = false;
+    }
+
+    string HighlightWord(string dialogue, string word)
+    {
+        if (!string.IsNullOrEmpty(word) && dialogue.Contains(word))
+        {
+            return dialogue.Replace(word, $"<link=\"{word}\"><b><color=#90EE90>{word}</color></b></link>");
+        }
+        return dialogue;
     }
 
     void PreviousDialogue()
@@ -188,41 +278,14 @@ public class Ddbmanager : MonoBehaviour
 
     void UpdateButtons()
     {
-        if (previousButton != null)
-        {
-            previousButton.gameObject.SetActive(currentDialogueIndex > 0);
-        }
-
-        if (nextButton != null)
-        {
-            nextButton.gameObject.SetActive(currentDialogueIndex < currentDialogues.Count - 1);
-        }
+        previousButton.gameObject.SetActive(currentDialogueIndex > 0);
+        nextButton.gameObject.SetActive(currentDialogueIndex < currentDialogues.Count - 1);
     }
 
-    string HighlightWord(string dialogue, string word)
-    {
-        if (!string.IsNullOrEmpty(word) && dialogue.Contains(word))
-        {
-            return dialogue.Replace(word, $"<link=\"{word}\"><b><color=#90EE90>{word}</color></b></link>");
-        }
-        return dialogue;
-    }
-
-    public TMP_Text definitionText;
-    public GameObject definitionPanel;
-    public RawImage definitionImage;
-
-    void ShowDefinitionPopup(string word)
+    public void ShowDefinitionPopup(string word)
     {
         definitionPanel.SetActive(true);
-        if (wordDefinitions.ContainsKey(word))
-        {
-            definitionText.text = $"<b>{word}</b>\n{wordDefinitions[word]}";
-        }
-        else
-        {
-            definitionText.text = $"<b>{word}</b>\nNo definition available.";
-        }
+        definitionText.text = wordDefinitions.ContainsKey(word) ? $"<b>{word}</b>\n{wordDefinitions[word]}" : $"<b>{word}</b>\nNo definition available.";
 
         if (wordImages.ContainsKey(word) && !string.IsNullOrEmpty(wordImages[word]))
         {
@@ -247,45 +310,9 @@ public class Ddbmanager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Texture2D texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
-                definitionImage.texture = texture;
+                definitionImage.texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
                 definitionImage.gameObject.SetActive(true);
             }
-            else
-            {
-                Debug.LogError("❌ Failed to load image: " + request.error);
-                definitionImage.gameObject.SetActive(false);
-            }
-        }
-    }
-
-    public void MuteAudio()
-    {
-        if (audioSource != null)
-        {
-            isMuted = true; // Set muted state
-            audioSource.volume = 0f; // Mute the audio
-            UpdateButtonSprite();
-            Debug.Log("✅ Firebase Audio Muted!");
-        }
-        else
-        {
-            Debug.LogWarning("⚠️ AudioSource is NULL, cannot mute audio!");
-        }
-    }
-
-    public void UnmuteAudio()
-    {
-        if (audioSource != null)
-        {
-            isMuted = false; // Set unmuted state
-            audioSource.volume = 1f; // Unmute the audio
-            UpdateButtonSprite();
-            Debug.Log("✅ Firebase Audio Unmuted!");
-        }
-        else
-        {
-            Debug.LogWarning("⚠️ AudioSource is NULL, cannot unmute audio!");
         }
     }
 }

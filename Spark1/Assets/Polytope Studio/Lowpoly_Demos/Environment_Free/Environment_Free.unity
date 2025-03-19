@@ -5231,6 +5231,7 @@ GameObject:
   - component: {fileID: 452454304}
   - component: {fileID: 452454303}
   - component: {fileID: 452454307}
+  - component: {fileID: 452454308}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -5344,6 +5345,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textUI: {fileID: 2052488106}
   frame2Trigger: {fileID: 1646285610}
+  frame3Trigger: {fileID: 2008247373}
   soundToggleButton: {fileID: 1318335750}
   soundOnSprite: {fileID: 21300000, guid: 9ab485285d640466cbc743eb971badde, type: 3}
   soundOffSprite: {fileID: 21300000, guid: 124a724fc9bcb42a4b6041863ecba1cf, type: 3}
@@ -5352,6 +5354,21 @@ MonoBehaviour:
   definitionText: {fileID: 1831933860}
   definitionPanel: {fileID: 1356583872}
   definitionImage: {fileID: 1603745010}
+--- !u!114 &452454308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 452454302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ebdbde5094bbb64f9f33155575068a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  panel1: {fileID: 1841352442}
+  panel2: {fileID: 901635621}
+  frame2Trigger: {fileID: 1646285610}
 --- !u!1 &454481521
 GameObject:
   m_ObjectHideFlags: 0
@@ -16277,7 +16294,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2, y: 1, z: 2}
+  m_Size: {x: 1.5, y: 1, z: 1.5}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!4 &1646285609
 Transform:
@@ -16288,7 +16305,7 @@ Transform:
   m_GameObject: {fileID: 1646285607}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 42.63, y: 3.28, z: 67.78}
+  m_LocalPosition: {x: 42.54, y: 3.32, z: 67.93}
   m_LocalScale: {x: 1, y: 0.43374, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -19533,6 +19550,73 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5147055916095616547, guid: bc9db5ba6e6f64c4fb6b3d967daf53fd, type: 3}
   m_PrefabInstance: {fileID: 1985233848}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2008247372
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2008247375}
+  - component: {fileID: 2008247374}
+  - component: {fileID: 2008247373}
+  m_Layer: 0
+  m_Name: frame3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2008247373
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008247372}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ed30c8743e17994e949d8bc39650fc2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isTriggered: 0
+--- !u!65 &2008247374
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008247372}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.5, y: 1, z: 1.5}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &2008247375
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008247372}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 44.27, y: 3.33, z: 66.39}
+  m_LocalScale: {x: 1, y: 0.43374, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2023947305
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21651,6 +21735,6 @@ SceneRoots:
   - {fileID: 1933139074}
   - {fileID: 20888977}
   - {fileID: 165394811}
-  - {fileID: 1802603063}
   - {fileID: 336909029}
   - {fileID: 1646285609}
+  - {fileID: 2008247375}
