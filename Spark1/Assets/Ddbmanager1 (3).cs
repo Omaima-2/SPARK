@@ -173,7 +173,7 @@ public class Ddbmanager : MonoBehaviour
                 string highlightedWord = dialogueSnapshot.ContainsField("word") ? dialogueSnapshot.GetValue<string>("word") : "";
                 string wordMeaning = dialogueSnapshot.ContainsField("meaning") ? dialogueSnapshot.GetValue<string>("meaning") : "";
                 string imageUrl = dialogueSnapshot.ContainsField("image") ? dialogueSnapshot.GetValue<string>("image") : "";
-                string audioUrl = dialogueSnapshot.ContainsField("audio") ? dialogueSnapshot.GetValue<string>("audio") : "";
+                string audioUrl = dialogueSnapshot.ContainsField("Audio") ? dialogueSnapshot.GetValue<string>("Audio") : "";
 
                 textUI.text = HighlightWord(dialogueText, highlightedWord);
 
