@@ -161,6 +161,8 @@ public class Ddbmanager : MonoBehaviour
         while (isPlaying) yield return null;
         isPlaying = true;
 
+        Debug.Log($"🎯 FetchAndPlayDialogue() called for ID: {dialogueId}"); // Debug log
+
         DocumentReference dialogueRef = db.Collection("Dialogues").Document(dialogueId);
         var dialogueTask = dialogueRef.GetSnapshotAsync();
         yield return new WaitUntil(() => dialogueTask.IsCompleted);
@@ -175,6 +177,9 @@ public class Ddbmanager : MonoBehaviour
                 string wordMeaning = dialogueSnapshot.ContainsField("meaning") ? dialogueSnapshot.GetValue<string>("meaning") : "";
                 string imageUrl = dialogueSnapshot.ContainsField("image") ? dialogueSnapshot.GetValue<string>("image") : "";
                 string audioUrl = dialogueSnapshot.ContainsField("Audio") ? dialogueSnapshot.GetValue<string>("Audio") : "";
+
+                Debug.Log($"📜 Dialogue Text: {dialogueText}"); // Debug log
+                Debug.Log($"🔊 Audio URL Retrieved: {audioUrl}"); // Debug log
 
                 if (textUI != null)
                 {
@@ -195,6 +200,17 @@ public class Ddbmanager : MonoBehaviour
                     }
                 }
 
+                // ✅ Play audio if available
+                if (!string.IsNullOrEmpty(audioUrl))
+                {
+                    Debug.Log($"🎵 Playing Audio from URL: {audioUrl}");
+                    StartCoroutine(LoadAndPlayAudio(audioUrl));
+                }
+                else
+                {
+                    Debug.LogWarning("⚠️ No audio found for this dialogue.");
+                }
+
                 Debug.Log("🔄 Dialogue loaded successfully!");
 
                 // ✅ Restart auto-advance after displaying dialogue
@@ -212,6 +228,7 @@ public class Ddbmanager : MonoBehaviour
 
         isPlaying = false;
     }
+
 
     // ✅ Updated HighlightWord() function to support clickable words
     string HighlightWord(string dialogue, string word)
@@ -334,20 +351,41 @@ public class Ddbmanager : MonoBehaviour
 
     IEnumerator LoadAndPlayAudio(string url)
     {
+        Debug.Log("🎧 Attempting to load audio...");
+
         using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(url, AudioType.MPEG))
         {
-            yield return www.SendWebRequest();
+            www.SendWebRequest();
+
+            while (!www.isDone)
+            {
+                yield return null; // Wait for download to finish
+            }
 
             if (www.result == UnityWebRequest.Result.Success)
             {
-                audioSource.clip = DownloadHandlerAudioClip.GetContent(www);
-                audioSource.volume = isMuted ? 0f : 1f;
-                audioSource.Play();
+                AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
+                if (clip != null)
+                {
+                    audioSource.clip = clip;
+                    audioSource.volume = isMuted ? 0f : 1f;
+                    audioSource.Play();
+                    Debug.Log("✅ Audio playback started!");
+                }
+                else
+                {
+                    Debug.LogError("❌ AudioClip is NULL after download!");
+                }
+            }
+            else
+            {
+                Debug.LogError($"❌ Failed to load audio: {www.error}");
             }
         }
     }
 
-    
+
+
 
     void PreviousDialogue()
     {
