@@ -11,8 +11,9 @@ public class Ddbmanager : MonoBehaviour
 {
     private FirebaseFirestore db;
     public TMP_Text textUI;
-    public FrameTrigger frame2Trigger;
+    public Frame2Trigger frame2Trigger;
     public FrameTrigger frame3Trigger;
+    public FrameTrigger frame4Trigger;
     public Button soundToggleButton;
     public Sprite soundOnSprite;
     public Sprite soundOffSprite;
@@ -111,24 +112,42 @@ public class Ddbmanager : MonoBehaviour
             {
                 DocumentReference frameRef = frameList[i];
 
-                if (i == 1)
+                if (i == 1) // Frame 2
                 {
                     Debug.Log("⏳ Waiting for Frame 2 trigger...");
                     yield return new WaitUntil(() => frame2Trigger.isTriggered);
                     Debug.Log("✅ Frame 2 triggered! Fetching dialogues...");
                 }
 
-                if (i == 2)
+                if (i == 2) // Frame 3 OR Frame 4 Selection
                 {
-                    Debug.Log("⏳ Waiting for Frame 3 trigger...");
-                    yield return new WaitUntil(() => frame3Trigger.isTriggered);
-                    Debug.Log("✅ Frame 3 triggered! Fetching dialogues...");
+                    Debug.Log("⏳ Waiting for Frame 3 OR Frame 4 trigger...");
+
+                    // Wait until either Frame 3 or Frame 4 is triggered
+                    yield return new WaitUntil(() => frame3Trigger.isTriggered || frame4Trigger.isTriggered);
+
+                    if (frame3Trigger.isTriggered)
+                    {
+                        Debug.Log("✅ Frame 3 triggered! Fetching dialogues...");
+                        frameRef = frameList[2]; // Set frame to Frame 3
+                        yield return FetchDialoguesFromFrame(frameRef);
+                        yield break; // 🔥 Exit the loop to prevent Frame 4 from running
+                    }
+                    else if (frame4Trigger.isTriggered)
+                    {
+                        Debug.Log("✅ Frame 4 triggered! Fetching dialogues...");
+                        frameRef = frameList[3]; // Set frame to Frame 4
+                        yield return FetchDialoguesFromFrame(frameRef);
+                        yield break; // 🔥 Exit the loop to prevent Frame 3 from running
+                    }
                 }
 
                 yield return FetchDialoguesFromFrame(frameRef);
             }
         }
     }
+
+
 
     IEnumerator FetchDialoguesFromFrame(DocumentReference frameRef)
     {

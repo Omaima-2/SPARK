@@ -6,7 +6,7 @@ public class PanelVisibilityController : MonoBehaviour
 {
     public GameObject panel1; // Assign in Unity Inspector
     public GameObject panel2; // Assign in Unity Inspector
-    public FrameTrigger frame2Trigger; // Reference to Frame 2 trigger
+    public Frame2Trigger frame2Trigger; // Reference to Frame 2 trigger
     public FrameTrigger frame3Trigger; // Reference to Frame 3 trigger
     public FrameTrigger frame4Trigger; // Reference to Frame 4 trigger
 
