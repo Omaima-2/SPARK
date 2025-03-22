@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
@@ -12,21 +13,25 @@ namespace ButterFly
         public Transform rightWing;
         public Transform[] flowers;
         public GameObject[] nectarObjects;
-        public GameObject handGesture; // Hand gesture icon
+        public GameObject handGesture;
         private Dictionary<Transform, List<GameObject>> nectarGroups = new Dictionary<Transform, List<GameObject>>();
         
         public float flySpeed = 3f;
         public float rotationSpeed = 5f;
         public float flutterSpeed = 2f;
         public float wingSpeed = 3f;
-        public float landingOffset = 0.2f; // Adjusted landing offset for Y-axis only
+        public float landingOffset = 0.2f;
 
         private bool isFlyingToFlower = false;
         private bool firstTapOccurred = false;
+        private bool isSwitchingScene = false;
+
+        private GameManager gameManager;
 
         private void Start()
         {
             Debug.Log("🔄 ButterflyActivity script started.");
+            gameManager = FindObjectOfType<GameManager>();
 
             if (flowers == null || flowers.Length != 3)
             {
@@ -57,7 +62,7 @@ namespace ButterFly
 
             if (handGesture != null)
             {
-                handGesture.SetActive(true); // Show hand gesture initially
+                handGesture.SetActive(true);
             }
         }
 
@@ -72,7 +77,7 @@ namespace ButterFly
             {
                 if (!firstTapOccurred && handGesture != null)
                 {
-                    handGesture.SetActive(false); // Hide hand gesture on first tap
+                    handGesture.SetActive(false);
                     firstTapOccurred = true;
                 }
                 HandleClickOrTap();
@@ -101,7 +106,7 @@ namespace ButterFly
             Vector3 landingPosition = flower.position;
             landingPosition.y += landingOffset;
 
-            while (Vector3.Distance(body.transform.position, landingPosition) > 0.02f) // Smaller threshold
+            while (Vector3.Distance(body.transform.position, landingPosition) > 0.02f)
             {
                 body.transform.position = Vector3.MoveTowards(body.transform.position, landingPosition, flySpeed * Time.deltaTime);
                 body.transform.rotation = Quaternion.Slerp(body.transform.rotation, Quaternion.LookRotation(flower.position - body.transform.position), rotationSpeed * Time.deltaTime);
@@ -110,6 +115,7 @@ namespace ButterFly
 
             body.transform.position = landingPosition;
             CollectNectar(flower);
+            CheckAllNectarCollected();
             isFlyingToFlower = false;
         }
 
@@ -121,6 +127,38 @@ namespace ButterFly
                 nectar.SetActive(false);
                 nectarGroups[flower].RemoveAt(0);
                 Debug.Log($"🍯 Nectar collected from {flower.name}, remaining: {nectarGroups[flower].Count}");
+            }
+        }
+
+        private void CheckAllNectarCollected()
+        {
+            bool allCollected = true;
+            foreach (var group in nectarGroups)
+            {
+                if (group.Value.Count > 0)
+                {
+                    allCollected = false;
+                    break;
+                }
+            }
+
+            if (allCollected && !isSwitchingScene)
+            {
+                Debug.Log("🏆 All nectar collected! Returning to Environment scene...");
+                ReturnToEnvironment();
+            }
+        }
+
+        private void ReturnToEnvironment()
+        {
+            isSwitchingScene = true;
+            if (gameManager != null)
+            {
+                gameManager.ReturnToEnvironment();
+            }
+            else
+            {
+                SceneManager.LoadScene("Environment_Free");
             }
         }
 
