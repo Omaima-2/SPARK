@@ -1,4 +1,5 @@
-﻿using Firebase.Extensions;
+﻿
+using Firebase.Extensions;
 using Firebase.Firestore;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,6 +25,8 @@ public class Ddbmanager : MonoBehaviour
 
     public Button previousButton;
     public Button nextButton;
+public RawImage photoUI;         // Drag your RawImage here in the Inspector
+public GameObject photoPanel;    // Optional: panel wrapping the RawImage
 
     private List<DocumentReference> currentDialogues = new List<DocumentReference>();
     private int currentDialogueIndex = 0;
@@ -126,7 +129,7 @@ public class Ddbmanager : MonoBehaviour
                     // Wait until either Frame 3 or Frame 4 is triggered
                     yield return new WaitUntil(() => frame3Trigger.isTriggered || frame4Trigger.isTriggered);
 
-                    if (frame3Trigger.isTriggered)
+if (frame3Trigger.isTriggered)
                     {
                         Debug.Log("✅ Frame 3 triggered! Fetching dialogues...");
                         frameRef = frameList[2]; // Set frame to Frame 3
@@ -196,6 +199,19 @@ public class Ddbmanager : MonoBehaviour
                 string wordMeaning = dialogueSnapshot.ContainsField("meaning") ? dialogueSnapshot.GetValue<string>("meaning") : "";
                 string imageUrl = dialogueSnapshot.ContainsField("image") ? dialogueSnapshot.GetValue<string>("image") : "";
                 string audioUrl = dialogueSnapshot.ContainsField("Audio") ? dialogueSnapshot.GetValue<string>("Audio") : "";
+                // 🔽 Get photo field if it exists
+               string photoUrl = dialogueSnapshot.ContainsField("visual") ? dialogueSnapshot.GetValue<string>("visual") : "";
+
+if (!string.IsNullOrEmpty(photoUrl))
+{
+    Debug.Log("🖼️ Visual image URL found in document.");
+    StartCoroutine(LoadPhoto(photoUrl));
+}
+else
+{
+    Debug.Log("ℹ️ No visual image URL found.");
+    if (photoPanel != null) photoPanel.SetActive(false);
+}
 
                 Debug.Log($"📜 Dialogue Text: {dialogueText}"); // Debug log
                 Debug.Log($"🔊 Audio URL Retrieved: {audioUrl}"); // Debug log
@@ -219,7 +235,7 @@ public class Ddbmanager : MonoBehaviour
                     }
                 }
 
-                // ✅ Play audio if available
+// ✅ Play audio if available
                 if (!string.IsNullOrEmpty(audioUrl))
                 {
                     Debug.Log($"🎵 Playing Audio from URL: {audioUrl}");
@@ -325,7 +341,7 @@ public class Ddbmanager : MonoBehaviour
         {
             yield return request.SendWebRequest();
 
-            if (request.result == UnityWebRequest.Result.Success)
+if (request.result == UnityWebRequest.Result.Success)
             {
                 Texture2D texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
                 definitionImage.texture = texture;
@@ -349,6 +365,35 @@ public class Ddbmanager : MonoBehaviour
         Debug.Log("▶️ Starting new auto-advance...");
         autoAdvanceCoroutine = StartCoroutine(AutoAdvanceDialogue());
     }
+IEnumerator LoadPhoto(string imageUrl)
+{
+    Debug.Log("🖼️ Attempting to load visual photo: " + imageUrl);
+
+    using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(imageUrl))
+    {
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Texture2D texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+            photoUI.texture = texture;
+            photoUI.gameObject.SetActive(true);
+
+            if (photoPanel != null)
+            {
+                photoPanel.SetActive(true);
+            }
+
+            Debug.Log("✅ Visual photo loaded and displayed.");
+        }
+        else
+        {
+            Debug.LogError("❌ Failed to load visual photo: " + request.error);
+            photoUI.gameObject.SetActive(false);
+            if (photoPanel != null) photoPanel.SetActive(false);
+        }
+    }
+}
 
     IEnumerator AutoAdvanceDialogue()
     {
