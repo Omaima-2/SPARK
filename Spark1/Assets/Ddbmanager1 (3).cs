@@ -270,7 +270,7 @@ else
     {
         if (!string.IsNullOrEmpty(word) && dialogue.Contains(word))
         {
-            return dialogue.Replace(word, $"<link=\"{word}\"><b><color=#90EE90>{word}</color></b></link>");
+            return dialogue.Replace(word, $"<link=\"{word}\"><b><color=#1E90FF>{word}</color></b></link>");
         }
         return dialogue;
     }
@@ -311,7 +311,7 @@ else
 
         if (wordDefinitions.ContainsKey(word))
         {
-            definitionText.text = $"<b>{word}</b>\n{wordDefinitions[word]}"; // ✅ Show definition
+definitionText.text = $"<b><color=#228B22>{word}</color></b>\n{wordDefinitions[word]}";
         }
         else
         {
