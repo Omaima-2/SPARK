@@ -10,6 +10,10 @@ using Firebase.Firestore;
 
 public class FirebaseController : MonoBehaviour
 {
+    // Singleton instance
+    public static FirebaseController Instance { get; private set; }
+    public bool IsFirebaseInitialized { get; private set; }
+    
     // Firebase variables
     private FirebaseAuth auth;
     private FirebaseUser user;
@@ -32,28 +36,54 @@ public class FirebaseController : MonoBehaviour
     public InputField deleteConfirmPassword;
     public TextMeshProUGUI accountErrorText;
 
+    private void Awake()
+    {
+        // Singleton pattern
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+    }
+
     async void Start()
     {
+        Debug.Log("FirebaseController: Starting initialization");
         await InitializeFirebase();
     }
 
     async Task InitializeFirebase()
     {
-        var dependencyTask = FirebaseApp.CheckAndFixDependenciesAsync();
-        await dependencyTask; // Wait until Firebase dependencies are checked
+        Debug.Log("FirebaseController: Beginning Firebase initialization");
+        
+        try
+        {
+            var dependencyTask = FirebaseApp.CheckAndFixDependenciesAsync();
+            await dependencyTask; // Wait until Firebase dependencies are checked
 
-        if (dependencyTask.Result == DependencyStatus.Available)
-        {
-            auth = FirebaseAuth.DefaultInstance;
-            db = FirebaseFirestore.DefaultInstance;
-            auth.StateChanged += AuthStateChanged;
-            AuthStateChanged(this, null);
-            Debug.Log("✅ Firebase initialized successfully.");
+            if (dependencyTask.Result == DependencyStatus.Available)
+            {
+                auth = FirebaseAuth.DefaultInstance;
+                db = FirebaseFirestore.DefaultInstance;
+                auth.StateChanged += AuthStateChanged;
+                AuthStateChanged(this, null);
+                IsFirebaseInitialized = true;
+                Debug.Log("✅ Firebase initialized successfully.");
+            }
+            else
+            {
+                Debug.LogError("❌ Firebase initialization failed: " + dependencyTask.Result);
+                DisplayError("Firebase failed to initialize.");
+            }
         }
-        else
+        catch (Exception e)
         {
-            Debug.LogError("❌ Firebase initialization failed: " + dependencyTask.Result);
-            DisplayError("Firebase failed to initialize.");
+            Debug.LogError("❌ Exception during Firebase initialization: " + e.Message);
         }
     }
 
@@ -551,7 +581,7 @@ public class FirebaseController : MonoBehaviour
 
     void AuthStateChanged(object sender, EventArgs eventArgs)
     {
-        if (auth.CurrentUser != user)
+        if (auth != null && auth.CurrentUser != user)
         {
             bool signedIn = user != auth.CurrentUser && auth.CurrentUser != null;
 
@@ -589,4 +619,20 @@ public class FirebaseController : MonoBehaviour
     }
 
     #endregion
+    
+    // Public methods for accessing Firebase services from other scripts
+    public FirebaseAuth GetAuth()
+    {
+        return auth;
+    }
+    
+    public FirebaseFirestore GetFirestore()
+    {
+        return db;
+    }
+    
+    public FirebaseUser GetCurrentUser()
+    {
+        return user;
+    }
 }

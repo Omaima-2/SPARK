@@ -68,20 +68,18 @@ public class ChildAccountManager : MonoBehaviour
     StartCoroutine(WaitForFirebaseInitialization());
 }
 
+// In ChildAccountManager.cs, WaitForFirebaseInitialization method
 private IEnumerator WaitForFirebaseInitialization()
 {
-    // Make sure you have the proper using statement at the top of your file
-    // using System.Collections;
-    
     Debug.Log("Waiting for Firebase to initialize...");
     
-    // Wait until Firebase is available
-    while (FirebaseAuth.DefaultInstance == null)
+    // Wait until FirebaseController is initialized
+    while (FirebaseController.Instance == null || !FirebaseController.Instance.IsFirebaseInitialized)
     {
         yield return new WaitForSeconds(0.2f);
     }
     
-    Debug.Log("Firebase is initialized, continuing setup...");
+    Debug.Log("Firebase is initialized via FirebaseController, continuing setup...");
     
     // Now we can initialize our manager
     InitializeManager();
