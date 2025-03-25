@@ -9,11 +9,11 @@ public class FirebaseInitializer : MonoBehaviour
         {
             if (task.IsCompleted)
             {
-                Debug.Log("Firebase initialized successfully!");
+                Debug.Log("Firebase initialized successfully!😍");
             }
             else
             {
-                Debug.LogError("Firebase initialization failed: " + task.Exception);
+                Debug.LogError("Firebase initialization failed:😔 " + task.Exception);
             }
         });
     }

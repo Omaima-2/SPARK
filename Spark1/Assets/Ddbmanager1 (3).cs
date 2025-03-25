@@ -1,4 +1,5 @@
-﻿using Firebase.Extensions;
+﻿
+using Firebase.Extensions;
 using Firebase.Firestore;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,8 +12,9 @@ public class Ddbmanager : MonoBehaviour
 {
     private FirebaseFirestore db;
     public TMP_Text textUI;
-    public FrameTrigger frame2Trigger;
+    public Frame2Trigger frame2Trigger;
     public FrameTrigger frame3Trigger;
+    public FrameTrigger frame4Trigger;
     public Button soundToggleButton;
     public Sprite soundOnSprite;
     public Sprite soundOffSprite;
@@ -23,6 +25,8 @@ public class Ddbmanager : MonoBehaviour
 
     public Button previousButton;
     public Button nextButton;
+public RawImage photoUI;         // Drag your RawImage here in the Inspector
+public GameObject photoPanel;    // Optional: panel wrapping the RawImage
 
     private List<DocumentReference> currentDialogues = new List<DocumentReference>();
     private int currentDialogueIndex = 0;
@@ -111,24 +115,42 @@ public class Ddbmanager : MonoBehaviour
             {
                 DocumentReference frameRef = frameList[i];
 
-                if (i == 1)
+                if (i == 1) // Frame 2
                 {
                     Debug.Log("⏳ Waiting for Frame 2 trigger...");
                     yield return new WaitUntil(() => frame2Trigger.isTriggered);
                     Debug.Log("✅ Frame 2 triggered! Fetching dialogues...");
                 }
 
-                if (i == 2)
+                if (i == 2) // Frame 3 OR Frame 4 Selection
                 {
-                    Debug.Log("⏳ Waiting for Frame 3 trigger...");
-                    yield return new WaitUntil(() => frame3Trigger.isTriggered);
-                    Debug.Log("✅ Frame 3 triggered! Fetching dialogues...");
+                    Debug.Log("⏳ Waiting for Frame 3 OR Frame 4 trigger...");
+
+                    // Wait until either Frame 3 or Frame 4 is triggered
+                    yield return new WaitUntil(() => frame3Trigger.isTriggered || frame4Trigger.isTriggered);
+
+if (frame3Trigger.isTriggered)
+                    {
+                        Debug.Log("✅ Frame 3 triggered! Fetching dialogues...");
+                        frameRef = frameList[2]; // Set frame to Frame 3
+                        yield return FetchDialoguesFromFrame(frameRef);
+                        yield break; // 🔥 Exit the loop to prevent Frame 4 from running
+                    }
+                    else if (frame4Trigger.isTriggered)
+                    {
+                        Debug.Log("✅ Frame 4 triggered! Fetching dialogues...");
+                        frameRef = frameList[3]; // Set frame to Frame 4
+                        yield return FetchDialoguesFromFrame(frameRef);
+                        yield break; // 🔥 Exit the loop to prevent Frame 3 from running
+                    }
                 }
 
                 yield return FetchDialoguesFromFrame(frameRef);
             }
         }
     }
+
+
 
     IEnumerator FetchDialoguesFromFrame(DocumentReference frameRef)
     {
@@ -161,6 +183,8 @@ public class Ddbmanager : MonoBehaviour
         while (isPlaying) yield return null;
         isPlaying = true;
 
+        Debug.Log($"🎯 FetchAndPlayDialogue() called for ID: {dialogueId}"); // Debug log
+
         DocumentReference dialogueRef = db.Collection("Dialogues").Document(dialogueId);
         var dialogueTask = dialogueRef.GetSnapshotAsync();
         yield return new WaitUntil(() => dialogueTask.IsCompleted);
@@ -175,6 +199,22 @@ public class Ddbmanager : MonoBehaviour
                 string wordMeaning = dialogueSnapshot.ContainsField("meaning") ? dialogueSnapshot.GetValue<string>("meaning") : "";
                 string imageUrl = dialogueSnapshot.ContainsField("image") ? dialogueSnapshot.GetValue<string>("image") : "";
                 string audioUrl = dialogueSnapshot.ContainsField("Audio") ? dialogueSnapshot.GetValue<string>("Audio") : "";
+                // 🔽 Get photo field if it exists
+               string photoUrl = dialogueSnapshot.ContainsField("visual") ? dialogueSnapshot.GetValue<string>("visual") : "";
+
+if (!string.IsNullOrEmpty(photoUrl))
+{
+    Debug.Log("🖼️ Visual image URL found in document.");
+    StartCoroutine(LoadPhoto(photoUrl));
+}
+else
+{
+    Debug.Log("ℹ️ No visual image URL found.");
+    if (photoPanel != null) photoPanel.SetActive(false);
+}
+
+                Debug.Log($"📜 Dialogue Text: {dialogueText}"); // Debug log
+                Debug.Log($"🔊 Audio URL Retrieved: {audioUrl}"); // Debug log
 
                 if (textUI != null)
                 {
@@ -195,6 +235,17 @@ public class Ddbmanager : MonoBehaviour
                     }
                 }
 
+// ✅ Play audio if available
+                if (!string.IsNullOrEmpty(audioUrl))
+                {
+                    Debug.Log($"🎵 Playing Audio from URL: {audioUrl}");
+                    StartCoroutine(LoadAndPlayAudio(audioUrl));
+                }
+                else
+                {
+                    Debug.LogWarning("⚠️ No audio found for this dialogue.");
+                }
+
                 Debug.Log("🔄 Dialogue loaded successfully!");
 
                 // ✅ Restart auto-advance after displaying dialogue
@@ -213,12 +264,13 @@ public class Ddbmanager : MonoBehaviour
         isPlaying = false;
     }
 
+
     // ✅ Updated HighlightWord() function to support clickable words
     string HighlightWord(string dialogue, string word)
     {
         if (!string.IsNullOrEmpty(word) && dialogue.Contains(word))
         {
-            return dialogue.Replace(word, $"<link=\"{word}\"><b><color=#90EE90>{word}</color></b></link>");
+            return dialogue.Replace(word, $"<link=\"{word}\"><b><color=#1E90FF>{word}</color></b></link>");
         }
         return dialogue;
     }
@@ -259,7 +311,7 @@ public class Ddbmanager : MonoBehaviour
 
         if (wordDefinitions.ContainsKey(word))
         {
-            definitionText.text = $"<b>{word}</b>\n{wordDefinitions[word]}"; // ✅ Show definition
+definitionText.text = $"<b><color=#228B22>{word}</color></b>\n{wordDefinitions[word]}";
         }
         else
         {
@@ -289,7 +341,7 @@ public class Ddbmanager : MonoBehaviour
         {
             yield return request.SendWebRequest();
 
-            if (request.result == UnityWebRequest.Result.Success)
+if (request.result == UnityWebRequest.Result.Success)
             {
                 Texture2D texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
                 definitionImage.texture = texture;
@@ -313,6 +365,35 @@ public class Ddbmanager : MonoBehaviour
         Debug.Log("▶️ Starting new auto-advance...");
         autoAdvanceCoroutine = StartCoroutine(AutoAdvanceDialogue());
     }
+IEnumerator LoadPhoto(string imageUrl)
+{
+    Debug.Log("🖼️ Attempting to load visual photo: " + imageUrl);
+
+    using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(imageUrl))
+    {
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Texture2D texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+            photoUI.texture = texture;
+            photoUI.gameObject.SetActive(true);
+
+            if (photoPanel != null)
+            {
+                photoPanel.SetActive(true);
+            }
+
+            Debug.Log("✅ Visual photo loaded and displayed.");
+        }
+        else
+        {
+            Debug.LogError("❌ Failed to load visual photo: " + request.error);
+            photoUI.gameObject.SetActive(false);
+            if (photoPanel != null) photoPanel.SetActive(false);
+        }
+    }
+}
 
     IEnumerator AutoAdvanceDialogue()
     {
@@ -334,20 +415,41 @@ public class Ddbmanager : MonoBehaviour
 
     IEnumerator LoadAndPlayAudio(string url)
     {
+        Debug.Log("🎧 Attempting to load audio...");
+
         using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(url, AudioType.MPEG))
         {
-            yield return www.SendWebRequest();
+            www.SendWebRequest();
+
+            while (!www.isDone)
+            {
+                yield return null; // Wait for download to finish
+            }
 
             if (www.result == UnityWebRequest.Result.Success)
             {
-                audioSource.clip = DownloadHandlerAudioClip.GetContent(www);
-                audioSource.volume = isMuted ? 0f : 1f;
-                audioSource.Play();
+                AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
+                if (clip != null)
+                {
+                    audioSource.clip = clip;
+                    audioSource.volume = isMuted ? 0f : 1f;
+                    audioSource.Play();
+                    Debug.Log("✅ Audio playback started!");
+                }
+                else
+                {
+                    Debug.LogError("❌ AudioClip is NULL after download!");
+                }
+            }
+            else
+            {
+                Debug.LogError($"❌ Failed to load audio: {www.error}");
             }
         }
     }
 
-    
+
+
 
     void PreviousDialogue()
     {

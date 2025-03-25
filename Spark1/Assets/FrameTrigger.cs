@@ -15,14 +15,4 @@ public class FrameTrigger : MonoBehaviour
         }
     }
 
-    private void OnTriggerExit(Collider other)
-    {
-        Debug.Log($"🚪 Exit detected by: {other.name}");
-
-        if (other.CompareTag("Player")) // Ensure only the player can deactivate it
-        {
-            isTriggered = false;
-            Debug.Log("❌ Frame Trigger DEACTIVATED! isTriggered = " + isTriggered);
-        }
-    }
 }
