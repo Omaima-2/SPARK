@@ -1,129 +1,105 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
-    private Vector3 playerPosition;
-    private Quaternion playerRotation;
-    private float animationTime;
-    private static bool returningFromPath1 = false;
+    public static GameManager Instance;
 
-    public GameObject player;
-    public Animator environmentAnimator;
-    public string triggerStateName = "EnterPath1";
+    public Camera environmentCam;
+    public Camera path1Cam;
 
-    private static GameManager instance;
-    private bool isSwitchingScene = false;
+    // UI Elements from the Canvas
+    public GameObject dialog, mute, stopStory, homeButton, next, previous, HandTaping;
 
-    void Awake()
+    // ✅ Fade Panel Reference
+    public CanvasGroup fadeGroup;  // Assign the CanvasGroup of your black panel here
+
+    private void Awake()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this;
+            Instance = this;
             DontDestroyOnLoad(gameObject);
-            Debug.Log("GameManager instance created and marked as DontDestroyOnLoad");
         }
         else
         {
-            Debug.Log("Duplicate GameManager found, destroying this instance");
             Destroy(gameObject);
-            return;
         }
     }
 
     void Start()
     {
-        // Ensure references are found
-        if (player == null)
-        {
-            player = GameObject.FindGameObjectWithTag("Player");
-            Debug.Log(player != null ? "Player found" : "Player not found");
-        }
-        if (environmentAnimator == null)
-        {
-            environmentAnimator = FindObjectOfType<Animator>();
-            Debug.Log(environmentAnimator != null ? "Animator found" : "Animator not found");
-        }
-
-        if (returningFromPath1)
-        {
-            Debug.Log("Returning from Path1, attempting to load state");
-            LoadEnvironmentState();
-            returningFromPath1 = false;
-        }
+        ActivateEnvironmentCam();  // Start on Environment
     }
 
-    void Update()
+    // ✅ CAMERA SWITCH ENTRY POINTS (Call these instead of direct switch)
+    public void ActivateEnvironmentCam()
     {
-        if (!isSwitchingScene && environmentAnimator != null && IsInTriggerState())
-        {
+        StartCoroutine(FadeAndSwitchCamera(false));  // false = to Environment
+    }
+
+    public void ActivatePath1Cam()
+    {
+        StartCoroutine(FadeAndSwitchCamera(true));   // true = to Path1
+    }
+
+    // ✅ STEP 3 - Fade and Camera Switch Coroutine
+    private IEnumerator FadeAndSwitchCamera(bool toPath1)
+    {
+        // Fade to black
+        yield return StartCoroutine(Fade(1));
+
+        // Switch cameras
+        if (toPath1)
             SwitchToPath1();
-        }
-    }
-
-    bool IsInTriggerState()
-    {
-        AnimatorStateInfo stateInfo = environmentAnimator.GetCurrentAnimatorStateInfo(0);
-        bool isTriggered = stateInfo.IsName(triggerStateName) && stateInfo.normalizedTime >= 0f;
-        Debug.Log($"Checking trigger state: {triggerStateName}, IsTriggered: {isTriggered}, NormalizedTime: {stateInfo.normalizedTime}");
-        return isTriggered;
-    }
-
-    void SwitchToPath1()
-    {
-        isSwitchingScene = true;
-        SaveEnvironmentState();
-        Debug.Log($"Switching to Path1, Saved State - Pos: {playerPosition}, Rot: {playerRotation}, AnimTime: {animationTime}");
-        SceneManager.LoadScene("Path1");
-        isSwitchingScene = false;
-    }
-
-    void SaveEnvironmentState()
-    {
-        if (player != null)
-        {
-            playerPosition = player.transform.position;
-            playerRotation = player.transform.rotation;
-        }
-        if (environmentAnimator != null)
-        {
-            animationTime = environmentAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-        }
-    }
-
-    public void ReturnToEnvironment()
-    {
-        if (!isSwitchingScene)
-        {
-            isSwitchingScene = true;
-            returningFromPath1 = true;
-            Debug.Log("Returning to Environment_Free");
-            SceneManager.LoadScene("Environment_Free");
-            isSwitchingScene = false;
-        }
-    }
-
-    void LoadEnvironmentState()
-    {
-        if (player != null)
-        {
-            player.transform.position = playerPosition;
-            player.transform.rotation = playerRotation;
-            Debug.Log($"Player state restored - Pos: {playerPosition}, Rot: {playerRotation}");
-        }
         else
-        {
-            Debug.LogError("Player is null in LoadEnvironmentState");
-        }
+            SwitchToEnvironment();
 
-        if (environmentAnimator != null)
+        // Fade back to clear
+        yield return StartCoroutine(Fade(0));
+    }
+
+    private IEnumerator Fade(float targetAlpha)
+    {
+        float duration = 1f; // 1 second fade duration
+        float startAlpha = fadeGroup.alpha;
+        float time = 0;
+
+        while (time < duration)
         {
-            environmentAnimator.Play(triggerStateName, 0, animationTime);
-            Debug.Log($"Animator state restored - State: {triggerStateName}, Time: {animationTime}");
+            time += Time.deltaTime;
+            fadeGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, time / duration);
+            yield return null;
         }
-        else
-        {
-            Debug.LogError("Animator is null in LoadEnvironmentState");
-        }
+        fadeGroup.alpha = targetAlpha;
+    }
+
+    // ✅ Separate logic for camera and UI switching
+    private void SwitchToEnvironment()
+    {
+        environmentCam.gameObject.SetActive(true);
+        path1Cam.gameObject.SetActive(false);
+
+        dialog.SetActive(true);
+        mute.SetActive(true);
+        stopStory.SetActive(true);
+        homeButton.SetActive(true);
+        next.SetActive(true);
+        previous.SetActive(true);
+        HandTaping.SetActive(false);
+    }
+
+    private void SwitchToPath1()
+    {
+        environmentCam.gameObject.SetActive(false);
+        path1Cam.gameObject.SetActive(true);
+
+        dialog.SetActive(false);
+        mute.SetActive(false);
+        stopStory.SetActive(false);
+        homeButton.SetActive(false);
+        next.SetActive(false);
+        previous.SetActive(false);
+        HandTaping.SetActive(true);
     }
 }

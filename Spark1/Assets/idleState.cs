@@ -2,12 +2,49 @@ using UnityEngine;
 
 public class idleState : StateMachineBehaviour
 {
-    // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
+    public Vector3 cameraShift = new Vector3(-2f, 0, 0); // Shift left by 2 units
+    private Camera mainCam;
+    private Vector3 originalCamPosition;
+
+    // Called when the Animator enters the state
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        // Ensure the GameObject is rotated to Y = 35 when entering idle state
+        // ✅ Rotate the character (your original line)
         animator.gameObject.transform.rotation = Quaternion.Euler(0, 300, 0);
+
+        // ✅ Only shift the camera if the state is Idle 2
+        if (stateInfo.IsName("Idle 2"))
+        {
+            mainCam = Camera.main;
+            if (mainCam != null)
+            {
+                // Save original camera position to restore later if needed
+                originalCamPosition = mainCam.transform.position;
+
+                // Shift the camera to the left
+                mainCam.transform.position += cameraShift;
+         
+           }
+        }
+        if (stateInfo.IsName("afterActivity"))
+           {
+             GameManager.Instance.ActivateEnvironmentCam();
+           }
+
+         if (stateInfo.IsName("EnterPath1"))
+        {
+        GameManager.Instance.ActivatePath1Cam();
+
+        }
     }
 
-    // You can use OnStateExit if needed to reset or change the rotation when leaving the idle state
+    // Optional: Reset camera position when exiting the state
+    public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        if (stateInfo.IsName("Idle 2") && mainCam != null)
+        {
+            mainCam.transform.position = originalCamPosition;
+        }
+       
+    }
 }
