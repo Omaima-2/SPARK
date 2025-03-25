@@ -18,7 +18,8 @@ public class Ddbmanager : MonoBehaviour
     public FrameTrigger frame4Trigger;
 
     public Button soundToggleButton;
-    public Sprite soundOnSprite; public Animator animator;
+    public Sprite soundOnSprite; 
+    public Animator animator;
     public Sprite soundOffSprite;
     private AudioSource audioSource;
     private bool isMuted = true;
@@ -131,7 +132,7 @@ public GameObject photoPanel;    // Optional: panel wrapping the RawImage
                     // Wait until either Frame 3 or Frame 4 is triggered
                     yield return new WaitUntil(() => frame3Trigger.isTriggered || frame4Trigger.isTriggered);
 
-if (frame3Trigger.isTriggered)
+                    if (frame3Trigger.isTriggered)
                     {
                         Debug.Log("✅ Frame 3 triggered! Fetching dialogues...");
                         frameRef = frameList[2]; // Set frame to Frame 3
