@@ -18,7 +18,8 @@ public class Ddbmanager : MonoBehaviour
     public FrameTrigger frame4Trigger;
 
     public Button soundToggleButton;
-    public Sprite soundOnSprite; public Animator animator;
+    public Sprite soundOnSprite; 
+    public Animator animator;
     public Sprite soundOffSprite;
     private AudioSource audioSource;
     private bool isMuted = true;
@@ -131,7 +132,7 @@ public GameObject photoPanel;    // Optional: panel wrapping the RawImage
                     // Wait until either Frame 3 or Frame 4 is triggered
                     yield return new WaitUntil(() => frame3Trigger.isTriggered || frame4Trigger.isTriggered);
 
-if (frame3Trigger.isTriggered)
+                    if (frame3Trigger.isTriggered)
                     {
                         Debug.Log("✅ Frame 3 triggered! Fetching dialogues...");
                         frameRef = frameList[2]; // Set frame to Frame 3
@@ -143,20 +144,26 @@ if (frame3Trigger.isTriggered)
                         Debug.Log("✅ Frame 4 triggered! Fetching dialogues...");
                         frameRef = frameList[3]; // Set frame to Frame 4
                         yield return FetchDialoguesFromFrame(frameRef);
+                        if (i == 5) // Frame 6 trigger via Animator
+                        {
+                            Debug.Log("⏳ Waiting for Animator to enter 'afterActivity' state...");
+                            yield return new WaitUntil(() =>
+                            {
+                                AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0); // 0 = base layer
+                                return stateInfo.IsName("afterActivity");
+                            });
+
+                            Debug.Log("✅ Animator is in 'afterActivity' state. Fetching Frame 6 dialogues...");
+
+                            frameRef = frameList[5]; // ✅ Set the frameRef to Frame 6
+                            yield return FetchDialoguesFromFrame(frameRef); // ✅ Fetch and play Frame 6
+                            yield break; // ✅ Prevent further frames from executing
+                        }
                         yield break; // 🔥 Exit the loop to prevent Frame 3 from running
                     }
                 }
-                if (i == 5) // Frame 6 trigger via Animator
-                {
-                    Debug.Log("⏳ Waiting for Animator to enter 'afterActivity' state...");
-                    yield return new WaitUntil(() =>
-                    {
-                        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0); // 0 = base layer
-                        return stateInfo.IsName("afterActivity");
-                    });
+                
 
-                    Debug.Log("✅ Animator is in 'afterActivity' state. Fetching Frame 6 dialogues...");
-                }
 
 
 
