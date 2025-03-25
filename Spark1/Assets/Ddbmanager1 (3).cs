@@ -142,26 +142,22 @@ public GameObject photoPanel;    // Optional: panel wrapping the RawImage
                     else if (frame4Trigger.isTriggered)
                     {
                         Debug.Log("✅ Frame 4 triggered! Fetching dialogues...");
-                        frameRef = frameList[3]; // Set frame to Frame 4
-                        yield return FetchDialoguesFromFrame(frameRef);
-                        if (i == 5) // Frame 6 trigger via Animator
+                        yield return FetchDialoguesFromFrame(frameList[3]);
+
+                        // ✅ Wait for Animator state ONLY IF we went to Frame 4
+                        Debug.Log("⏳ Waiting for Animator to enter 'afterActivity' state...");
+                        yield return new WaitUntil(() =>
                         {
-                            Debug.Log("⏳ Waiting for Animator to enter 'afterActivity' state...");
-                            yield return new WaitUntil(() =>
-                            {
-                                AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0); // 0 = base layer
-                                return stateInfo.IsName("afterActivity");
-                            });
+                            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+                            return stateInfo.IsName("afterActivity");
+                        });
 
-                            Debug.Log("✅ Animator is in 'afterActivity' state. Fetching Frame 6 dialogues...");
-
-                            frameRef = frameList[5]; // ✅ Set the frameRef to Frame 6
-                            yield return FetchDialoguesFromFrame(frameRef); // ✅ Fetch and play Frame 6
-                            yield break; // ✅ Prevent further frames from executing
-                        }
-                        yield break; // 🔥 Exit the loop to prevent Frame 3 from running
+                        Debug.Log("✅ Animator is in 'afterActivity' state. Fetching Frame 6 dialogues...");
+                        yield return FetchDialoguesFromFrame(frameList[5]); // Frame 6
+                        yield break;
                     }
-                }
+                
+            }
                 
 
 
