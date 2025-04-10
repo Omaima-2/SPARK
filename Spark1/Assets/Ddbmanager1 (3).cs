@@ -190,21 +190,22 @@ public GameObject photoPanel;    // Optional: panel wrapping the RawImage
 
             if (currentDialogues.Count > 0)
             {
-                yield return FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id);
+                yield return FetchAndPlayDialogue(currentDialogues[currentDialogueIndex]);
+
             }
 
             UpdateButtons();
         }
     }
 
-    IEnumerator FetchAndPlayDialogue(string dialogueId)
+    IEnumerator FetchAndPlayDialogue(DocumentReference dialogueRef)
     {
         while (isPlaying) yield return null;
         isPlaying = true;
 
-        Debug.Log($"🎯 FetchAndPlayDialogue() called for ID: {dialogueId}"); // Debug log
+        Debug.Log($"🎯 FetchAndPlayDialogue() called for ID: {dialogueRef}"); // Debug log
 
-        DocumentReference dialogueRef = db.Collection("Dialogues").Document(dialogueId);
+        //DocumentReference dialogueRef = db.Collection("Dialogues").Document(dialogueId);
         var dialogueTask = dialogueRef.GetSnapshotAsync();
         yield return new WaitUntil(() => dialogueTask.IsCompleted);
 
@@ -277,7 +278,7 @@ else
         }
         else
         {
-            Debug.LogError($"❌ Failed to fetch dialogue {dialogueId}: {dialogueTask.Exception}");
+            Debug.LogError($"❌ Failed to fetch dialogue {dialogueRef}: {dialogueTask.Exception}");
         }
 
         isPlaying = false;
@@ -418,7 +419,7 @@ IEnumerator LoadPhoto(string imageUrl)
     {
         Debug.Log("⏳ Waiting to auto-advance...");
 
-        yield return new WaitForSeconds(7); // ✅ Wait 7 seconds before moving to the next dialogue
+        yield return new WaitForSeconds(9); // ✅ Wait 7 seconds before moving to the next dialogue
 
         if (currentDialogueIndex < currentDialogues.Count - 1)
         {
@@ -475,7 +476,7 @@ IEnumerator LoadPhoto(string imageUrl)
         if (currentDialogueIndex > 0)
         {
             currentDialogueIndex--;
-            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id));
+            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex]));
         }
         UpdateButtons();
     }
@@ -485,7 +486,7 @@ IEnumerator LoadPhoto(string imageUrl)
         if (currentDialogueIndex < currentDialogues.Count - 1)
         {
             currentDialogueIndex++;
-            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id));
+            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex]));
         }
         UpdateButtons();
     }
