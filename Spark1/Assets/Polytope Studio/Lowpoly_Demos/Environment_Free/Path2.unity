@@ -456,7 +456,7 @@ GameObject:
   - component: {fileID: 179675388}
   - component: {fileID: 179675387}
   m_Layer: 0
-  m_Name: Camera
+  m_Name: CameraPath2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -742,7 +742,7 @@ GameObject:
   - component: {fileID: 404421766}
   - component: {fileID: 404421765}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: CanvasPath2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
