@@ -18,10 +18,13 @@ public class Ddbmanager : MonoBehaviour
     public Button soundToggleButton;
     public Sprite soundOnSprite;
     public Sprite soundOffSprite;
-    private AudioSource audioSource;
-    private bool isMuted = true;
+    public AudioSource audioSource;
+    public bool isMuted = true;
     private Dictionary<string, string> wordImages = new Dictionary<string, string>();
     private Dictionary<string, string> wordDefinitions = new Dictionary<string, string>();
+public GameObject definitionPanel;
+
+public GameObject definitionActionButton;  // Assign in the Inspector (e.g., Got It button)
 
     public Button previousButton;
     public Button nextButton;
@@ -35,7 +38,7 @@ public GameObject photoPanel;    // Optional: panel wrapping the RawImage
     private Coroutine autoAdvanceCoroutine;
 
     public TMP_Text definitionText;
-    public GameObject definitionPanel;
+   
     public RawImage definitionImage;
 
     void Start()
@@ -63,6 +66,7 @@ public GameObject photoPanel;    // Optional: panel wrapping the RawImage
             nextButton.onClick.AddListener(NextDialogue);
             nextButton.gameObject.SetActive(false);
         }
+    
 
         StartCoroutine(FetchFramesFromStory("story1"));
     }
@@ -270,7 +274,7 @@ else
     {
         if (!string.IsNullOrEmpty(word) && dialogue.Contains(word))
         {
-            return dialogue.Replace(word, $"<link=\"{word}\"><b><color=#1E90FF>{word}</color></b></link>");
+    return dialogue.Replace(word, $"<link=\"{word}\"><b><color=#CCCC00>{word}</color></b></link>");
         }
         return dialogue;
     }
@@ -289,7 +293,7 @@ else
 
                 if (wordDefinitions.ContainsKey(clickedWord)) // ✅ Check if the word exists
                 {
-                    ShowDefinitionPopup(clickedWord); // ✅ Show word definition & image
+ShowDefinitionPopup(clickedWord); 
                 }
                 else
                 {
@@ -298,41 +302,99 @@ else
                 }
             }
             else
-            {
-                definitionPanel.SetActive(false); // ✅ Hide panel if user clicks outside
-            }
+            
+{
+    definitionPanel.SetActive(false);
+    definitionActionButton.SetActive(false); // 👈 Hide button if clicked outside
+}
+
+            
         }
     }
 
     // ✅ Function to Show Word Definition
     void ShowDefinitionPopup(string word)
+{
+    definitionPanel.SetActive(true);
+
+    if (wordDefinitions.ContainsKey(word))
     {
-        definitionPanel.SetActive(true);
-
-        if (wordDefinitions.ContainsKey(word))
-        {
-definitionText.text = $"<b><color=#228B22>{word}</color></b>\n{wordDefinitions[word]}";
-        }
-        else
-        {
-            definitionText.text = $"<b>{word}</b>\nNo definition available.";
-        }
-
-        if (wordImages.ContainsKey(word) && !string.IsNullOrEmpty(wordImages[word]))
-        {
-            StartCoroutine(LoadImage(wordImages[word])); // ✅ Load and display the image
-        }
-        else
-        {
-            definitionImage.gameObject.SetActive(false); // ✅ Hide if no image available
-        }
+        definitionText.text = $"<b><color=#228B22>{word}</color></b>\n{wordDefinitions[word]}";
+    }
+    else
+    {
+        definitionText.text = $"<b>{word}</b>\nNo definition available.";
     }
 
-    // ✅ Function to Close Definition Popup
-    public void CloseDefinitionPopup()
+    if (wordImages.ContainsKey(word) && !string.IsNullOrEmpty(wordImages[word]))
     {
-        definitionPanel.SetActive(false);
+        StartCoroutine(LoadImage(wordImages[word]));
     }
+    else
+    {
+        definitionImage.gameObject.SetActive(false);
+    }
+}
+
+public void CloseDefinitionPopup()
+{
+    Debug.Log("🧹 CloseDefinitionPopup called");
+
+    definitionPanel.SetActive(false);
+
+    
+}
+
+
+
+
+
+private bool isPaused = false;
+
+public void PauseStory()
+{
+    if (isPaused) return;
+
+    Debug.Log("⏸️ PauseStory() called");
+    Time.timeScale = 0f;
+
+    if (audioSource != null && audioSource.isPlaying)
+    {
+        audioSource.Pause();
+        Debug.Log("✅ Local audio paused");
+    }
+
+    MuteAudio(); // your existing function
+    isPaused = true;
+}
+public void ResumeStory()
+{
+    Debug.Log("🚀 ResumeStory() CALLED");
+
+    if (!isPaused)
+    {
+        Debug.Log("🟡 Resume skipped — isPaused is false");
+        return;
+    }
+
+    Time.timeScale = 1f;
+    Debug.Log("✅ Time resumed: Time.timeScale = " + Time.timeScale);
+
+    if (audioSource != null)
+    {
+        audioSource.UnPause();
+        Debug.Log("✅ Local audio resumed");
+    }
+
+    UnmuteAudio();
+    isPaused = false;
+}
+
+
+
+
+
+
 
     // ✅ Function to Load Image from URL
     IEnumerator LoadImage(string imageUrl)
@@ -449,8 +511,7 @@ IEnumerator LoadPhoto(string imageUrl)
     }
 
 
-
-
+  
     void PreviousDialogue()
     {
         if (currentDialogueIndex > 0)
