@@ -1,119 +1,121 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class PlantingController : MonoBehaviour
 {
-    public List<GameObject> seeds; // Assign seed GameObjects in the Inspector
-    public GameObject handGuideUI; // Assign the UI hand guide (to hide it after the first tap)
-    public Camera plantingCamera; // Assign the Camera in the Inspector
-    public AudioClip plantingSound; // Assign the sound effect in the Inspector
+    public List<GameObject> seeds;
+    public GameObject handGuideUI;
+    public Camera plantingCamera;
+    public AudioClip plantingSound;
+    public AudioSource completionAudio; // Assign your audio clip in the Inspector
 
-    private int currentSeedIndex = 0; // Keeps track of the next seed to activate
-    private bool handGestureHidden = false; // Tracks if the hand gesture has been hidden
-    private AudioSource audioSource; // Audio source for playing the sound
+
+    public Animator environmentAnimator;
+    public string enterPathStateName = "EnterPath2";
+
+    private int currentSeedIndex = 0;
+    private bool handGestureHidden = false;
+    private AudioSource audioSource;
+    private bool finalActionTriggered = false;
+    private bool cameraSwitched = false;
 
     void Start()
     {
-        // Debug check for missing references
         if (seeds == null || seeds.Count == 0) Debug.LogError("❌ ERROR: Seeds list is empty!");
         if (handGuideUI == null) Debug.LogWarning("⚠️ WARNING: Hand Guide UI is not assigned.");
         if (plantingCamera == null) Debug.LogWarning("⚠️ WARNING: Planting Camera is not assigned.");
         if (plantingSound == null) Debug.LogWarning("⚠️ WARNING: Planting sound is not assigned!");
 
-        // Get or Add AudioSource component
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>(); // Adds an AudioSource if missing
-        }
+            audioSource = gameObject.AddComponent<AudioSource>();
 
-        // Ensure all seeds are inactive at the start
         foreach (GameObject seed in seeds)
         {
             if (seed != null)
                 seed.SetActive(false);
             else
-                Debug.LogError("❌ ERROR: One of the seeds in the list is NULL!");
+                Debug.LogError("❌ ERROR: One of the seeds is NULL!");
         }
 
-        // Attempt to find the Camera if it's not assigned
         if (plantingCamera == null)
         {
-            plantingCamera = Camera.main; // Use main camera as fallback
+            plantingCamera = Camera.main;
             if (plantingCamera == null)
-            {
-                Debug.LogError("❌ ERROR: No camera assigned and no Main Camera found!");
-            }
+                Debug.LogError("❌ ERROR: No camera found!");
             else
-            {
                 Debug.Log("✅ Found main camera as fallback.");
-            }
         }
     }
 
     void Update()
     {
+        MonitorAnimationState();
+
         if (plantingCamera == null)
         {
-            Debug.LogError("❌ ERROR: Planting Camera is NULL! Cannot perform raycast.");
+            Debug.LogError("❌ ERROR: Planting Camera is NULL!");
             return;
         }
 
-        // Check for touch input (mobile) or mouse click (PC testing)
         if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) || Input.GetMouseButtonDown(0))
         {
-            Ray ray;
-            if (Input.touchCount > 0) // Mobile Touch
-            {
-                ray = plantingCamera.ScreenPointToRay(Input.GetTouch(0).position);
-            }
-            else // Mouse Click
-            {
-                ray = plantingCamera.ScreenPointToRay(Input.mousePosition);
-            }
+            Ray ray = Input.touchCount > 0 ?
+                plantingCamera.ScreenPointToRay(Input.GetTouch(0).position) :
+                plantingCamera.ScreenPointToRay(Input.mousePosition);
 
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit))
+            if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                if (hit.collider != null)
+                if (hit.collider != null && hit.collider.gameObject == gameObject)
                 {
-                    Debug.Log("✅ Clicked on: " + hit.collider.gameObject.name);
-                    if (hit.collider.gameObject == gameObject) // Ensure it's the soil
-                    {
-                        ActivateNextSeed();
-                    }
+                    ActivateNextSeed();
                 }
-                else
-                {
-                    Debug.LogWarning("⚠️ Raycast hit nothing!");
-                }
+            }
+        }
+    }
+
+    void MonitorAnimationState()
+    {
+        if (!cameraSwitched && environmentAnimator != null)
+        {
+            AnimatorStateInfo stateInfo = environmentAnimator.GetCurrentAnimatorStateInfo(0);
+            if (stateInfo.IsName(enterPathStateName))
+            {
+                cameraSwitched = true;
+                if (plantingCamera != null)
+                    plantingCamera.enabled = true;
+
+                if (handGuideUI != null)
+                    handGuideUI.SetActive(true);
+
+                Debug.Log("🎥 Camera enabled and hand gesture shown on 'EnterPath2'");
             }
         }
     }
 
     void ActivateNextSeed()
     {
-        if (!handGestureHidden) // Hide the hand gesture on first tap
+        if (!handGestureHidden)
         {
             HideHandGesture();
             handGestureHidden = true;
         }
 
-        if (currentSeedIndex < seeds.Count) // Check if there are seeds left to activate
+        if (currentSeedIndex < seeds.Count)
         {
             if (seeds[currentSeedIndex] != null)
             {
-                seeds[currentSeedIndex].SetActive(true); // Activate the next seed
-                Debug.Log("✅ Activated Seed: " + seeds[currentSeedIndex].name);
-
-                // Play planting sound
+                seeds[currentSeedIndex].SetActive(true);
                 PlayPlantingSound();
+                Debug.Log("✅ Activated Seed: " + seeds[currentSeedIndex].name);
+                currentSeedIndex++;
 
-                currentSeedIndex++; // Move to the next seed
-            }
-            else
-            {
-                Debug.LogError("❌ ERROR: Seed at index " + currentSeedIndex + " is NULL!");
+                if (currentSeedIndex == seeds.Count && !finalActionTriggered)
+                {
+                    finalActionTriggered = true;
+                    StartCoroutine(PlaySuccessSequence());
+                }
             }
         }
         else
@@ -127,22 +129,8 @@ public class PlantingController : MonoBehaviour
         if (handGuideUI != null)
         {
             Animator handAnimator = handGuideUI.GetComponent<Animator>();
-            if (handAnimator != null)
-            {
-                Debug.Log("✅ Disabling Hand Animator...");
-                handAnimator.enabled = false; // Stop animation
-            }
-            else
-            {
-                Debug.LogError("❌ ERROR: Animator not found on handGuideUI!");
-            }
-
-            Debug.Log("🔄 Hiding hand gesture UI...");
-            handGuideUI.SetActive(false); // Hide the UI
-        }
-        else
-        {
-            Debug.LogWarning("⚠️ Hand Guide UI was already null before hiding.");
+            if (handAnimator != null) handAnimator.enabled = false;
+            handGuideUI.SetActive(false);
         }
     }
 
@@ -151,11 +139,32 @@ public class PlantingController : MonoBehaviour
         if (audioSource != null && plantingSound != null)
         {
             audioSource.PlayOneShot(plantingSound);
-            Debug.Log("🔊 Played planting sound!");
         }
-        else
+    }
+
+    IEnumerator PlaySuccessSequence()
+    {
+        Debug.Log("⏳ Waiting before playing success sound...");
+       
+
+        if (completionAudio != null  && completionAudio.clip != null)
+{
+   audioSource.PlayOneShot(completionAudio.clip); // safer than .Play()
+        Debug.Log("🏆 Played completion audio.");
+        yield return new WaitForSeconds(completionAudio.clip.length); // wait until it's done
+}
+else
+{
+    Debug.LogWarning("⚠️ Completion Audio not assigned!");
+}
+
+
+     //   yield return new WaitForSeconds(3f); // Delay to finish sound
+
+        if (environmentAnimator != null)
         {
-            Debug.LogWarning("⚠️ Planting sound or AudioSource is missing!");
+            environmentAnimator.SetTrigger("activityDone");
+            Debug.Log("🎬 Triggered 'activityDone' in Animator.");
         }
     }
 }

@@ -7,12 +7,17 @@ public class GameManager : MonoBehaviour
 
     public Camera environmentCam;
     public Camera path1Cam;
+    public Camera path2Cam;
 
     // UI Elements from the Canvas
-    public GameObject dialog, mute, stopStory, homeButton, next, previous, HandTaping;
+    public GameObject dialog, mute, stopStory, homeButton, next, previous, HandTaping1, HandTaping2;
 
     // ✅ Fade Panel Reference
-    public CanvasGroup fadeGroup;  // Assign the CanvasGroup of your black panel here
+    public CanvasGroup fadeGroup;
+
+    // ✅ GameObjects for path-specific elements
+    public GameObject Flower, Flower1, Flower2, Flower3;
+    public GameObject Soil, Soil0;
 
     private void Awake()
     {
@@ -29,39 +34,52 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        ActivateEnvironmentCam();  // Start on Environment
+        // Deactivate all special objects at startup
+        SetFlowersActive(false);
+        SetSoilActive(false);
+
+        ActivateEnvironmentCam(); // Start on Environment
     }
 
-    // ✅ CAMERA SWITCH ENTRY POINTS (Call these instead of direct switch)
     public void ActivateEnvironmentCam()
     {
-        StartCoroutine(FadeAndSwitchCamera(false));  // false = to Environment
+        StartCoroutine(FadeAndSwitchCamera("Environment"));
     }
 
     public void ActivatePath1Cam()
     {
-        StartCoroutine(FadeAndSwitchCamera(true));   // true = to Path1
+        StartCoroutine(FadeAndSwitchCamera("Path1"));
     }
 
-    // ✅ STEP 3 - Fade and Camera Switch Coroutine
-    private IEnumerator FadeAndSwitchCamera(bool toPath1)
+    public void ActivatePath2Cam()
     {
-        // Fade to black
-        yield return StartCoroutine(Fade(1));
+        StartCoroutine(FadeAndSwitchCamera("Path2"));
+    }
 
-        // Switch cameras
-        if (toPath1)
-            SwitchToPath1();
-        else
-            SwitchToEnvironment();
+    private IEnumerator FadeAndSwitchCamera(string camTarget)
+    {
+        yield return StartCoroutine(Fade(1)); // Fade to black
 
-        // Fade back to clear
-        yield return StartCoroutine(Fade(0));
+        switch (camTarget)
+        {
+            case "Path1":
+                SwitchToPath1();
+                break;
+            case "Path2":
+                SwitchToPath2();
+                break;
+            case "Environment":
+            default:
+                SwitchToEnvironment();
+                break;
+        }
+
+        yield return StartCoroutine(Fade(0)); // Fade to clear
     }
 
     private IEnumerator Fade(float targetAlpha)
     {
-        float duration = 1f; // 1 second fade duration
+        float duration = 1f;
         float startAlpha = fadeGroup.alpha;
         float time = 0;
 
@@ -74,11 +92,11 @@ public class GameManager : MonoBehaviour
         fadeGroup.alpha = targetAlpha;
     }
 
-    // ✅ Separate logic for camera and UI switching
     private void SwitchToEnvironment()
     {
         environmentCam.gameObject.SetActive(true);
         path1Cam.gameObject.SetActive(false);
+        path2Cam.gameObject.SetActive(false);
 
         dialog.SetActive(true);
         mute.SetActive(true);
@@ -86,13 +104,18 @@ public class GameManager : MonoBehaviour
         homeButton.SetActive(true);
         next.SetActive(true);
         previous.SetActive(true);
-        HandTaping.SetActive(false);
+        HandTaping1.SetActive(false);
+        HandTaping2.SetActive(false);
+
+        SetFlowersActive(false);
+        SetSoilActive(false);
     }
 
     private void SwitchToPath1()
     {
         environmentCam.gameObject.SetActive(false);
         path1Cam.gameObject.SetActive(true);
+        path2Cam.gameObject.SetActive(false);
 
         dialog.SetActive(false);
         mute.SetActive(false);
@@ -100,6 +123,48 @@ public class GameManager : MonoBehaviour
         homeButton.SetActive(false);
         next.SetActive(false);
         previous.SetActive(false);
-        HandTaping.SetActive(true);
+        HandTaping1.SetActive(true);
+        //HandTaping2.SetActive(false);
+
+        SetFlowersActive(true);
+       // SetSoilActive(false);
+    }
+
+    private void SwitchToPath2()
+    {
+        environmentCam.gameObject.SetActive(false);
+        path1Cam.gameObject.SetActive(false);
+        path2Cam.gameObject.SetActive(true);
+
+        dialog.SetActive(false);
+        mute.SetActive(false);
+        stopStory.SetActive(false);
+        homeButton.SetActive(false);
+        next.SetActive(false);
+        previous.SetActive(false);
+       // HandTaping1.SetActive(false);
+        HandTaping2.SetActive(true);
+
+      //  SetFlowersActive(false);
+        SetSoilActive(true);
+    }
+
+    // ✅ Helper functions for object activation
+    private void SetFlowersActive(bool state)
+    {
+        if (Flower != null) Flower.SetActive(state);
+        if (Flower1 != null) Flower1.SetActive(state);
+        if (Flower2 != null) Flower2.SetActive(state);
+        if (Flower3 != null) Flower3.SetActive(state);
+    }
+
+    private void SetSoilActive(bool state)
+    {
+        if (Soil != null) Soil.SetActive(state);
+        if(state){
+            if (Soil0 != null) Soil0.SetActive(false);
+        }else{
+            if (Soil0 != null) Soil0.SetActive(true); 
+        }
     }
 }
