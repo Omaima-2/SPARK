@@ -2843,6 +2843,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 11500000, guid: 3a29b69fcdcb84070984be6a1f864b54, type: 3}
+        m_TargetAssemblyTypeName: UnityEngine.Object, UnityEngine
+        m_MethodName: set_name
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: OpenSignUp()
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &661044706
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6843,7 +6855,7 @@ MonoBehaviour:
   errorTextLogin: {fileID: 37009135}
   usernameText: {fileID: 438346815}
   logoutButton: {fileID: 1508668142}
-  accountNameButton: {fileID: 0}
+  accountNameButton: {fileID: 235194169}
   displayUsernameText: {fileID: 1322251032}
   displayEmailText: {fileID: 751129794}
   deleteAccountButton: {fileID: 1434164389}
