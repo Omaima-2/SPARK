@@ -1,129 +1,171 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
-    private Vector3 playerPosition;
-    private Quaternion playerRotation;
-    private float animationTime;
-    private static bool returningFromPath1 = false;
+    public static GameManager Instance;
 
-    public GameObject player;
-    public Animator environmentAnimator;
-    public string triggerStateName = "EnterPath1";
+    public Camera environmentCam;
+    public Camera path1Cam;
+    public Camera path2Cam;
 
-    private static GameManager instance;
-    private bool isSwitchingScene = false;
+    // UI Elements from the Canvas
+    public GameObject dialog, mute, stopStory, homeButton, next, previous, HandTaping1, HandTaping2;
 
-    void Awake()
+    // ✅ Fade Panel Reference
+    public CanvasGroup fadeGroup;
+
+    // ✅ GameObjects for path-specific elements
+    public GameObject Flower, Flower1, Flower2, Flower3;
+    public GameObject Soil, Soil0;
+
+    private void Awake()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this;
+            Instance = this;
             DontDestroyOnLoad(gameObject);
-            Debug.Log("GameManager instance created and marked as DontDestroyOnLoad");
         }
         else
         {
-            Debug.Log("Duplicate GameManager found, destroying this instance");
             Destroy(gameObject);
-            return;
         }
     }
 
     void Start()
     {
-        // Ensure references are found
-        if (player == null)
-        {
-            player = GameObject.FindGameObjectWithTag("Player");
-            Debug.Log(player != null ? "Player found" : "Player not found");
-        }
-        if (environmentAnimator == null)
-        {
-            environmentAnimator = FindObjectOfType<Animator>();
-            Debug.Log(environmentAnimator != null ? "Animator found" : "Animator not found");
-        }
+        // Deactivate all special objects at startup
+        SetFlowersActive(false);
+        SetSoilActive(false);
 
-        if (returningFromPath1)
-        {
-            Debug.Log("Returning from Path1, attempting to load state");
-            LoadEnvironmentState();
-            returningFromPath1 = false;
-        }
+        ActivateEnvironmentCam(); // Start on Environment
     }
 
-    void Update()
+    public void ActivateEnvironmentCam()
     {
-        if (!isSwitchingScene && environmentAnimator != null && IsInTriggerState())
-        {
-            SwitchToPath1();
-        }
+        StartCoroutine(FadeAndSwitchCamera("Environment"));
     }
 
-    bool IsInTriggerState()
+    public void ActivatePath1Cam()
     {
-        AnimatorStateInfo stateInfo = environmentAnimator.GetCurrentAnimatorStateInfo(0);
-        bool isTriggered = stateInfo.IsName(triggerStateName) && stateInfo.normalizedTime >= 0f;
-        Debug.Log($"Checking trigger state: {triggerStateName}, IsTriggered: {isTriggered}, NormalizedTime: {stateInfo.normalizedTime}");
-        return isTriggered;
+        StartCoroutine(FadeAndSwitchCamera("Path1"));
     }
 
-    void SwitchToPath1()
+    public void ActivatePath2Cam()
     {
-        isSwitchingScene = true;
-        SaveEnvironmentState();
-        Debug.Log($"Switching to Path1, Saved State - Pos: {playerPosition}, Rot: {playerRotation}, AnimTime: {animationTime}");
-        SceneManager.LoadScene("Path1");
-        isSwitchingScene = false;
+        StartCoroutine(FadeAndSwitchCamera("Path2"));
     }
 
-    void SaveEnvironmentState()
+    private IEnumerator FadeAndSwitchCamera(string camTarget)
     {
-        if (player != null)
+        yield return StartCoroutine(Fade(1)); // Fade to black
+
+        switch (camTarget)
         {
-            playerPosition = player.transform.position;
-            playerRotation = player.transform.rotation;
+            case "Path1":
+                SwitchToPath1();
+                break;
+            case "Path2":
+                SwitchToPath2();
+                break;
+            case "Environment":
+            default:
+                SwitchToEnvironment();
+                break;
         }
-        if (environmentAnimator != null)
-        {
-            animationTime = environmentAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-        }
+
+        yield return StartCoroutine(Fade(0)); // Fade to clear
     }
 
-    public void ReturnToEnvironment()
+    private IEnumerator Fade(float targetAlpha)
     {
-        if (!isSwitchingScene)
+        float duration = 1f;
+        float startAlpha = fadeGroup.alpha;
+        float time = 0;
+
+        while (time < duration)
         {
-            isSwitchingScene = true;
-            returningFromPath1 = true;
-            Debug.Log("Returning to Environment_Free");
-            SceneManager.LoadScene("Environment_Free");
-            isSwitchingScene = false;
+            time += Time.deltaTime;
+            fadeGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, time / duration);
+            yield return null;
         }
+        fadeGroup.alpha = targetAlpha;
     }
 
-    void LoadEnvironmentState()
+    private void SwitchToEnvironment()
     {
-        if (player != null)
-        {
-            player.transform.position = playerPosition;
-            player.transform.rotation = playerRotation;
-            Debug.Log($"Player state restored - Pos: {playerPosition}, Rot: {playerRotation}");
-        }
-        else
-        {
-            Debug.LogError("Player is null in LoadEnvironmentState");
-        }
+        environmentCam.gameObject.SetActive(true);
+        path1Cam.gameObject.SetActive(false);
+        path2Cam.gameObject.SetActive(false);
 
-        if (environmentAnimator != null)
-        {
-            environmentAnimator.Play(triggerStateName, 0, animationTime);
-            Debug.Log($"Animator state restored - State: {triggerStateName}, Time: {animationTime}");
-        }
-        else
-        {
-            Debug.LogError("Animator is null in LoadEnvironmentState");
+        dialog.SetActive(true);
+        mute.SetActive(true);
+        stopStory.SetActive(true);
+        homeButton.SetActive(true);
+        next.SetActive(true);
+        previous.SetActive(true);
+        //HandTaping1.SetActive(false);
+        //HandTaping2.SetActive(false);
+
+        SetFlowersActive(false);
+        SetSoilActive(false);
+    }
+
+    private void SwitchToPath1()
+    {
+        environmentCam.gameObject.SetActive(false);
+        path1Cam.gameObject.SetActive(true);
+        path2Cam.gameObject.SetActive(false);
+
+        dialog.SetActive(false);
+        mute.SetActive(false);
+        stopStory.SetActive(false);
+        homeButton.SetActive(false);
+        next.SetActive(false);
+        previous.SetActive(false);
+        //HandTaping1.SetActive(true);
+        //HandTaping2.SetActive(false);
+
+        SetFlowersActive(true);
+        //SetSoilActive(false);
+    }
+
+    private void SwitchToPath2()
+    {
+        environmentCam.gameObject.SetActive(false);
+        path1Cam.gameObject.SetActive(false);
+        path2Cam.gameObject.SetActive(true);
+
+        dialog.SetActive(false);
+        mute.SetActive(false);
+        stopStory.SetActive(false);
+        homeButton.SetActive(false);
+        next.SetActive(false);
+        previous.SetActive(false);
+        //HandTaping1.SetActive(false);
+        //HandTaping2.SetActive(true);
+
+        //SetFlowersActive(false);
+        SetSoilActive(true);
+    }
+
+    // ✅ Helper functions for object activation
+    private void SetFlowersActive(bool state)
+    {
+        if (Flower != null) Flower.SetActive(state);
+        if (Flower1 != null) Flower1.SetActive(state);
+        if (Flower2 != null) Flower2.SetActive(state);
+        if (Flower3 != null) Flower3.SetActive(state);
+    }
+
+    private void SetSoilActive(bool state)
+    {
+        if (Soil != null) Soil.SetActive(state);
+
+        if(Soil){
+            if (Soil0 != null) Soil0.SetActive(false);
+        }else{
+            if (Soil0 != null) Soil0.SetActive(true);
         }
     }
 }
