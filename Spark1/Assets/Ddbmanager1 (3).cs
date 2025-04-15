@@ -22,15 +22,15 @@ public class Ddbmanager : MonoBehaviour
     public bool isMuted = true;
     private Dictionary<string, string> wordImages = new Dictionary<string, string>();
     private Dictionary<string, string> wordDefinitions = new Dictionary<string, string>();
-public GameObject definitionPanel;
+    public GameObject definitionPanel;
 
-public GameObject definitionActionButton;  // Assign in the Inspector (e.g., Got It button)
+    public GameObject definitionActionButton;  // Assign in the Inspector (e.g., Got It button)
 
-   public GameObject ExitPanel; // Assign your Panel in the inspector
+    public GameObject ExitPanel; // Assign your Panel in the inspector
     public Button previousButton;
     public Button nextButton;
-public RawImage photoUI;         // Drag your RawImage here in the Inspector
-public GameObject photoPanel;    // Optional: panel wrapping the RawImage
+    public RawImage photoUI;         // Drag your RawImage here in the Inspector
+    public GameObject photoPanel;    // Optional: panel wrapping the RawImage
 
     private List<DocumentReference> currentDialogues = new List<DocumentReference>();
     private int currentDialogueIndex = 0;
@@ -38,8 +38,9 @@ public GameObject photoPanel;    // Optional: panel wrapping the RawImage
 
     private Coroutine autoAdvanceCoroutine;
 
+    private Coroutine playingCoroutine; // ✅ Added coroutine to handle playback interruptions
     public TMP_Text definitionText;
-   
+
     public RawImage definitionImage;
 
     void Start()
@@ -67,7 +68,7 @@ public GameObject photoPanel;    // Optional: panel wrapping the RawImage
             nextButton.onClick.AddListener(NextDialogue);
             nextButton.gameObject.SetActive(false);
         }
-    
+
 
         StartCoroutine(FetchFramesFromStory("story1"));
     }
@@ -134,7 +135,7 @@ public GameObject photoPanel;    // Optional: panel wrapping the RawImage
                     // Wait until either Frame 3 or Frame 4 is triggered
                     yield return new WaitUntil(() => frame3Trigger.isTriggered || frame4Trigger.isTriggered);
 
-if (frame3Trigger.isTriggered)
+                    if (frame3Trigger.isTriggered)
                     {
                         Debug.Log("✅ Frame 3 triggered! Fetching dialogues...");
                         frameRef = frameList[2]; // Set frame to Frame 3
@@ -183,13 +184,19 @@ if (frame3Trigger.isTriggered)
         }
     }
 
-    IEnumerator FetchAndPlayDialogue(string dialogueId)
+        IEnumerator FetchAndPlayDialogue(string dialogueId)
     {
-        while (isPlaying) yield return null;
-        isPlaying = true;
+        if (playingCoroutine != null)
+        {
+            StopCoroutine(playingCoroutine); // ✅ Stop previous coroutine to allow immediate dialogue switch
+        }
+        playingCoroutine = StartCoroutine(PlayDialogueCoroutine(dialogueId));
+        yield return playingCoroutine;
+    }
 
-        Debug.Log($"🎯 FetchAndPlayDialogue() called for ID: {dialogueId}"); // Debug log
-
+    IEnumerator PlayDialogueCoroutine(string dialogueId)
+    {
+        Debug.Log($"🎯 FetchAndPlayDialogue() called for ID: {dialogueId}");
         DocumentReference dialogueRef = db.Collection("Dialogues").Document(dialogueId);
         var dialogueTask = dialogueRef.GetSnapshotAsync();
         yield return new WaitUntil(() => dialogueTask.IsCompleted);
@@ -204,69 +211,37 @@ if (frame3Trigger.isTriggered)
                 string wordMeaning = dialogueSnapshot.ContainsField("meaning") ? dialogueSnapshot.GetValue<string>("meaning") : "";
                 string imageUrl = dialogueSnapshot.ContainsField("image") ? dialogueSnapshot.GetValue<string>("image") : "";
                 string audioUrl = dialogueSnapshot.ContainsField("Audio") ? dialogueSnapshot.GetValue<string>("Audio") : "";
-                // 🔽 Get photo field if it exists
-               string photoUrl = dialogueSnapshot.ContainsField("visual") ? dialogueSnapshot.GetValue<string>("visual") : "";
+                string photoUrl = dialogueSnapshot.ContainsField("visual") ? dialogueSnapshot.GetValue<string>("visual") : "";
 
-if (!string.IsNullOrEmpty(photoUrl))
-{
-    Debug.Log("🖼️ Visual image URL found in document.");
-    StartCoroutine(LoadPhoto(photoUrl));
-}
-else
-{
-    Debug.Log("ℹ️ No visual image URL found.");
-    if (photoPanel != null) photoPanel.SetActive(false);
-}
-
-                Debug.Log($"📜 Dialogue Text: {dialogueText}"); // Debug log
-                Debug.Log($"🔊 Audio URL Retrieved: {audioUrl}"); // Debug log
+                if (!string.IsNullOrEmpty(photoUrl))
+                    StartCoroutine(LoadPhoto(photoUrl));
+                else if (photoPanel != null) photoPanel.SetActive(false);
 
                 if (textUI != null)
-                {
                     textUI.text = HighlightWord(dialogueText, highlightedWord);
-                }
 
-                // ✅ Store word, meaning, and image
                 if (!string.IsNullOrEmpty(highlightedWord))
                 {
                     if (!wordDefinitions.ContainsKey(highlightedWord))
-                    {
                         wordDefinitions[highlightedWord] = wordMeaning;
-                    }
-
                     if (!wordImages.ContainsKey(highlightedWord))
-                    {
                         wordImages[highlightedWord] = imageUrl;
-                    }
                 }
 
-// ✅ Play audio if available
+                float clipLength = 7f; // ✅ Default fallback time if no audio is found
+
                 if (!string.IsNullOrEmpty(audioUrl))
                 {
-                    Debug.Log($"🎵 Playing Audio from URL: {audioUrl}");
-                    StartCoroutine(LoadAndPlayAudio(audioUrl));
-                }
-                else
-                {
-                    Debug.LogWarning("⚠️ No audio found for this dialogue.");
+                    yield return StartCoroutine(LoadAndPlayAudio(audioUrl));
+                    if (audioSource.clip != null)
+                        clipLength = audioSource.clip.length;
                 }
 
-                Debug.Log("🔄 Dialogue loaded successfully!");
-
-                // ✅ Restart auto-advance after displaying dialogue
-                RestartAutoAdvanceCoroutine();
-            }
-            else
-            {
-                Debug.LogWarning("⚠️ Dialogue document does not exist!");
+                if (autoAdvanceCoroutine != null)
+                    StopCoroutine(autoAdvanceCoroutine);
+                autoAdvanceCoroutine = StartCoroutine(AutoAdvanceDialogue(clipLength)); // ✅ Start dynamic timer
             }
         }
-        else
-        {
-            Debug.LogError($"❌ Failed to fetch dialogue {dialogueId}: {dialogueTask.Exception}");
-        }
-
-        isPlaying = false;
     }
 
 
@@ -275,7 +250,7 @@ else
     {
         if (!string.IsNullOrEmpty(word) && dialogue.Contains(word))
         {
-    return dialogue.Replace(word, $"<link=\"{word}\"><b><color=#CCCC00>{word}</color></b></link>");
+            return dialogue.Replace(word, $"<link=\"{word}\"><b><color=#CCCC00>{word}</color></b></link>");
         }
         return dialogue;
     }
@@ -294,7 +269,7 @@ else
 
                 if (wordDefinitions.ContainsKey(clickedWord)) // ✅ Check if the word exists
                 {
-ShowDefinitionPopup(clickedWord); 
+                    ShowDefinitionPopup(clickedWord);
                 }
                 else
                 {
@@ -303,95 +278,95 @@ ShowDefinitionPopup(clickedWord);
                 }
             }
             else
-            
-{
-    definitionPanel.SetActive(false);
-    definitionActionButton.SetActive(false); // 👈 Hide button if clicked outside
-}
 
-            
+            {
+                definitionPanel.SetActive(false);
+                definitionActionButton.SetActive(false); // 👈 Hide button if clicked outside
+            }
+
+
         }
     }
 
     // ✅ Function to Show Word Definition
     void ShowDefinitionPopup(string word)
-{
-    definitionPanel.SetActive(true);
-    definitionActionButton.SetActive(true);
-
-
-    if (wordDefinitions.ContainsKey(word))
     {
-        definitionText.text = $"<b><color=#228B22>{word}</color></b>\n{wordDefinitions[word]}";
-    }
-    else
-    {
-        definitionText.text = $"<b>{word}</b>\nNo definition available.";
-    }
-
-    if (wordImages.ContainsKey(word) && !string.IsNullOrEmpty(wordImages[word]))
-    {
-        StartCoroutine(LoadImage(wordImages[word]));
-    }
-    else
-    {
-        definitionImage.gameObject.SetActive(false);
-    }
-}
-
-public void CloseDefinitionPopup()
-{
-    Debug.Log("🧹 CloseDefinitionPopup called");
-
-    definitionPanel.SetActive(false);
-
-    
-}
+        definitionPanel.SetActive(true);
+        definitionActionButton.SetActive(true);
 
 
+        if (wordDefinitions.ContainsKey(word))
+        {
+            definitionText.text = $"<b><color=#228B22>{word}</color></b>\n{wordDefinitions[word]}";
+        }
+        else
+        {
+            definitionText.text = $"<b>{word}</b>\nNo definition available.";
+        }
 
-
-
-private bool isPaused = false;
-
-public void PauseStory()
-{
-    if (isPaused) return;
-
-    Debug.Log("⏸️ PauseStory() called");
-    Time.timeScale = 0f;
-
-    if (audioSource != null && audioSource.isPlaying)
-    {
-        audioSource.Pause();
-        Debug.Log("✅ Local audio paused");
+        if (wordImages.ContainsKey(word) && !string.IsNullOrEmpty(wordImages[word]))
+        {
+            StartCoroutine(LoadImage(wordImages[word]));
+        }
+        else
+        {
+            definitionImage.gameObject.SetActive(false);
+        }
     }
 
-    MuteAudio(); // your existing function
-    isPaused = true;
-}
-public void ResumeStory()
-{
-    Debug.Log("🚀 ResumeStory() CALLED");
-
-    if (!isPaused)
+    public void CloseDefinitionPopup()
     {
-        Debug.Log("🟡 Resume skipped — isPaused is false");
-        return;
+        Debug.Log("🧹 CloseDefinitionPopup called");
+
+        definitionPanel.SetActive(false);
+
+
     }
 
-    Time.timeScale = 1f;
-    Debug.Log("✅ Time resumed: Time.timeScale = " + Time.timeScale);
 
-    if (audioSource != null)
+
+
+
+    private bool isPaused = false;
+
+    public void PauseStory()
     {
-        audioSource.UnPause();
-        Debug.Log("✅ Local audio resumed");
-    }
+        if (isPaused) return;
 
-    UnmuteAudio();
-    isPaused = false;
-}
+        Debug.Log("⏸️ PauseStory() called");
+        Time.timeScale = 0f;
+
+        if (audioSource != null && audioSource.isPlaying)
+        {
+            audioSource.Pause();
+            Debug.Log("✅ Local audio paused");
+        }
+
+        MuteAudio(); // your existing function
+        isPaused = true;
+    }
+    public void ResumeStory()
+    {
+        Debug.Log("🚀 ResumeStory() CALLED");
+
+        if (!isPaused)
+        {
+            Debug.Log("🟡 Resume skipped — isPaused is false");
+            return;
+        }
+
+        Time.timeScale = 1f;
+        Debug.Log("✅ Time resumed: Time.timeScale = " + Time.timeScale);
+
+        if (audioSource != null)
+        {
+            audioSource.UnPause();
+            Debug.Log("✅ Local audio resumed");
+        }
+
+        UnmuteAudio();
+        isPaused = false;
+    }
 
 
 
@@ -406,7 +381,7 @@ public void ResumeStory()
         {
             yield return request.SendWebRequest();
 
-if (request.result == UnityWebRequest.Result.Success)
+            if (request.result == UnityWebRequest.Result.Success)
             {
                 Texture2D texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
                 definitionImage.texture = texture;
@@ -419,7 +394,7 @@ if (request.result == UnityWebRequest.Result.Success)
             }
         }
     }
-    void RestartAutoAdvanceCoroutine()
+    /*void RestartAutoAdvanceCoroutine()
     {
         if (autoAdvanceCoroutine != null)
         {
@@ -429,51 +404,44 @@ if (request.result == UnityWebRequest.Result.Success)
 
         Debug.Log("▶️ Starting new auto-advance...");
         autoAdvanceCoroutine = StartCoroutine(AutoAdvanceDialogue());
-    }
-IEnumerator LoadPhoto(string imageUrl)
-{
-    Debug.Log("🖼️ Attempting to load visual photo: " + imageUrl);
-
-    using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(imageUrl))
+    }*/
+    IEnumerator LoadPhoto(string imageUrl)
     {
-        yield return request.SendWebRequest();
+        Debug.Log("🖼️ Attempting to load visual photo: " + imageUrl);
 
-        if (request.result == UnityWebRequest.Result.Success)
+        using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(imageUrl))
         {
-            Texture2D texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
-            photoUI.texture = texture;
-            photoUI.gameObject.SetActive(true);
+            yield return request.SendWebRequest();
 
-            if (photoPanel != null)
+            if (request.result == UnityWebRequest.Result.Success)
             {
-                photoPanel.SetActive(true);
-            }
+                Texture2D texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+                photoUI.texture = texture;
+                photoUI.gameObject.SetActive(true);
 
-            Debug.Log("✅ Visual photo loaded and displayed.");
-        }
-        else
-        {
-            Debug.LogError("❌ Failed to load visual photo: " + request.error);
-            photoUI.gameObject.SetActive(false);
-            if (photoPanel != null) photoPanel.SetActive(false);
+                if (photoPanel != null)
+                {
+                    photoPanel.SetActive(true);
+                }
+
+                Debug.Log("✅ Visual photo loaded and displayed.");
+            }
+            else
+            {
+                Debug.LogError("❌ Failed to load visual photo: " + request.error);
+                photoUI.gameObject.SetActive(false);
+                if (photoPanel != null) photoPanel.SetActive(false);
+            }
         }
     }
-}
-
-    IEnumerator AutoAdvanceDialogue()
+  IEnumerator AutoAdvanceDialogue(float waitTime)
     {
-        Debug.Log("⏳ Waiting to auto-advance...");
-
-        yield return new WaitForSeconds(7); // ✅ Wait 7 seconds before moving to the next dialogue
+        yield return new WaitForSeconds(waitTime);
 
         if (currentDialogueIndex < currentDialogues.Count - 1)
         {
-            Debug.Log("➡️ Auto-advancing to next dialogue...");
-            NextDialogue();
-        }
-        else
-        {
-            Debug.Log("✅ Last dialogue reached, stopping auto-advance.");
+            currentDialogueIndex++;
+            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id));
         }
     }
 
@@ -513,14 +481,12 @@ IEnumerator LoadPhoto(string imageUrl)
         }
     }
 
-
-  
-    void PreviousDialogue()
+   void PreviousDialogue()
     {
         if (currentDialogueIndex > 0)
         {
             currentDialogueIndex--;
-            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id));
+            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id)); // ✅ Immediate switch
         }
         UpdateButtons();
     }
@@ -530,7 +496,7 @@ IEnumerator LoadPhoto(string imageUrl)
         if (currentDialogueIndex < currentDialogues.Count - 1)
         {
             currentDialogueIndex++;
-            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id));
+            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id)); // ✅ Immediate switch
         }
         UpdateButtons();
     }
@@ -540,10 +506,10 @@ IEnumerator LoadPhoto(string imageUrl)
         previousButton.gameObject.SetActive(currentDialogueIndex > 0);
         nextButton.gameObject.SetActive(currentDialogueIndex < currentDialogues.Count - 1);
     }
-    
-    
 
-   
+
+
+
 
 
 }

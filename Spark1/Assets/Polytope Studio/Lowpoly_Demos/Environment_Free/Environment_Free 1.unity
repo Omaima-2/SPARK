@@ -19373,7 +19373,7 @@ MonoBehaviour:
   - {fileID: 592414635}
   - {fileID: 1508915676}
   - {fileID: 373041261}
-  handGesture: {fileID: 1403619710}
+  handGesture: {fileID: 1484901586}
   flySpeed: 1
   rotationSpeed: 3
   flutterSpeed: 5

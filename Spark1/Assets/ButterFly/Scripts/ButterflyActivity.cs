@@ -20,19 +20,25 @@ namespace ButterFly
         public float rotationSpeed = 5f;
         public float flutterSpeed = 2f;
         public float wingSpeed = 3f;
-        public float landingOffset = 0.5f; // Adjusted for nectar position
+        public float landingOffset = 0.5f;
 
         private bool isFlyingToFlower = false;
         private bool firstTapOccurred = false;
         private bool isSwitchingScene = false;
-        public Animator environmentAnimator; // Assign in the Inspector
 
-        public AudioSource completionAudio; // Assign your audio clip in the inspector
+        public Animator environmentAnimator;
+        public AudioSource completionAudio;
+
+        private AudioSource audioSource; // ✅ Internal source for playback
 
         private void Start()
         {
             Debug.Log("🔄 ButterflyActivity script started.");
-      
+
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+                audioSource = gameObject.AddComponent<AudioSource>();
+
             // Validate flowers and nectar objects
             if (flowers == null || flowers.Length != 3)
             {
@@ -46,7 +52,6 @@ namespace ButterFly
                 return;
             }
 
-            // Group nectar objects with flowers
             for (int i = 0; i < flowers.Length; i++)
             {
                 nectarGroups[flowers[i]] = new List<GameObject>();
@@ -83,9 +88,15 @@ namespace ButterFly
 
         private void HandleClickOrTap()
         {
-            Camera path1Cam = GameObject.FindGameObjectWithTag("Path1Cam").GetComponent<Camera>();
+            Camera path1Cam = GameObject.FindGameObjectWithTag("Path1Cam")?.GetComponent<Camera>();
+            if (path1Cam == null)
+            {
+                Debug.LogError("❌ No camera found with tag 'Path1Cam'!");
+                return;
+            }
+
             Ray ray = path1Cam.ScreenPointToRay(Input.mousePosition);
-            int layerMask = LayerMask.GetMask("Flowers"); // Only hit objects on the "Flowers" layer
+            int layerMask = LayerMask.GetMask("Flowers");
             RaycastHit[] hits = Physics.RaycastAll(ray, Mathf.Infinity, layerMask);
 
             if (hits.Length > 0)
@@ -95,16 +106,12 @@ namespace ButterFly
                     Transform hitTransform = hit.transform;
                     Debug.Log($"🎯 Hit flower: {hitTransform.name}");
 
-                    // Check if the hit object is one of the flowers
                     foreach (Transform flower in flowers)
                     {
-                        if (hitTransform == flower)
+                        if (hitTransform == flower && nectarGroups.ContainsKey(flower))
                         {
-                            if (nectarGroups.ContainsKey(flower))
-                            {
-                                StartCoroutine(FlyToFlower(flower));
-                                return; // Exit after finding the first flower hit
-                            }
+                            StartCoroutine(FlyToFlower(flower));
+                            return;
                         }
                     }
                 }
@@ -147,67 +154,58 @@ namespace ButterFly
             }
         }
 
-    private void CheckAllNectarCollected()
-{
-    bool allCollected = true;
-    foreach (var group in nectarGroups)
-    {
-        if (group.Value.Count > 0)
+        private void CheckAllNectarCollected()
         {
-            allCollected = false;
-            break;
+            bool allCollected = true;
+            foreach (var group in nectarGroups)
+            {
+                if (group.Value.Count > 0)
+                {
+                    allCollected = false;
+                    break;
+                }
+            }
+
+            if (allCollected && !isSwitchingScene)
+            {
+                Debug.Log("🏆 All nectar collected! Preparing to trigger success...");
+                isSwitchingScene = true;
+                StartCoroutine(PlaySoundAndTrigger());
+            }
         }
-    }
 
-    if (allCollected && !isSwitchingScene)
-    {
-        Debug.Log("🏆 All nectar collected! Returning to Environment scene...");
-
-        isSwitchingScene = true; // Prevent re-trigger
-        StartCoroutine(PlaySoundAndTrigger());
-
-        if (environmentAnimator != null)
+        private void FlutterEffect()
         {
-            environmentAnimator.SetTrigger("activityDone");
+            float wingFlapAngle = Mathf.Sin(Time.time * wingSpeed) * 30f;
+            leftWing.localRotation = Quaternion.Euler(0f, 0f, wingFlapAngle);
+            rightWing.localRotation = Quaternion.Euler(0f, 0f, -wingFlapAngle);
         }
-        else
+
+        private IEnumerator PlaySoundAndTrigger()
         {
-            Debug.LogWarning("⚠️ Animator reference not set!");
+            Debug.Log("▶️ PlaySoundAndTrigger called...");
+
+            if (completionAudio != null && completionAudio.clip != null)
+            {
+                audioSource.PlayOneShot(completionAudio.clip);
+                Debug.Log($"🏆 Played completion audio (Length: {completionAudio.clip.length}s)");
+                yield return new WaitForSeconds(completionAudio.clip.length);
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ Completion audio not assigned or has no clip!");
+                yield return new WaitForSeconds(3f); // fallback wait
+            }
+
+            if (environmentAnimator != null)
+            {
+                environmentAnimator.SetTrigger("activityDone");
+                Debug.Log("🎬 Triggered 'activityDone' in Animator.");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ Animator reference not set!");
+            }
         }
-    }
-}
-    private void FlutterEffect()
-{
-    float wingFlapAngle = Mathf.Sin(Time.time * wingSpeed) * 30f;
-    leftWing.localRotation = Quaternion.Euler(0f, 0f, wingFlapAngle);
-    rightWing.localRotation = Quaternion.Euler(0f, 0f, -wingFlapAngle);
-}
-   private IEnumerator PlaySoundAndTrigger()
-{
-    Debug.Log("▶️ Starting the sound...");
-    if (completionAudio != null)
-    {
-        completionAudio.Play();
-    }
-    else
-    {
-        Debug.LogWarning("⚠️ Completion Audio not assigned!");
-    }
-
-    Debug.Log("⏳ Waiting for 5 seconds...");
-    yield return new WaitForSeconds(5f);  // This WILL delay if called as a coroutine
-
-    Debug.Log("🎬 Triggering the Animator now...");
-    if (environmentAnimator != null)
-    {
-        environmentAnimator.SetTrigger("activityDone");
-    }
-    else
-    {
-        Debug.LogWarning("⚠️ Animator reference not set!");
-    }
-}
-
-
     }
 }
