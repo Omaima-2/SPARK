@@ -184,7 +184,7 @@ public class Ddbmanager : MonoBehaviour
         }
     }
 
-        IEnumerator FetchAndPlayDialogue(string dialogueId)
+    IEnumerator FetchAndPlayDialogue(string dialogueId)
     {
         if (playingCoroutine != null)
         {
@@ -240,8 +240,12 @@ public class Ddbmanager : MonoBehaviour
                 if (autoAdvanceCoroutine != null)
                     StopCoroutine(autoAdvanceCoroutine);
                 autoAdvanceCoroutine = StartCoroutine(AutoAdvanceDialogue(clipLength)); // ✅ Start dynamic timer
+
+                UpdateButtons();
+
             }
         }
+
     }
 
 
@@ -434,7 +438,7 @@ public class Ddbmanager : MonoBehaviour
             }
         }
     }
-  IEnumerator AutoAdvanceDialogue(float waitTime)
+    IEnumerator AutoAdvanceDialogue(float waitTime)
     {
         yield return new WaitForSeconds(waitTime);
 
@@ -481,7 +485,7 @@ public class Ddbmanager : MonoBehaviour
         }
     }
 
-   void PreviousDialogue()
+    void PreviousDialogue()
     {
         if (currentDialogueIndex > 0)
         {
