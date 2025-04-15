@@ -26,6 +26,7 @@ public GameObject definitionPanel;
 
 public GameObject definitionActionButton;  // Assign in the Inspector (e.g., Got It button)
 
+   public GameObject ExitPanel; // Assign your Panel in the inspector
     public Button previousButton;
     public Button nextButton;
 public RawImage photoUI;         // Drag your RawImage here in the Inspector
@@ -60,7 +61,7 @@ public GameObject photoPanel;    // Optional: panel wrapping the RawImage
             previousButton.onClick.AddListener(PreviousDialogue);
             previousButton.gameObject.SetActive(false);
         }
-
+        ExitPanel.SetActive(false);
         if (nextButton != null)
         {
             nextButton.onClick.AddListener(NextDialogue);
@@ -284,7 +285,7 @@ else
     {
         if (Input.GetMouseButtonDown(0)) // Detect mouse click
         {
-            int linkIndex = TMP_TextUtilities.FindIntersectingLink(textUI, Input.mousePosition, Camera.main);
+            int linkIndex = TMP_TextUtilities.FindIntersectingLink(textUI, Input.mousePosition, null);
             if (linkIndex != -1)
             {
                 TMP_LinkInfo linkInfo = textUI.textInfo.linkInfo[linkIndex];
@@ -316,6 +317,8 @@ ShowDefinitionPopup(clickedWord);
     void ShowDefinitionPopup(string word)
 {
     definitionPanel.SetActive(true);
+    definitionActionButton.SetActive(true);
+
 
     if (wordDefinitions.ContainsKey(word))
     {
