@@ -6207,6 +6207,7 @@ MonoBehaviour:
   frame3Trigger: {fileID: 2008247373}
   frame4Trigger: {fileID: 18213475}
   animator: {fileID: 276840976}
+  animator1: {fileID: 276840976}
   soundToggleButton: {fileID: 1318335750}
   soundOnSprite: {fileID: 21300000, guid: 9ab485285d640466cbc743eb971badde, type: 3}
   soundOffSprite: {fileID: 21300000, guid: 124a724fc9bcb42a4b6041863ecba1cf, type: 3}
