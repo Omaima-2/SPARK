@@ -14,7 +14,7 @@ public class Ddbmanager : MonoBehaviour
     public TMP_Text textUI;
     public Frame2Trigger frame2Trigger;
     public FrameTrigger frame3Trigger;
-    public FrameTrigger frame4Trigger;
+    public FrameTrigger frame4Trigger; public Animator animator;
     public Button soundToggleButton;
     public Sprite soundOnSprite;
     public Sprite soundOffSprite;
@@ -144,12 +144,28 @@ public class Ddbmanager : MonoBehaviour
                     }
                     else if (frame4Trigger.isTriggered)
                     {
-                        Debug.Log("✅ Frame 4 triggered! Fetching dialogues...");
-                        frameRef = frameList[3]; // Set frame to Frame 4
-                        yield return FetchDialoguesFromFrame(frameRef);
-                        yield break; // 🔥 Exit the loop to prevent Frame 3 from running
+                       
+                            Debug.Log("✅ Frame 4 triggered! Fetching dialogues...");
+                            frameRef = frameList[3]; // Frame 4
+                            yield return FetchDialoguesFromFrame(frameRef);
+
+                            // ✅ ننتظر دخول حالة afterActivity
+                            Debug.Log("⏳ Waiting for Animator to enter 'afterActivity' state...");
+                            yield return new WaitUntil(() =>
+                            {
+                                AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0); // 0 = base layer
+                                return stateInfo.IsName("afterActivity");
+                            });
+
+                            // ✅ بعد دخول الحالة نعرض Frame 5
+                            Debug.Log("✅ Animator is in 'afterActivity' state. Fetching Frame 5 dialogues...");
+                            yield return FetchDialoguesFromFrame(frameList[4]);
+
+                            yield break; // 🔥 نوقف بعد Frame 5
+                        }
+
                     }
-                }
+                
 
                 yield return FetchDialoguesFromFrame(frameRef);
             }
