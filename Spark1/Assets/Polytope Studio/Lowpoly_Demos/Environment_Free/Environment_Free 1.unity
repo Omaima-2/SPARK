@@ -5039,6 +5039,8 @@ MonoBehaviour:
   homeButton: {fileID: 869970689}
   next: {fileID: 658975885}
   previous: {fileID: 353247086}
+  HandTaping1: {fileID: 0}
+  HandTaping2: {fileID: 0}
   fadeGroup: {fileID: 1085217615}
   Flower: {fileID: 1594144825}
   Flower1: {fileID: 1636723241}
@@ -5271,8 +5273,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1075.9, y: -647.21}
-  m_SizeDelta: {x: 248.11, y: 236.39}
+  m_AnchoredPosition: {x: -961.75, y: -558}
+  m_SizeDelta: {x: 235.05, y: 265.579}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &353247088
 MonoBehaviour:
@@ -6221,10 +6223,6 @@ MonoBehaviour:
   photoPanel: {fileID: 608091795}
   definitionText: {fileID: 1831933860}
   definitionImage: {fileID: 1603745010}
-  storyEndingPanel: {fileID: 457695053}
-  celeprationSparkles: {fileID: 1467786708}
-  sparklesAnimator: {fileID: 1467786709}
-  fadeGroup: {fileID: 1085217615}
 --- !u!114 &452454308
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7745,8 +7743,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 10.000008, y: -637}
-  m_SizeDelta: {x: -421.90063, y: -1340.4}
+  m_AnchoredPosition: {x: 10.000008, y: -564.71}
+  m_SizeDelta: {x: -421.9006, y: -1195.8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &582639084
 MonoBehaviour:
@@ -9021,8 +9019,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1097, y: -647.21}
-  m_SizeDelta: {x: 254.1055, y: 265.579}
+  m_AnchoredPosition: {x: 982.47, y: -558}
+  m_SizeDelta: {x: 235.05, y: 265.579}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &658975887
 MonoBehaviour:
@@ -16567,7 +16565,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -156.00854, y: -143.27148}
+  m_AnchoredPosition: {x: -156.00854, y: -136.7285}
   m_SizeDelta: {x: 173.90283, y: 148.67847}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1318335750
