@@ -18,7 +18,7 @@ public class LogoutPopup : MonoBehaviour
 
     public void ShowLogoutPopup()
     {
-        messageText.text = "Are you sure you want to log out? We’ll miss you!";
+        //messageText.text = "Are you sure you want to log out? We’ll miss you!";
         logoutPanel.SetActive(true);
     }
 

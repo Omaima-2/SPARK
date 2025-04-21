@@ -17,6 +17,7 @@ public class Ddbmanager : MonoBehaviour
     public Frame2Trigger frame2Trigger;
     public FrameTrigger frame3Trigger;
     public FrameTrigger frame4Trigger; public Animator animator; public Animator animator1;
+    
     public Button soundToggleButton;
     public Sprite soundOnSprite;
     public Sprite soundOffSprite;

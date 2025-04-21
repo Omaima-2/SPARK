@@ -11,6 +11,8 @@ public class GameManager : MonoBehaviour
 
     // UI Elements from the Canvas
     public GameObject dialog, mute, stopStory, homeButton, next, previous;
+    public GameObject handGuide1;
+    public GameObject handGuide2;
 
     // ✅ Fade Panel Reference
     public CanvasGroup fadeGroup;
@@ -109,6 +111,8 @@ public class GameManager : MonoBehaviour
         previous.SetActive(true);
         //HandTaping1.SetActive(false);
         //HandTaping2.SetActive(false);
+        handGuide2.SetActive(false);
+        handGuide1.SetActive(false);
 
         SetFlowersActive(false);
         SetSoilActive(false);
@@ -128,9 +132,10 @@ public class GameManager : MonoBehaviour
         previous.SetActive(false);
         //HandTaping1.SetActive(true);
         //HandTaping2.SetActive(false);
+        handGuide1.SetActive(true);
 
         SetFlowersActive(true);
-        //SetSoilActive(false);
+        SetSoilActive(false);
     }
 
     private void SwitchToPath2()
@@ -147,6 +152,7 @@ public class GameManager : MonoBehaviour
         previous.SetActive(false);
         //HandTaping1.SetActive(false);
         //HandTaping2.SetActive(true);
+        handGuide2.SetActive(true);
 
         //SetFlowersActive(false);
         SetSoilActive(true);
@@ -165,7 +171,7 @@ public class GameManager : MonoBehaviour
     {
         if (Soil != null) Soil.SetActive(state);
 
-        if(Soil){
+        if(state){
             if (Soil0 != null) Soil0.SetActive(false);
         }else{
             if (Soil0 != null) Soil0.SetActive(true);
