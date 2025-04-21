@@ -605,13 +605,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 20888973}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.03168416, y: 0.7196729, z: -0.03050629, w: 0.69291884}
-  m_LocalPosition: {x: -20.535913, y: 3.9638443, z: 65.4012}
+  m_LocalRotation: {x: -0.012496092, y: 0.5223884, z: -0.0021876541, w: 0.85261333}
+  m_LocalPosition: {x: 34.990486, y: 13.512236, z: 69.41028}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 5.038, y: 92.178, z: 0.191}
+  m_LocalEulerAnglesHint: {x: -1.09, y: 63, z: -0.962}
 --- !u!114 &20888978
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4381,9 +4381,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62e3f7f0ec023f143b144c30bd3a840e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 276840974}
-  environmentAnimator: {fileID: 276840976}
-  triggerStateName: EnterPath1
+  environmentCam: {fileID: 0}
+  path1Cam: {fileID: 0}
+  path2Cam: {fileID: 0}
+  dialog: {fileID: 0}
+  mute: {fileID: 0}
+  stopStory: {fileID: 0}
+  homeButton: {fileID: 0}
+  next: {fileID: 0}
+  previous: {fileID: 0}
+  HandTaping1: {fileID: 0}
+  HandTaping2: {fileID: 0}
+  fadeGroup: {fileID: 0}
+  Flower: {fileID: 0}
+  Flower1: {fileID: 0}
+  Flower2: {fileID: 0}
+  Flower3: {fileID: 0}
+  Soil: {fileID: 0}
+  Soil0: {fileID: 0}
 --- !u!4 &343542483
 Transform:
   m_ObjectHideFlags: 0
@@ -5414,7 +5429,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &452454303
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5525,6 +5540,8 @@ MonoBehaviour:
   frame2Trigger: {fileID: 1646285610}
   frame3Trigger: {fileID: 2008247373}
   frame4Trigger: {fileID: 18213475}
+  animator: {fileID: 0}
+  animator1: {fileID: 0}
   soundToggleButton: {fileID: 1318335750}
   soundOnSprite: {fileID: 21300000, guid: 9ab485285d640466cbc743eb971badde, type: 3}
   soundOffSprite: {fileID: 21300000, guid: 124a724fc9bcb42a4b6041863ecba1cf, type: 3}
@@ -5532,6 +5549,7 @@ MonoBehaviour:
   isMuted: 1
   definitionPanel: {fileID: 1356583872}
   definitionActionButton: {fileID: 598096475}
+  ExitPanel: {fileID: 0}
   previousButton: {fileID: 353247088}
   nextButton: {fileID: 658975887}
   photoUI: {fileID: 1487695363}
@@ -7465,7 +7483,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &608091796
 RectTransform:
   m_ObjectHideFlags: 0

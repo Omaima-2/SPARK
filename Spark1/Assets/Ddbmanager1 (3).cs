@@ -7,6 +7,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement; // ✅ At the top if not already there
+
 
 public class Ddbmanager : MonoBehaviour
 {
@@ -42,9 +44,23 @@ public class Ddbmanager : MonoBehaviour
     public TMP_Text definitionText;
 
     public RawImage definitionImage;
+    public GameObject storyEndingPanel; // 🎉 Assign in Inspector
+    public GameObject celeprationSparkles; // 🎉 Assign in Inspector
 
+    public Animator sparklesAnimator;
+    private bool isAfterActivity = false;
+
+
+// ✅ Fade Panel Reference
+    public CanvasGroup fadeGroup;
     void Start()
     {
+
+             if (fadeGroup != null)
+    {
+        //fadeGroup.alpha = 1f; // start black
+        StartCoroutine(Fade(0)); // fade to clear on load
+    }
         db = FirebaseFirestore.DefaultInstance;
         definitionPanel.SetActive(false);
         audioSource = gameObject.AddComponent<AudioSource>();
@@ -150,6 +166,7 @@ public class Ddbmanager : MonoBehaviour
 
                         // ✅ بعد دخول الحالة نعرض Frame 5
                         Debug.Log("✅ Animator is in 'afterActivity' state. Fetching Frame 5 dialogues...");
+                        isAfterActivity = true;
                         yield return FetchDialoguesFromFrame(frameList[4]);
                         yield break; // 🔥 Exit the loop to prevent Frame 4 from running
                     }
@@ -170,6 +187,7 @@ public class Ddbmanager : MonoBehaviour
 
                             // ✅ بعد دخول الحالة نعرض Frame 5
                             Debug.Log("✅ Animator is in 'afterActivity' state. Fetching Frame 5 dialogues...");
+                            isAfterActivity = true;
                             yield return FetchDialoguesFromFrame(frameList[5]);
 
                             yield break; // 🔥 نوقف بعد Frame 5
@@ -464,17 +482,33 @@ public class Ddbmanager : MonoBehaviour
                 if (photoPanel != null) photoPanel.SetActive(false);
             }
         }
-    }
-    IEnumerator AutoAdvanceDialogue(float waitTime)
-    {
-        yield return new WaitForSeconds(waitTime);
+    }IEnumerator AutoAdvanceDialogue(float waitTime)
+{
+    yield return new WaitForSeconds(waitTime);
 
-        if (currentDialogueIndex < currentDialogues.Count - 1)
+    if (currentDialogueIndex < currentDialogues.Count - 1)
+    {
+        currentDialogueIndex++;
+        StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id));
+    }
+    else if(isAfterActivity)
+    {
+        // 🎉 Last dialogue reached!
+        Debug.Log("🏁 Last dialogue reached!");
+
+        if (storyEndingPanel != null)
         {
-            currentDialogueIndex++;
-            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id));
+            storyEndingPanel.SetActive(true); // Show the ending popup
+            //celeprationSparkles.SetActive(true); // Show the ending sparkles 
+            sparklesAnimator.SetTrigger("end");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Story ending panel is not assigned!");
         }
     }
+}
+
 
 
     IEnumerator LoadAndPlayAudio(string url)
@@ -539,8 +573,20 @@ public class Ddbmanager : MonoBehaviour
     }
 
 
+    private IEnumerator Fade(float targetAlpha)
+    {
+        float duration = 4f;
+        float startAlpha = fadeGroup.alpha;
+        float time = 0;
 
-
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            fadeGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, time / duration);
+            yield return null;
+        }
+        fadeGroup.alpha = targetAlpha;
+    }
 
 
 }

@@ -88,7 +88,7 @@ namespace ButterFly
 
         private void HandleClickOrTap()
         {
-            Camera path1Cam = GameObject.FindGameObjectWithTag("Path1Cam")?.GetComponent<Camera>();
+            Camera path1Cam = GameObject.FindGameObjectWithTag("Path1cam")?.GetComponent<Camera>();
             if (path1Cam == null)
             {
                 Debug.LogError("❌ No camera found with tag 'Path1Cam'!");

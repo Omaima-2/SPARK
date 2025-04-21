@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
     public Camera path2Cam;
 
     // UI Elements from the Canvas
-    public GameObject dialog, mute, stopStory, homeButton, next, previous, HandTaping1, HandTaping2;
+    public GameObject dialog, mute, stopStory, homeButton, next, previous;
 
     // ✅ Fade Panel Reference
     public CanvasGroup fadeGroup;
@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+ 
         if (Instance == null)
         {
             Instance = this;
@@ -34,6 +35,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+
+   
         // Deactivate all special objects at startup
         SetFlowersActive(false);
         SetSoilActive(false);
@@ -79,7 +82,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator Fade(float targetAlpha)
     {
-        float duration = 1f;
+        float duration = 2f;
         float startAlpha = fadeGroup.alpha;
         float time = 0;
 
@@ -168,4 +171,26 @@ public class GameManager : MonoBehaviour
             if (Soil0 != null) Soil0.SetActive(true);
         }
     }
+    
+public void RestartStory()
+{
+    StartCoroutine(RestartWithFade());
+}
+
+private IEnumerator RestartWithFade()
+{
+    // Fade to black
+    yield return StartCoroutine(Fade(1));
+
+    // Wait a moment (optional)
+    yield return new WaitForSeconds(0.5f);
+
+    // Reload current scene
+    UnityEngine.SceneManagement.SceneManager.LoadScene(
+        UnityEngine.SceneManagement.SceneManager.GetActiveScene().name
+    
+    );
+}
+
+
 }

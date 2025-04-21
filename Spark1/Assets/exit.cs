@@ -44,4 +44,5 @@ public class exit : MonoBehaviour
         Debug.Log("Exiting Game...");
         Application.Quit();
     }
+    
 }
