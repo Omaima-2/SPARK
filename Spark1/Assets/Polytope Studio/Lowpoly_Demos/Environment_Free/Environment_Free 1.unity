@@ -5039,6 +5039,8 @@ MonoBehaviour:
   homeButton: {fileID: 869970689}
   next: {fileID: 658975885}
   previous: {fileID: 353247086}
+  handGuide1: {fileID: 1484901586}
+  handGuide2: {fileID: 80328424}
   fadeGroup: {fileID: 1085217615}
   Flower: {fileID: 1594144825}
   Flower1: {fileID: 1636723241}
@@ -13703,7 +13705,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1085217612
 RectTransform:
   m_ObjectHideFlags: 0
@@ -17045,7 +17047,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -17086,7 +17088,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -50}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 397.2484, y: -131.00818}
+  m_AnchoredPosition: {x: 539.219, y: -135.578}
   m_SizeDelta: {x: 150, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &1406941709
@@ -17659,7 +17661,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1467786710}
   - component: {fileID: 1467786709}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: 'Celepration sparkls '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20890,7 +20892,7 @@ GameObject:
   - component: {fileID: 1687041228}
   - component: {fileID: 1687041230}
   - component: {fileID: 1687041229}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Animation
   m_TagString: Untagged
   m_Icon: {fileID: 0}

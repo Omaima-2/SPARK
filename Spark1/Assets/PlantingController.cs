@@ -86,8 +86,8 @@ public class PlantingController : MonoBehaviour
                 if (plantingCamera != null)
                     plantingCamera.enabled = true;
 
-                if (handGuideUI != null)
-                    handGuideUI.SetActive(true);
+                //if (handGuideUI != null)
+                //    handGuideUI.SetActive(true);
 
                 Debug.Log("🎥 Camera enabled and hand gesture shown on 'EnterPath2'");
             }
