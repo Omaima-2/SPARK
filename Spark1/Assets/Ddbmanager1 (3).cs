@@ -202,8 +202,6 @@ public class Ddbmanager : MonoBehaviour
         }
     }
 
-
-
     IEnumerator FetchDialoguesFromFrame(DocumentReference frameRef)
     {
         var frameTask = frameRef.GetSnapshotAsync();
@@ -226,9 +224,14 @@ public class Ddbmanager : MonoBehaviour
                 yield return FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id);
             }
 
+            // ✅ نحدث الأزرار بعد عرض أول دايلوق لضمان إخفاء زر Previous إذا لازم
             UpdateButtons();
         }
     }
+
+
+
+
 
     IEnumerator FetchAndPlayDialogue(string dialogueId)
     {
@@ -569,9 +572,27 @@ public class Ddbmanager : MonoBehaviour
 
     void UpdateButtons()
     {
-        previousButton.gameObject.SetActive(currentDialogueIndex > 0);
-        nextButton.gameObject.SetActive(currentDialogueIndex < currentDialogues.Count - 1);
+        // ✅ نخفي Previous دائمًا في أول دايلوق
+        if (currentDialogueIndex == 0)
+        {
+            previousButton.gameObject.SetActive(false);
+        }
+        else
+        {
+            previousButton.gameObject.SetActive(true);
+        }
+
+        // ✅ نخفي Next دائمًا في آخر دايلوق
+        if (currentDialogueIndex >= currentDialogues.Count - 1)
+        {
+            nextButton.gameObject.SetActive(false);
+        }
+        else
+        {
+            nextButton.gameObject.SetActive(true);
+        }
     }
+
 
 
     private IEnumerator Fade(float targetAlpha)
