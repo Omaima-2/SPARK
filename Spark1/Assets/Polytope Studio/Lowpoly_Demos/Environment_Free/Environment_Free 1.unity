@@ -4221,7 +4221,7 @@ MonoBehaviour:
   - {fileID: 212229998}
   - {fileID: 1514606697}
   - {fileID: 2045190809}
-  moveSpeed: 1
+  moveSpeed: 1.5
   rotationSpeed: 2
   animator: {fileID: 276840976}
 --- !u!95 &276840976 stripped
@@ -5039,8 +5039,6 @@ MonoBehaviour:
   homeButton: {fileID: 869970689}
   next: {fileID: 658975885}
   previous: {fileID: 353247086}
-  HandTaping1: {fileID: 0}
-  HandTaping2: {fileID: 0}
   fadeGroup: {fileID: 1085217615}
   Flower: {fileID: 1594144825}
   Flower1: {fileID: 1636723241}
@@ -6223,6 +6221,10 @@ MonoBehaviour:
   photoPanel: {fileID: 608091795}
   definitionText: {fileID: 1831933860}
   definitionImage: {fileID: 1603745010}
+  storyEndingPanel: {fileID: 0}
+  celeprationSparkles: {fileID: 0}
+  sparklesAnimator: {fileID: 0}
+  fadeGroup: {fileID: 0}
 --- !u!114 &452454308
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14314,12 +14316,12 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 787799308}
         m_TargetAssemblyTypeName: exit, Assembly-CSharp
-        m_MethodName: ExitGame
-        m_Mode: 1
+        m_MethodName: LeaveToSceneWithPage
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 4
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -30820,7 +30822,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2090769757}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 787799308}
+        m_TargetAssemblyTypeName: exit, Assembly-CSharp
+        m_MethodName: LeaveToSceneWithPage
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 4
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2090769757
 MonoBehaviour:
   m_ObjectHideFlags: 0

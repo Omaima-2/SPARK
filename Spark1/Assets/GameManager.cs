@@ -36,10 +36,20 @@ public class GameManager : MonoBehaviour
     void Start()
     {
 
-   
+       string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+         if (sceneName == "Start")  // Adjust name to match your Start scene
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+      
+
         // Deactivate all special objects at startup
         SetFlowersActive(false);
         SetSoilActive(false);
+       
+
 
         ActivateEnvironmentCam(); // Start on Environment
     }

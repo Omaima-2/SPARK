@@ -18,7 +18,6 @@ public class log : MonoBehaviour
 
     public void ShowLogoutPopup()
     {
-        messageText.text = "Are you sure you want to log out? We’ll miss you!";
         logoutPanel.SetActive(true);
     }
 

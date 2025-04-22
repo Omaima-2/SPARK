@@ -44,5 +44,13 @@ public class exit : MonoBehaviour
         Debug.Log("Exiting Game...");
         Application.Quit();
     }
-    
+
+    // NEW METHOD to switch scene and target a specific page
+    public void LeaveToSceneWithPage(int pageIndex)
+    {
+        NavigationData.targetPanelIndex = 4; // Set this to whatever index matches child_Home
+        SceneManager.LoadScene("Start"); // Load the UI scene
+       
+    }
+
 }

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
@@ -9,29 +9,28 @@ public class UIManager : MonoBehaviour
     public GameObject homePanel;
 
     // Start by showing only the Welcome panel
+   
+    public GameObject[] panels; // Add all panels in correct order (Welcome, SignIn, SignUp, Accounts, Home)
+
     void Start()
     {
-        ShowPanel(welcomePanel);
+        ShowPanelByIndex(NavigationData.targetPanelIndex); // ← This line is ESSENTIAL
     }
 
-    // Function to show the selected panel and hide others
-    public void ShowPanel(GameObject panelToShow)
+
+    public void ShowPanelByIndex(int index)
     {
-        // Hide all panels first
-        welcomePanel.SetActive(false);
-        signInPanel.SetActive(false);
-        signUpPanel.SetActive(false);
-        accountsPanel.SetActive(false);
-        homePanel.SetActive(false);
-
-        // Show the selected panel
-        panelToShow.SetActive(true);
+        for (int i = 0; i < panels.Length; i++)
+        {
+            panels[i].SetActive(i == index);
+        }
     }
 
-    // Button Functions to Navigate
-    public void ShowWelcome() { ShowPanel(welcomePanel); }
-    public void ShowSignIn() { ShowPanel(signInPanel); }
-    public void ShowSignUp() { ShowPanel(signUpPanel); }
-    public void ShowAccounts() { ShowPanel(accountsPanel); }
-    public void ShowHome() { ShowPanel(homePanel); }
+    // Optional: For button-based navigation if still needed
+    public void ShowWelcome() { ShowPanelByIndex(0); }
+    public void ShowSignIn() { ShowPanelByIndex(1); }
+    public void ShowSignUp() { ShowPanelByIndex(2); }
+    public void ShowAccounts() { ShowPanelByIndex(3); }
+    public void ShowHome() { ShowPanelByIndex(4); }
 }
+
