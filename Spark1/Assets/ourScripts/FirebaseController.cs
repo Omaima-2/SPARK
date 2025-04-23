@@ -36,6 +36,11 @@ public class FirebaseController : MonoBehaviour
     public InputField deleteConfirmPassword;
     public TextMeshProUGUI accountErrorText;
 
+    
+    // User change delegate and event
+    public delegate void UserChangedEventHandler(FirebaseUser oldUser, FirebaseUser newUser);
+    public event UserChangedEventHandler OnUserChanged;
+
     private void Awake()
     {
         // Singleton pattern
@@ -128,9 +133,11 @@ public class FirebaseController : MonoBehaviour
             DisplayError("Oops! All fields are required.😊");
             return;
         }
-        if (!IsValidEmail(signupEmail.text)) // 🔥 Validate Email Format
+
+        // 🔥 Validate Email Format
+        if (!IsValidEmail(signupEmail.text)) 
         {
-            DisplayError("Hmm..That doesn't look like a valid email.try again!✨");
+            DisplayError("Hmm..That doesn't look like a valid email. try again!✨");
             return;
         }
 
@@ -140,25 +147,21 @@ public class FirebaseController : MonoBehaviour
             return;
         }
 
-        // Check if name is valid (no excessive length, etc.)
+        // Check if name is valid 
         if (!IsValidName(signupName.text))
         {
-            DisplayError("Name can only contain letters, spaces, and common punctuation. Maximum 50 characters allowed!");
+            DisplayError("Name can only contain letters, spaces, and common punctuation. Maximum 40 characters allowed!");
             return;
         }
 
-        // Create user directly without checking username availability
         CreateUser(signupEmail.text, signupPassword.text, signupName.text);
     }
 
     private bool IsValidName(string name)
     {
-        // Name validation - much more permissive than username validation
-        // Just check for reasonable length and basic sanity
-        if (string.IsNullOrEmpty(name) || name.Length > 50)
+        if (string.IsNullOrEmpty(name) || name.Length > 40 )
             return false;
 
-        // You could add more validation here if needed
         return true;
     }
 
@@ -193,8 +196,6 @@ public class FirebaseController : MonoBehaviour
         }
         catch (FirebaseException firebaseEx)
         {
-//            Debug.LogError("🔥 Firebase Auth Error: " + firebaseEx.Message);
-
             AuthError errorCode = (AuthError)firebaseEx.ErrorCode; // Convert to Firebase AuthError
 
             switch (errorCode)
@@ -243,30 +244,28 @@ public class FirebaseController : MonoBehaviour
             AuthError errorCode = (AuthError)firebaseEx.ErrorCode;
 
          
-switch (errorCode)
-{
-    case AuthError.WrongPassword:
+        switch (errorCode)
+        {
+        case AuthError.WrongPassword:
         DisplayError("Oops! Incorrect password. Try again. 🔑", true);
         break;
-    case AuthError.UserNotFound:
+        case AuthError.UserNotFound:
         DisplayError("Oh no! We couldn't find that account. Try signing up first! 📩", true);
         break;
-    case AuthError.InvalidEmail:
+        case AuthError.InvalidEmail:
         DisplayError("That doesn't look like a valid email. Try again! ✨", true);
         break;
-    case AuthError.UserDisabled:
+        case AuthError.UserDisabled:
         DisplayError("This account has been disabled. Please contact support.", true);
         break;
-    case (AuthError)1: // 🔥 Firebase internal error code
+        case (AuthError)1: // 🔥 Firebase internal error code
         DisplayError("Oops! Incorrect Email or password. Try again. 🔑", true);
         break;
-    default:
+        default:
         Debug.LogError($"🔥 Unknown Firebase Error: {errorCode} - {firebaseEx.Message}");
         DisplayError("Something went wrong, try again later. 🌟", true);
         break;
-}
-
-
+        }
         }
         catch (Exception e)
         {
@@ -292,7 +291,6 @@ switch (errorCode)
 
      void DisplayError(string message, bool isLogin = false)
     {
-        //Debug.LogError("Displaying error: " + message);
 
         if (isLogin)
         {
@@ -321,8 +319,6 @@ switch (errorCode)
             }
         }
     }
-
-
 
     private bool IsValidEmail(string email)
     {
@@ -418,8 +414,21 @@ switch (errorCode)
         {
             try
             {
+                // Store old user before logout
+                FirebaseUser oldUser = user;
+                
+                // Sign out from Firebase
                 auth.SignOut();
+                
+                // Update reference
                 user = null;
+                
+                // Manually trigger OnUserChanged event
+                if (OnUserChanged != null)
+                {
+                    OnUserChanged(oldUser, null);
+                }
+                
                 Debug.Log("✅ User signed out successfully");
                 
                 // Hide account info panel if it's open
@@ -525,7 +534,6 @@ switch (errorCode)
         catch (Exception e)
         {
             Debug.LogError("❌ Error deleting user data from Firestore: " + e.Message);
-            // We don't throw here because the authentication account is already deleted
         }
     }
     
@@ -544,22 +552,38 @@ switch (errorCode)
 
     #region Firebase Auth State
 
+    // Updated AuthStateChanged method to use the OnUserChanged event
     void AuthStateChanged(object sender, EventArgs eventArgs)
     {
-        if (auth != null && auth.CurrentUser != user)
+        if (auth != null)
         {
-            bool signedIn = user != auth.CurrentUser && auth.CurrentUser != null;
+            FirebaseUser oldUser = user;
+            FirebaseUser newUser = auth.CurrentUser;
 
-            if (!signedIn && user != null)
+            // Check if the user has actually changed
+            if (oldUser != newUser)
             {
-                Debug.Log("🔴 Signed out: " + user.UserId);
-            }
+                if (newUser == null)
+                {
+                    Debug.Log("🔴 User signed out");
+                }
+                else if (oldUser == null)
+                {
+                    Debug.Log($"🟢 User signed in: {newUser.UserId}");
+                }
+                else
+                {
+                    Debug.Log($"🔄 User changed from {oldUser.UserId} to {newUser.UserId}");
+                }
 
-            user = auth.CurrentUser;
+                // Update our user reference
+                user = newUser;
 
-            if (signedIn)
-            {
-                Debug.Log("🟢 Signed in: " + user.UserId);
+                // Trigger the event
+                if (OnUserChanged != null)
+                {
+                    OnUserChanged(oldUser, newUser);
+                }
             }
         }
     }
