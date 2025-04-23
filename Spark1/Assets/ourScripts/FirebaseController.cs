@@ -140,56 +140,29 @@ public class FirebaseController : MonoBehaviour
             return;
         }
 
-        // Check if username is valid (alphanumeric, no spaces, etc.)
-        if (!IsValidUsername(signupName.text))
+        // Check if name is valid (no excessive length, etc.)
+        if (!IsValidName(signupName.text))
         {
-            DisplayError("Username can only contain letters, numbers, and underscores. No spaces allowed!");
+            DisplayError("Name can only contain letters, spaces, and common punctuation. Maximum 50 characters allowed!");
             return;
         }
 
-        // Check if username already exists before creating user
-        CheckUsernameAvailability(signupName.text, signupEmail.text, signupPassword.text);
+        // Create user directly without checking username availability
+        CreateUser(signupEmail.text, signupPassword.text, signupName.text);
     }
 
-    private bool IsValidUsername(string username)
+    private bool IsValidName(string name)
     {
-        // Username can only contain letters, numbers, and underscores
-        // No spaces, minimum 3 characters, maximum 20 characters
-        if (username.Length < 3 || username.Length > 20)
+        // Name validation - much more permissive than username validation
+        // Just check for reasonable length and basic sanity
+        if (string.IsNullOrEmpty(name) || name.Length > 50)
             return false;
 
-        // Check if username contains only allowed characters
-        System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"^[a-zA-Z0-9_]+$");
-        return regex.IsMatch(username);
+        // You could add more validation here if needed
+        return true;
     }
 
-    async void CheckUsernameAvailability(string username, string email, string password)
-    {
-        try
-        {
-            // Create a reference to the "usernames" collection
-            Query query = db.Collection("usernames").WhereEqualTo("username", username.ToLower());
-            QuerySnapshot snapshot = await query.GetSnapshotAsync();
-
-            if (snapshot.Count > 0)
-            {
-                // Username already exists
-                DisplayError("This username is already taken. Please choose another one!");
-            }
-            else
-            {
-                // Username is available, proceed with user creation
-                CreateUser(email, password, username);
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Error checking username availability: " + e.Message);
-            DisplayError("Error checking username availability. Please try again.");
-        }
-    }
-
-    async void CreateUser(string email, string password, string username)
+    async void CreateUser(string email, string password, string displayName)
     {
         try
         {
@@ -200,26 +173,17 @@ public class FirebaseController : MonoBehaviour
             {
                 Debug.LogFormat("✅ User created successfully: {0} ({1})", user.Email, user.UserId);
 
-                // Update Firebase Authentication Profile with the username
-                UserProfile profile = new UserProfile { DisplayName = username };
+                // Update Firebase Authentication Profile with the display name
+                UserProfile profile = new UserProfile { DisplayName = displayName };
                 await user.UpdateUserProfileAsync(profile);
-                Debug.Log("✅ Username updated in Firebase Authentication.");
+                Debug.Log("✅ Display name updated in Firebase Authentication.");
 
                 // Store user data in Firestore
                 DocumentReference userRef = db.Collection("users").Document(user.UserId);
                 await userRef.SetAsync(new Dictionary<string, object>
                 {
-                    { "username", username },
+                    { "displayName", displayName },
                     { "email", email },
-                    { "createdAt", FieldValue.ServerTimestamp }
-                });
-
-                // Store username in a separate collection for uniqueness checks
-                DocumentReference usernameRef = db.Collection("usernames").Document(username.ToLower());
-                await usernameRef.SetAsync(new Dictionary<string, object>
-                {
-                    { "username", username.ToLower() },
-                    { "userId", user.UserId },
                     { "createdAt", FieldValue.ServerTimestamp }
                 });
 
@@ -388,15 +352,15 @@ switch (errorCode)
             {
                 Dictionary<string, object> userData = snapshot.ToDictionary();
                 
-                if (userData.TryGetValue("username", out object usernameObj) && usernameText != null)
+                if (userData.TryGetValue("displayName", out object displayNameObj) && usernameText != null)
                 {
-                    string username = usernameObj.ToString();
-                    usernameText.text = username;
-                    Debug.Log($"✅ Loaded user data with username: {username}");
+                    string displayName = displayNameObj.ToString();
+                    usernameText.text = displayName;
+                    Debug.Log($"✅ Loaded user data with display name: {displayName}");
                 }
                 else if (user.DisplayName != null && usernameText != null)
                 {
-                    // Fallback to Auth DisplayName if Firestore doesn't have username
+                    // Fallback to Auth DisplayName if Firestore doesn't have display name
                     usernameText.text = user.DisplayName;
                 }
             }
@@ -433,7 +397,7 @@ switch (errorCode)
         if (user != null)
         {
             if (displayUsernameText != null)
-                displayUsernameText.text = user.DisplayName ?? "No username";
+                displayUsernameText.text = user.DisplayName ?? "No name";
                 
             if (displayEmailText != null)
                 displayEmailText.text = user.Email ?? "No email";
@@ -505,13 +469,12 @@ switch (errorCode)
             
             // Get user ID to delete Firestore data after auth account deletion
             string userId = user.UserId;
-            string username = user.DisplayName?.ToLower() ?? "";
             
             // Delete from Firebase Authentication
             await user.DeleteAsync();
             
             // Delete user data from Firestore
-            await DeleteUserData(userId, username);
+            await DeleteUserData(userId);
             
             Debug.Log("✅ User account deleted successfully");
             
@@ -550,18 +513,12 @@ switch (errorCode)
     }
     
     // Delete user data from Firestore
-    private async Task DeleteUserData(string userId, string username)
+    private async Task DeleteUserData(string userId)
     {
         try
         {
             // Delete user document
             await db.Collection("users").Document(userId).DeleteAsync();
-            
-            // Delete username document if it exists
-            if (!string.IsNullOrEmpty(username))
-            {
-                await db.Collection("usernames").Document(username).DeleteAsync();
-            }
             
             Debug.Log("✅ User data deleted from Firestore");
         }
