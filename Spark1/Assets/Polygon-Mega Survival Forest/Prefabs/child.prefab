@@ -167,8 +167,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   childNameText: {fileID: 8111147194090511476}
   avatarImage: {fileID: 3532782977040516034}
-  avatar0Sprite: {fileID: 21300000, guid: f10dbd4f930ac4bf9815b0497caad2ab, type: 3}
-  avatar1Sprite: {fileID: 21300000, guid: 648661f3d2312477bbfc7ca8a20ebb1b, type: 3}
+  avatar0Sprite: {fileID: 21300000, guid: caf7370c8089a1d408b63bdefb480800, type: 3}
+  avatar1Sprite: {fileID: 21300000, guid: 410fccc51d22ef74ca575f77f9424357, type: 3}
 --- !u!1 &4523639996907927376
 GameObject:
   m_ObjectHideFlags: 0
