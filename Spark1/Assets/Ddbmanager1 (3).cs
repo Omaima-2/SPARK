@@ -14,13 +14,17 @@ public class Ddbmanager : MonoBehaviour
 {
     private FirebaseFirestore db;
     public TMP_Text textUI;
-    public Frame2Trigger frame2Trigger;
+    public Frame2Trigger frame2Trigger; private bool delayLock = true; // 🔒 يمنع التفعيل المبكر
+
     public FrameTrigger frame3Trigger;
     public FrameTrigger frame4Trigger; public Animator animator; public Animator animator1;
     
     public Button soundToggleButton;
     public Sprite soundOnSprite;
     public Sprite soundOffSprite;
+    private bool allowButtonDisplay = false;
+
+
     public AudioSource audioSource;
     public bool isMuted = true;
     private Dictionary<string, string> wordImages = new Dictionary<string, string>();
@@ -88,6 +92,8 @@ public class Ddbmanager : MonoBehaviour
 
 
         StartCoroutine(FetchFramesFromStory("story1"));
+        StartCoroutine(DelayedButtonDisplay(5f));
+
     }
 
     public void ToggleSound()
@@ -134,6 +140,10 @@ public class Ddbmanager : MonoBehaviour
         DocumentSnapshot storySnapshot = storyTask.Result;
         if (storySnapshot.Exists && storySnapshot.TryGetValue("dialogeList", out List<DocumentReference> frameList))
         {
+            // ✅ إخفاء الأزرار أول ما نحمّل القصة (قاطع)
+            previousButton.gameObject.SetActive(false);
+            nextButton.gameObject.SetActive(false);
+
             for (int i = 0; i < frameList.Count; i++)
             {
                 DocumentReference frameRef = frameList[i];
@@ -148,59 +158,51 @@ public class Ddbmanager : MonoBehaviour
                 if (i == 2) // Frame 3 OR Frame 4 Selection
                 {
                     Debug.Log("⏳ Waiting for Frame 3 OR Frame 4 trigger...");
-
-                    // Wait until either Frame 3 or Frame 4 is triggered
                     yield return new WaitUntil(() => frame3Trigger.isTriggered || frame4Trigger.isTriggered);
 
                     if (frame3Trigger.isTriggered)
                     {
                         Debug.Log("✅ Frame 3 triggered! Fetching dialogues...");
-                        frameRef = frameList[2]; // Set frame to Frame 3
+                        frameRef = frameList[2];
                         yield return FetchDialoguesFromFrame(frameRef);
-                        // ✅ ننتظر دخول حالة afterActivity
+
                         Debug.Log("⏳ Waiting for Animator to enter 'afterActivity' state...");
                         yield return new WaitUntil(() =>
                         {
-                            AnimatorStateInfo stateInfo = animator1.GetCurrentAnimatorStateInfo(0); // 0 = base layer
+                            AnimatorStateInfo stateInfo = animator1.GetCurrentAnimatorStateInfo(0);
                             return stateInfo.IsName("afterActivity1");
                         });
 
-                        // ✅ بعد دخول الحالة نعرض Frame 5
                         Debug.Log("✅ Animator is in 'afterActivity' state. Fetching Frame 5 dialogues...");
                         isAfterActivity = true;
                         yield return FetchDialoguesFromFrame(frameList[4]);
-                        yield break; // 🔥 Exit the loop to prevent Frame 4 from running
+                        yield break;
                     }
                     else if (frame4Trigger.isTriggered)
                     {
-                       
-                            Debug.Log("✅ Frame 4 triggered! Fetching dialogues...");
-                            frameRef = frameList[3]; // Frame 4
-                            yield return FetchDialoguesFromFrame(frameRef);
+                        Debug.Log("✅ Frame 4 triggered! Fetching dialogues...");
+                        frameRef = frameList[3];
+                        yield return FetchDialoguesFromFrame(frameRef);
 
-                            // ✅ ننتظر دخول حالة afterActivity
-                            Debug.Log("⏳ Waiting for Animator to enter 'afterActivity' state...");
-                            yield return new WaitUntil(() =>
-                            {
-                                AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0); // 0 = base layer
-                                return stateInfo.IsName("afterActivity");
-                            });
+                        Debug.Log("⏳ Waiting for Animator to enter 'afterActivity' state...");
+                        yield return new WaitUntil(() =>
+                        {
+                            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+                            return stateInfo.IsName("afterActivity");
+                        });
 
-                            // ✅ بعد دخول الحالة نعرض Frame 5
-                            Debug.Log("✅ Animator is in 'afterActivity' state. Fetching Frame 5 dialogues...");
-                            isAfterActivity = true;
-                            yield return FetchDialoguesFromFrame(frameList[5]);
-
-                            yield break; // 🔥 نوقف بعد Frame 5
-                        }
-
+                        Debug.Log("✅ Animator is in 'afterActivity' state. Fetching Frame 5 dialogues...");
+                        isAfterActivity = true;
+                        yield return FetchDialoguesFromFrame(frameList[5]);
+                        yield break;
                     }
-                
+                }
 
                 yield return FetchDialoguesFromFrame(frameRef);
             }
         }
     }
+
 
     IEnumerator FetchDialoguesFromFrame(DocumentReference frameRef)
     {
@@ -225,7 +227,11 @@ public class Ddbmanager : MonoBehaviour
             }
 
             // ✅ نحدث الأزرار بعد عرض أول دايلوق لضمان إخفاء زر Previous إذا لازم
-            UpdateButtons();
+            if (allowButtonDisplay)
+            {
+                UpdateButtons();
+            }
+
         }
     }
 
@@ -290,7 +296,11 @@ public class Ddbmanager : MonoBehaviour
                     StopCoroutine(autoAdvanceCoroutine);
                 autoAdvanceCoroutine = StartCoroutine(AutoAdvanceDialogue(clipLength)); // ✅ Start dynamic timer
 
-                UpdateButtons();
+                if (allowButtonDisplay)
+                {
+                    UpdateButtons();
+                }
+
 
             }
         }
@@ -555,9 +565,11 @@ public class Ddbmanager : MonoBehaviour
         if (currentDialogueIndex > 0)
         {
             currentDialogueIndex--;
-            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id)); // ✅ Immediate switch
+            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id));
         }
-        UpdateButtons();
+
+        if (allowButtonDisplay)
+            UpdateButtons();
     }
 
     void NextDialogue()
@@ -565,33 +577,42 @@ public class Ddbmanager : MonoBehaviour
         if (currentDialogueIndex < currentDialogues.Count - 1)
         {
             currentDialogueIndex++;
-            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id)); // ✅ Immediate switch
+            StartCoroutine(FetchAndPlayDialogue(currentDialogues[currentDialogueIndex].Id));
         }
-        UpdateButtons();
+
+        if (allowButtonDisplay)
+            UpdateButtons();
     }
+
+    IEnumerator DelayedButtonDisplay(float delaySeconds)
+    {
+        previousButton.gameObject.SetActive(false);
+        nextButton.gameObject.SetActive(false);
+
+        delayLock = true;
+        yield return new WaitForSeconds(delaySeconds);
+        delayLock = false;
+
+        allowButtonDisplay = true;
+        UpdateButtons(); // ✅ يتم التفعيل حسب الحالة بعد فتح القفل
+    }
+
 
     void UpdateButtons()
     {
-        // ✅ نخفي Previous دائمًا في أول دايلوق
-        if (currentDialogueIndex == 0)
+        if (delayLock || !allowButtonDisplay || currentDialogues == null || currentDialogues.Count == 0)
         {
             previousButton.gameObject.SetActive(false);
-        }
-        else
-        {
-            previousButton.gameObject.SetActive(true);
+            nextButton.gameObject.SetActive(false);
+            return;
         }
 
-        // ✅ نخفي Next دائمًا في آخر دايلوق
-        if (currentDialogueIndex >= currentDialogues.Count - 1)
-        {
-            nextButton.gameObject.SetActive(false);
-        }
-        else
-        {
-            nextButton.gameObject.SetActive(true);
-        }
+        previousButton.gameObject.SetActive(currentDialogueIndex > 0);
+        nextButton.gameObject.SetActive(currentDialogueIndex < currentDialogues.Count - 1);
     }
+
+
+
 
 
 
