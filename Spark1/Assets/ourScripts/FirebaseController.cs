@@ -36,6 +36,11 @@ public class FirebaseController : MonoBehaviour
     public InputField deleteConfirmPassword;
     public TextMeshProUGUI accountErrorText;
 
+    
+    // User change delegate and event
+    public delegate void UserChangedEventHandler(FirebaseUser oldUser, FirebaseUser newUser);
+    public event UserChangedEventHandler OnUserChanged;
+
     private void Awake()
     {
         // Singleton pattern
@@ -128,9 +133,11 @@ public class FirebaseController : MonoBehaviour
             DisplayError("Oops! All fields are required.😊");
             return;
         }
-        if (!IsValidEmail(signupEmail.text)) // 🔥 Validate Email Format
+
+        // 🔥 Validate Email Format
+        if (!IsValidEmail(signupEmail.text)) 
         {
-            DisplayError("Hmm..That doesn't look like a valid email.try again!✨");
+            DisplayError("Hmm..That doesn't look like a valid email. try again!✨");
             return;
         }
 
@@ -140,56 +147,25 @@ public class FirebaseController : MonoBehaviour
             return;
         }
 
-        // Check if username is valid (alphanumeric, no spaces, etc.)
-        if (!IsValidUsername(signupName.text))
+        // Check if name is valid 
+        if (!IsValidName(signupName.text))
         {
-            DisplayError("Username can only contain letters, numbers, and underscores. No spaces allowed!");
+            DisplayError("Name can only contain letters, spaces, and common punctuation. Maximum 40 characters allowed!");
             return;
         }
 
-        // Check if username already exists before creating user
-        CheckUsernameAvailability(signupName.text, signupEmail.text, signupPassword.text);
+        CreateUser(signupEmail.text, signupPassword.text, signupName.text);
     }
 
-    private bool IsValidUsername(string username)
+    private bool IsValidName(string name)
     {
-        // Username can only contain letters, numbers, and underscores
-        // No spaces, minimum 3 characters, maximum 20 characters
-        if (username.Length < 3 || username.Length > 20)
+        if (string.IsNullOrEmpty(name) || name.Length > 40 )
             return false;
 
-        // Check if username contains only allowed characters
-        System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"^[a-zA-Z0-9_]+$");
-        return regex.IsMatch(username);
+        return true;
     }
 
-    async void CheckUsernameAvailability(string username, string email, string password)
-    {
-        try
-        {
-            // Create a reference to the "usernames" collection
-            Query query = db.Collection("usernames").WhereEqualTo("username", username.ToLower());
-            QuerySnapshot snapshot = await query.GetSnapshotAsync();
-
-            if (snapshot.Count > 0)
-            {
-                // Username already exists
-                DisplayError("This username is already taken. Please choose another one!");
-            }
-            else
-            {
-                // Username is available, proceed with user creation
-                CreateUser(email, password, username);
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Error checking username availability: " + e.Message);
-            DisplayError("Error checking username availability. Please try again.");
-        }
-    }
-
-    async void CreateUser(string email, string password, string username)
+    async void CreateUser(string email, string password, string displayName)
     {
         try
         {
@@ -200,26 +176,17 @@ public class FirebaseController : MonoBehaviour
             {
                 Debug.LogFormat("✅ User created successfully: {0} ({1})", user.Email, user.UserId);
 
-                // Update Firebase Authentication Profile with the username
-                UserProfile profile = new UserProfile { DisplayName = username };
+                // Update Firebase Authentication Profile with the display name
+                UserProfile profile = new UserProfile { DisplayName = displayName };
                 await user.UpdateUserProfileAsync(profile);
-                Debug.Log("✅ Username updated in Firebase Authentication.");
+                Debug.Log("✅ Display name updated in Firebase Authentication.");
 
                 // Store user data in Firestore
                 DocumentReference userRef = db.Collection("users").Document(user.UserId);
                 await userRef.SetAsync(new Dictionary<string, object>
                 {
-                    { "username", username },
+                    { "displayName", displayName },
                     { "email", email },
-                    { "createdAt", FieldValue.ServerTimestamp }
-                });
-
-                // Store username in a separate collection for uniqueness checks
-                DocumentReference usernameRef = db.Collection("usernames").Document(username.ToLower());
-                await usernameRef.SetAsync(new Dictionary<string, object>
-                {
-                    { "username", username.ToLower() },
-                    { "userId", user.UserId },
                     { "createdAt", FieldValue.ServerTimestamp }
                 });
 
@@ -229,8 +196,6 @@ public class FirebaseController : MonoBehaviour
         }
         catch (FirebaseException firebaseEx)
         {
-            Debug.LogError("🔥 Firebase Auth Error: " + firebaseEx.Message);
-
             AuthError errorCode = (AuthError)firebaseEx.ErrorCode; // Convert to Firebase AuthError
 
             switch (errorCode)
@@ -278,26 +243,29 @@ public class FirebaseController : MonoBehaviour
 
             AuthError errorCode = (AuthError)firebaseEx.ErrorCode;
 
-            switch (errorCode)
-            {
-                case AuthError.WrongPassword:
-                    DisplayError("Oops! Incorrect password. Try again. 🔑", true);
-                    break;
-                case AuthError.UserNotFound:
-                    Debug.LogError("🔥 ERROR: User not found! This should display in UI.");
-                    DisplayError("Oh no! We couldn't find that account. Try signing up first! 📩", true);
-                    break;
-                case AuthError.InvalidEmail:
-                    DisplayError("That doesn't look like a valid email. Try again! ✨", true);
-                    break;
-                case AuthError.UserDisabled:
-                    DisplayError("This account has been disabled. Please contact support.", true);
-                    break;
-                default:
-                    Debug.LogError($"🔥 Unknown Firebase Error: {errorCode} - {firebaseEx.Message}");
-                    DisplayError("Something went wrong, try again later. 🌟", true);
-                    break;
-            }
+         
+        switch (errorCode)
+        {
+        case AuthError.WrongPassword:
+        DisplayError("Oops! Incorrect password. Try again. 🔑", true);
+        break;
+        case AuthError.UserNotFound:
+        DisplayError("Oh no! We couldn't find that account. Try signing up first! 📩", true);
+        break;
+        case AuthError.InvalidEmail:
+        DisplayError("That doesn't look like a valid email. Try again! ✨", true);
+        break;
+        case AuthError.UserDisabled:
+        DisplayError("This account has been disabled. Please contact support.", true);
+        break;
+        case (AuthError)1: // 🔥 Firebase internal error code
+        DisplayError("Oops! Incorrect Email or password. Try again. 🔑", true);
+        break;
+        default:
+        Debug.LogError($"🔥 Unknown Firebase Error: {errorCode} - {firebaseEx.Message}");
+        DisplayError("Something went wrong, try again later. 🌟", true);
+        break;
+        }
         }
         catch (Exception e)
         {
@@ -305,6 +273,7 @@ public class FirebaseController : MonoBehaviour
             DisplayError("An unexpected error occurred. Please try again. 🚀", true);
         }
     }
+
 
     void HideError(bool isLogin)
     {
@@ -320,9 +289,8 @@ public class FirebaseController : MonoBehaviour
         }
     }
 
-    void DisplayError(string message, bool isLogin = false)
+     void DisplayError(string message, bool isLogin = false)
     {
-        Debug.LogError("Displaying error: " + message);
 
         if (isLogin)
         {
@@ -380,15 +348,15 @@ public class FirebaseController : MonoBehaviour
             {
                 Dictionary<string, object> userData = snapshot.ToDictionary();
                 
-                if (userData.TryGetValue("username", out object usernameObj) && usernameText != null)
+                if (userData.TryGetValue("displayName", out object displayNameObj) && usernameText != null)
                 {
-                    string username = usernameObj.ToString();
-                    usernameText.text = username;
-                    Debug.Log($"✅ Loaded user data with username: {username}");
+                    string displayName = displayNameObj.ToString();
+                    usernameText.text = displayName;
+                    Debug.Log($"✅ Loaded user data with display name: {displayName}");
                 }
                 else if (user.DisplayName != null && usernameText != null)
                 {
-                    // Fallback to Auth DisplayName if Firestore doesn't have username
+                    // Fallback to Auth DisplayName if Firestore doesn't have display name
                     usernameText.text = user.DisplayName;
                 }
             }
@@ -425,7 +393,7 @@ public class FirebaseController : MonoBehaviour
         if (user != null)
         {
             if (displayUsernameText != null)
-                displayUsernameText.text = user.DisplayName ?? "No username";
+                displayUsernameText.text = user.DisplayName ?? "No name";
                 
             if (displayEmailText != null)
                 displayEmailText.text = user.Email ?? "No email";
@@ -446,8 +414,21 @@ public class FirebaseController : MonoBehaviour
         {
             try
             {
+                // Store old user before logout
+                FirebaseUser oldUser = user;
+                
+                // Sign out from Firebase
                 auth.SignOut();
+                
+                // Update reference
                 user = null;
+                
+                // Manually trigger OnUserChanged event
+                if (OnUserChanged != null)
+                {
+                    OnUserChanged(oldUser, null);
+                }
+                
                 Debug.Log("✅ User signed out successfully");
                 
                 // Hide account info panel if it's open
@@ -497,13 +478,12 @@ public class FirebaseController : MonoBehaviour
             
             // Get user ID to delete Firestore data after auth account deletion
             string userId = user.UserId;
-            string username = user.DisplayName?.ToLower() ?? "";
             
             // Delete from Firebase Authentication
             await user.DeleteAsync();
             
             // Delete user data from Firestore
-            await DeleteUserData(userId, username);
+            await DeleteUserData(userId);
             
             Debug.Log("✅ User account deleted successfully");
             
@@ -542,25 +522,18 @@ public class FirebaseController : MonoBehaviour
     }
     
     // Delete user data from Firestore
-    private async Task DeleteUserData(string userId, string username)
+    private async Task DeleteUserData(string userId)
     {
         try
         {
             // Delete user document
             await db.Collection("users").Document(userId).DeleteAsync();
             
-            // Delete username document if it exists
-            if (!string.IsNullOrEmpty(username))
-            {
-                await db.Collection("usernames").Document(username).DeleteAsync();
-            }
-            
             Debug.Log("✅ User data deleted from Firestore");
         }
         catch (Exception e)
         {
             Debug.LogError("❌ Error deleting user data from Firestore: " + e.Message);
-            // We don't throw here because the authentication account is already deleted
         }
     }
     
@@ -579,22 +552,38 @@ public class FirebaseController : MonoBehaviour
 
     #region Firebase Auth State
 
+    // Updated AuthStateChanged method to use the OnUserChanged event
     void AuthStateChanged(object sender, EventArgs eventArgs)
     {
-        if (auth != null && auth.CurrentUser != user)
+        if (auth != null)
         {
-            bool signedIn = user != auth.CurrentUser && auth.CurrentUser != null;
+            FirebaseUser oldUser = user;
+            FirebaseUser newUser = auth.CurrentUser;
 
-            if (!signedIn && user != null)
+            // Check if the user has actually changed
+            if (oldUser != newUser)
             {
-                Debug.Log("🔴 Signed out: " + user.UserId);
-            }
+                if (newUser == null)
+                {
+                    Debug.Log("🔴 User signed out");
+                }
+                else if (oldUser == null)
+                {
+                    Debug.Log($"🟢 User signed in: {newUser.UserId}");
+                }
+                else
+                {
+                    Debug.Log($"🔄 User changed from {oldUser.UserId} to {newUser.UserId}");
+                }
 
-            user = auth.CurrentUser;
+                // Update our user reference
+                user = newUser;
 
-            if (signedIn)
-            {
-                Debug.Log("🟢 Signed in: " + user.UserId);
+                // Trigger the event
+                if (OnUserChanged != null)
+                {
+                    OnUserChanged(oldUser, newUser);
+                }
             }
         }
     }
