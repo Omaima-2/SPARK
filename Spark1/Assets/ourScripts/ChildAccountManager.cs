@@ -108,7 +108,7 @@ private void InitializeManager()
     }
     else
     {
-        Debug.LogError("User not logged in. Cannot access child accounts.");
+        //Debug.LogError("User not logged in. Cannot access child accounts.");
     }
 }
     

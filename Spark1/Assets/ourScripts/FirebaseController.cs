@@ -229,7 +229,7 @@ public class FirebaseController : MonoBehaviour
         }
         catch (FirebaseException firebaseEx)
         {
-            Debug.LogError("🔥 Firebase Auth Error: " + firebaseEx.Message);
+//            Debug.LogError("🔥 Firebase Auth Error: " + firebaseEx.Message);
 
             AuthError errorCode = (AuthError)firebaseEx.ErrorCode; // Convert to Firebase AuthError
 
@@ -278,26 +278,31 @@ public class FirebaseController : MonoBehaviour
 
             AuthError errorCode = (AuthError)firebaseEx.ErrorCode;
 
-            switch (errorCode)
-            {
-                case AuthError.WrongPassword:
-                    DisplayError("Oops! Incorrect password. Try again. 🔑", true);
-                    break;
-                case AuthError.UserNotFound:
-                    Debug.LogError("🔥 ERROR: User not found! This should display in UI.");
-                    DisplayError("Oh no! We couldn't find that account. Try signing up first! 📩", true);
-                    break;
-                case AuthError.InvalidEmail:
-                    DisplayError("That doesn't look like a valid email. Try again! ✨", true);
-                    break;
-                case AuthError.UserDisabled:
-                    DisplayError("This account has been disabled. Please contact support.", true);
-                    break;
-                default:
-                    Debug.LogError($"🔥 Unknown Firebase Error: {errorCode} - {firebaseEx.Message}");
-                    DisplayError("Something went wrong, try again later. 🌟", true);
-                    break;
-            }
+         
+switch (errorCode)
+{
+    case AuthError.WrongPassword:
+        DisplayError("Oops! Incorrect password. Try again. 🔑", true);
+        break;
+    case AuthError.UserNotFound:
+        DisplayError("Oh no! We couldn't find that account. Try signing up first! 📩", true);
+        break;
+    case AuthError.InvalidEmail:
+        DisplayError("That doesn't look like a valid email. Try again! ✨", true);
+        break;
+    case AuthError.UserDisabled:
+        DisplayError("This account has been disabled. Please contact support.", true);
+        break;
+    case (AuthError)1: // 🔥 Firebase internal error code
+        DisplayError("Oops! Incorrect Email or password. Try again. 🔑", true);
+        break;
+    default:
+        Debug.LogError($"🔥 Unknown Firebase Error: {errorCode} - {firebaseEx.Message}");
+        DisplayError("Something went wrong, try again later. 🌟", true);
+        break;
+}
+
+
         }
         catch (Exception e)
         {
@@ -305,6 +310,7 @@ public class FirebaseController : MonoBehaviour
             DisplayError("An unexpected error occurred. Please try again. 🚀", true);
         }
     }
+
 
     void HideError(bool isLogin)
     {
@@ -320,9 +326,9 @@ public class FirebaseController : MonoBehaviour
         }
     }
 
-    void DisplayError(string message, bool isLogin = false)
+     void DisplayError(string message, bool isLogin = false)
     {
-        Debug.LogError("Displaying error: " + message);
+        //Debug.LogError("Displaying error: " + message);
 
         if (isLogin)
         {
@@ -351,6 +357,8 @@ public class FirebaseController : MonoBehaviour
             }
         }
     }
+
+
 
     private bool IsValidEmail(string email)
     {
