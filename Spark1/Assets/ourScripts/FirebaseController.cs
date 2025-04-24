@@ -239,7 +239,7 @@ public class FirebaseController : MonoBehaviour
         }
         catch (FirebaseException firebaseEx)
         {
-            Debug.LogError($"🔥 Firebase Auth Error ({firebaseEx.ErrorCode}): {firebaseEx.Message}");
+//            Debug.LogError($"🔥 Firebase Auth Error ({firebaseEx.ErrorCode}): {firebaseEx.Message}");
 
             AuthError errorCode = (AuthError)firebaseEx.ErrorCode;
 
