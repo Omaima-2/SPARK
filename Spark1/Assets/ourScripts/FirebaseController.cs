@@ -235,7 +235,24 @@ public class FirebaseController : MonoBehaviour
                 // Fetch user data from Firestore
                 await LoadUserData(user.UserId);
                 ShowHomePanel();
+
+                 // Fire user change event
+    if (OnUserChanged != null)
+    {
+        OnUserChanged(null, user);
+        Debug.Log("🔄 Fired OnUserChanged manually after login");
+    }
+
+    // Force reload children just in case
+    if (ChildAccountManager.Instance != null)
+    {
+        ChildAccountManager.Instance.ClearChildData();
+        ChildAccountManager.Instance.LoadChildAccounts();
+    }
+
             }
+
+
         }
         catch (FirebaseException firebaseEx)
         {
@@ -423,6 +440,14 @@ public class FirebaseController : MonoBehaviour
                 // Update reference
                 user = null;
                 
+// Clear child data before triggering user change
+if (ChildAccountManager.Instance != null)
+{
+    ChildAccountManager.Instance.ClearChildData();
+    Debug.Log("✅ Cleared child data manually before logout.");
+}
+
+
                 // Manually trigger OnUserChanged event
                 if (OnUserChanged != null)
                 {
@@ -624,4 +649,6 @@ public class FirebaseController : MonoBehaviour
     {
         return user;
     }
+
+
 }

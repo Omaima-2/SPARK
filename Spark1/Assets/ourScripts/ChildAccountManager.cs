@@ -127,6 +127,7 @@ public class ChildAccountManager : MonoBehaviour
 
     void OnUserChanged(Firebase.Auth.FirebaseUser oldUser, Firebase.Auth.FirebaseUser newUser)
     {
+        Debug.Log("👥 OnUserChanged triggered in ChildAccountManager.");
         Debug.Log($"ChildAccountManager: User changed from {oldUser?.UserId} to {newUser?.UserId}");
         
         // Clear all child data
@@ -205,7 +206,7 @@ public class ChildAccountManager : MonoBehaviour
         }
     }
     
-    private async void LoadChildAccounts()
+    public async void LoadChildAccounts()
     {
         try
         {
@@ -219,6 +220,9 @@ public class ChildAccountManager : MonoBehaviour
             user = auth.CurrentUser;
             string parentUserId = user.UserId;
             
+            Debug.Log($"📥 LoadChildAccounts for Firebase user: {parentUserId}");
+
+
             // Debug parent ID and authentication
             Debug.Log($"Loading child accounts for parent: {parentUserId}");
             
@@ -293,6 +297,8 @@ public class ChildAccountManager : MonoBehaviour
     
     void RefreshChildList()
     {
+        Debug.Log($"🧼 Refreshing child list UI for {childAccounts.Count} children.");
+
         // Debug log to track execution
         Debug.Log($"Refreshing child list with {childAccounts.Count} children for parent: {auth.CurrentUser?.UserId}");
         
