@@ -3316,7 +3316,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Daniah Alkathiri Moh
+  m_text: User name
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 00452d8b435b3419ab95d4e8cc36f3db, type: 2}
   m_sharedMaterial: {fileID: -5484475325105853923, guid: 00452d8b435b3419ab95d4e8cc36f3db, type: 2}
