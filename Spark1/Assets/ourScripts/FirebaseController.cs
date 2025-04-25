@@ -24,7 +24,7 @@ public class FirebaseController : MonoBehaviour
     
     [Header("Login/Signup UI elements")]
     public InputField loginEmail, loginPassword, signupEmail, signupPassword, signupCPassword, signupName;
-    public TextMeshProUGUI errorTextSignUp, errorTextLogin;
+    public TextMeshProUGUI errorTextSignUp , errorTextLogin;
     
     [Header("Parent page UI elements ")]
     public Button logoutButton;
@@ -156,7 +156,7 @@ public class FirebaseController : MonoBehaviour
         // Check if name is valid 
         if (!IsValidName(signupName.text))
         {
-            DisplayError("Name can only contain letters, spaces, and common punctuation. Maximum 40 characters allowed!");
+            DisplayError("Name can only contain letters, spaces, and common punctuation. Maximum 30 characters allowed!");
             return;
         }
 
@@ -165,7 +165,7 @@ public class FirebaseController : MonoBehaviour
 
     private bool IsValidName(string name)
     {
-        if (string.IsNullOrEmpty(name) || name.Length > 40 )
+        if (string.IsNullOrEmpty(name) || name.Length > 20 )
             return false;
 
         return true;
@@ -726,9 +726,9 @@ public class FirebaseController : MonoBehaviour
         return;
     }
     
-    if (newName.Length > 40)
+    if (newName.Length > 20)
     {
-        DisplayEditNameError("Name cannot exceed 40 characters.");
+        DisplayEditNameError("Name cannot exceed 20 characters.");
         return;
     }
     

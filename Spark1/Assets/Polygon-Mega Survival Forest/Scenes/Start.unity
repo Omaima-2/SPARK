@@ -251,7 +251,7 @@ GameObject:
   - component: {fileID: 37009136}
   - component: {fileID: 37009135}
   m_Layer: 5
-  m_Name: ErrorMsgName
+  m_Name: ErrorMsg_login
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -269,11 +269,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 174856732}
+  m_Father: {fileID: 404434162}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -34, y: -73}
+  m_AnchoredPosition: {x: -5.7035, y: 192.27}
   m_SizeDelta: {x: 851.9282, y: 128.26}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &37009135
@@ -843,7 +843,6 @@ RectTransform:
   - {fileID: 1464903749}
   - {fileID: 750623552}
   - {fileID: 1076441870}
-  - {fileID: 37009134}
   m_Father: {fileID: 1601065408}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -2863,6 +2862,7 @@ RectTransform:
   - {fileID: 348030964}
   - {fileID: 661044704}
   - {fileID: 1085322488}
+  - {fileID: 37009134}
   m_Father: {fileID: 1501294204}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -9328,7 +9328,7 @@ GameObject:
   - component: {fileID: 1257686296}
   - component: {fileID: 1257686295}
   m_Layer: 5
-  m_Name: Text_NoAccountQuastion
+  m_Name: text_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10795,7 +10795,7 @@ MonoBehaviour:
   emailText: {fileID: 619622063}
   editNamePanel: {fileID: 174856728}
   editNameInputField: {fileID: 1076441869}
-  editNameErrorText: {fileID: 0}
+  editNameErrorText: {fileID: 37009135}
   deleteAccountButton: {fileID: 1562432994}
   deleteConfirmPassword: {fileID: 1507201015}
   accountErrorText: {fileID: 37009135}
@@ -11775,7 +11775,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1501294204
 RectTransform:
   m_ObjectHideFlags: 0
