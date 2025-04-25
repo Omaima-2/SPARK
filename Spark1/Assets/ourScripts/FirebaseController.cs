@@ -110,7 +110,7 @@ public class FirebaseController : MonoBehaviour
     {
         if (string.IsNullOrEmpty(loginEmail.text) || string.IsNullOrEmpty(loginPassword.text))
         {
-            DisplayError("Oops! Fill in both fields.", true);
+            DisplayError("Oops! Fill in both fields.😊", true);
             return;
         }
 
@@ -207,7 +207,7 @@ public class FirebaseController : MonoBehaviour
                     DisplayError("Hmm... That doesn't look like a valid email.try again!✨");
                     break;
                 case AuthError.WeakPassword:
-                    DisplayError("Your password needs a little more strength!");
+                    DisplayError("Oopsie! 🐾 Your password needs at least 6 characters.");
                     break;
                 default:
                     DisplayError("Something went wrong, but don't worry! Try again in a moment. 🌟");
