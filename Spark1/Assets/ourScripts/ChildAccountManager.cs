@@ -381,7 +381,7 @@ public class ChildAccountManager : MonoBehaviour
         
         // Update child info popup
         childInfoNameText.text = child.name;
-        childInfoStreakText.text = $"Streak: {child.streak}";
+        childInfoStreakText.text = $"{child.streak}";
         
         // Set avatar in the child info popup
         if (childInfoAvatarImage != null)
@@ -607,7 +607,7 @@ public class ChildAccountManager : MonoBehaviour
             selectedChild.streak = newStreak;
             
             // Update UI
-            childModeStreakText.text = $"Streak: {newStreak}";
+            childModeStreakText.text = $"{newStreak}";
             
             Debug.Log($"Incremented streak for {selectedChild.name}: {newStreak}");
         }

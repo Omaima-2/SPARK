@@ -19,23 +19,29 @@ public class FirebaseController : MonoBehaviour
     private FirebaseUser user;
     private FirebaseFirestore db;
 
-    // UI Panels
+    [Header("UI Panels")]
     public GameObject loginPanel, signupPanel, homePanel, accountInfoPanel, welcmePanel;
     
-    // Login/Signup UI elements
+    [Header("Login/Signup UI elements")]
     public InputField loginEmail, loginPassword, signupEmail, signupPassword, signupCPassword, signupName;
     public TextMeshProUGUI errorTextSignUp, errorTextLogin;
-    public TextMeshProUGUI usernameText;
-
-    // Account management UI elements
+    
+    [Header("Parent page UI elements ")]
     public Button logoutButton;
     public Button accountNameButton;
+    public TextMeshProUGUI usernameText;
+    
+    [Header("Account Panel UI")]
     public TextMeshProUGUI displayUsernameText;
-    public TextMeshProUGUI displayEmailText;
+    public TextMeshProUGUI emailText;
+    public GameObject editNamePanel; 
+    public TMP_InputField editNameInputField;
+    public TextMeshProUGUI editNameErrorText;
+    
+    [Header("Delete Account")]
     public Button deleteAccountButton;
     public InputField deleteConfirmPassword;
     public TextMeshProUGUI accountErrorText;
-
     
     // User change delegate and event
     public delegate void UserChangedEventHandler(FirebaseUser oldUser, FirebaseUser newUser);
@@ -192,6 +198,20 @@ public class FirebaseController : MonoBehaviour
 
                 Debug.Log("✅ User information stored in Firestore.");
                 ShowHomePanel();
+
+                // Fire user change event manually after signup
+                if (OnUserChanged != null)
+                {
+                    OnUserChanged(null, user);
+                    Debug.Log("🆕 Fired OnUserChanged manually after signup.");
+                }
+
+                // Force reload child data after signup
+                if (ChildAccountManager.Instance != null)
+                {
+                    ChildAccountManager.Instance.ClearChildData();
+                    ChildAccountManager.Instance.LoadChildAccounts();
+                }
             }
         }
         catch (FirebaseException firebaseEx)
@@ -207,7 +227,7 @@ public class FirebaseController : MonoBehaviour
                     DisplayError("Hmm... That doesn't look like a valid email.try again!✨");
                     break;
                 case AuthError.WeakPassword:
-                    DisplayError("Your password needs a little more strength!");
+                    DisplayError("Oops! Your password is too short. Make it at least 6 characters long!");
                     break;
                 default:
                     DisplayError("Something went wrong, but don't worry! Try again in a moment. 🌟");
@@ -236,53 +256,47 @@ public class FirebaseController : MonoBehaviour
                 await LoadUserData(user.UserId);
                 ShowHomePanel();
 
-                 // Fire user change event
-    if (OnUserChanged != null)
-    {
-        OnUserChanged(null, user);
-        Debug.Log("🔄 Fired OnUserChanged manually after login");
-    }
+                // Fire user change event
+                if (OnUserChanged != null)
+                {
+                    OnUserChanged(null, user);
+                    Debug.Log("🔄 Fired OnUserChanged manually after login");
+                }
 
-    // Force reload children just in case
-    if (ChildAccountManager.Instance != null)
-    {
-        ChildAccountManager.Instance.ClearChildData();
-        ChildAccountManager.Instance.LoadChildAccounts();
-    }
-
+                // Force reload children just in case
+                if (ChildAccountManager.Instance != null)
+                {
+                    ChildAccountManager.Instance.ClearChildData();
+                    ChildAccountManager.Instance.LoadChildAccounts();
+                }
             }
-
-
         }
         catch (FirebaseException firebaseEx)
         {
-//            Debug.LogError($"🔥 Firebase Auth Error ({firebaseEx.ErrorCode}): {firebaseEx.Message}");
-
             AuthError errorCode = (AuthError)firebaseEx.ErrorCode;
-
-         
-        switch (errorCode)
-        {
-        case AuthError.WrongPassword:
-        DisplayError("Oops! Incorrect password. Try again. 🔑", true);
-        break;
-        case AuthError.UserNotFound:
-        DisplayError("Oh no! We couldn't find that account. Try signing up first! 📩", true);
-        break;
-        case AuthError.InvalidEmail:
-        DisplayError("That doesn't look like a valid email. Try again! ✨", true);
-        break;
-        case AuthError.UserDisabled:
-        DisplayError("This account has been disabled. Please contact support.", true);
-        break;
-        case (AuthError)1: // 🔥 Firebase internal error code
-        DisplayError("Oops! Incorrect Email or password. Try again. 🔑", true);
-        break;
-        default:
-        Debug.LogError($"🔥 Unknown Firebase Error: {errorCode} - {firebaseEx.Message}");
-        DisplayError("Something went wrong, try again later. 🌟", true);
-        break;
-        }
+            
+            switch (errorCode)
+            {
+                case AuthError.WrongPassword:
+                    DisplayError("Oops! Incorrect password. Try again. 🔑", true);
+                    break;
+                case AuthError.UserNotFound:
+                    DisplayError("Oh no! We couldn't find that account. Try signing up first! 📩", true);
+                    break;
+                case AuthError.InvalidEmail:
+                    DisplayError("That doesn't look like a valid email. Try again! ✨", true);
+                    break;
+                case AuthError.UserDisabled:
+                    DisplayError("This account has been disabled. Please contact support.", true);
+                    break;
+                case (AuthError)1: // 🔥 Firebase internal error code
+                    DisplayError("Oops! Incorrect Email or password. Try again. 🔑", true);
+                    break;
+                default:
+                    Debug.LogError($"🔥 Unknown Firebase Error: {errorCode} - {firebaseEx.Message}");
+                    DisplayError("Something went wrong, try again later. 🌟", true);
+                    break;
+            }
         }
         catch (Exception e)
         {
@@ -290,7 +304,6 @@ public class FirebaseController : MonoBehaviour
             DisplayError("An unexpected error occurred. Please try again. 🚀", true);
         }
     }
-
 
     void HideError(bool isLogin)
     {
@@ -306,9 +319,8 @@ public class FirebaseController : MonoBehaviour
         }
     }
 
-     void DisplayError(string message, bool isLogin = false)
+    void DisplayError(string message, bool isLogin = false)
     {
-
         if (isLogin)
         {
             if (errorTextLogin != null)
@@ -365,16 +377,37 @@ public class FirebaseController : MonoBehaviour
             {
                 Dictionary<string, object> userData = snapshot.ToDictionary();
                 
-                if (userData.TryGetValue("displayName", out object displayNameObj) && usernameText != null)
+                string displayName = "";
+                if (userData.TryGetValue("displayName", out object displayNameObj))
                 {
-                    string displayName = displayNameObj.ToString();
-                    usernameText.text = displayName;
-                    Debug.Log($"✅ Loaded user data with display name: {displayName}");
+                    displayName = displayNameObj.ToString();
                 }
-                else if (user.DisplayName != null && usernameText != null)
+                else if (user.DisplayName != null)
                 {
                     // Fallback to Auth DisplayName if Firestore doesn't have display name
-                    usernameText.text = user.DisplayName;
+                    displayName = user.DisplayName;
+                }
+                
+                // Update all UI elements with the display name
+                if (!string.IsNullOrEmpty(displayName))
+                {
+                    if (usernameText != null)
+                    {
+                        usernameText.text = displayName;
+                    }
+                    
+                    if (displayUsernameText != null)
+                    {
+                        displayUsernameText.text = displayName;
+                    }
+                    
+                    Debug.Log($"✅ Loaded user data with display name: {displayName}");
+                }
+                
+                // Update email display
+                if (emailText != null && user != null)
+                {
+                    emailText.text = user.Email ?? "";
                 }
             }
         }
@@ -387,42 +420,6 @@ public class FirebaseController : MonoBehaviour
     #endregion
 
     #region Account Management
-
-    // Toggle the account info panel when clicking on the account name
-    public void ToggleAccountInfoPanel()
-    {
-        if (accountInfoPanel != null)
-        {
-            bool isActive = !accountInfoPanel.activeSelf;
-            accountInfoPanel.SetActive(isActive);
-            
-            if (isActive)
-            {
-                // Update displayed user information
-                UpdateAccountInfoDisplay();
-            }
-        }
-    }
-    
-    // Update the account info display with current user data
-    private void UpdateAccountInfoDisplay()
-    {
-        if (user != null)
-        {
-            if (displayUsernameText != null)
-                displayUsernameText.text = user.DisplayName ?? "No name";
-                
-            if (displayEmailText != null)
-                displayEmailText.text = user.Email ?? "No email";
-                
-            // Clear any previous error messages
-            if (accountErrorText != null)
-            {
-                accountErrorText.text = "";
-                accountErrorText.gameObject.SetActive(false);
-            }
-        }
-    }
 
     // Logout functionality
     public void LogoutUser()
@@ -440,13 +437,12 @@ public class FirebaseController : MonoBehaviour
                 // Update reference
                 user = null;
                 
-// Clear child data before triggering user change
-if (ChildAccountManager.Instance != null)
-{
-    ChildAccountManager.Instance.ClearChildData();
-    Debug.Log("✅ Cleared child data manually before logout.");
-}
-
+                // Clear child data before triggering user change
+                if (ChildAccountManager.Instance != null)
+                {
+                    ChildAccountManager.Instance.ClearChildData();
+                    Debug.Log("✅ Cleared child data manually before logout.");
+                }
 
                 // Manually trigger OnUserChanged event
                 if (OnUserChanged != null)
@@ -591,14 +587,27 @@ if (ChildAccountManager.Instance != null)
                 if (newUser == null)
                 {
                     Debug.Log("🔴 User signed out");
+                    // Clear all user-related UI
+                    ClearUserUI();
                 }
                 else if (oldUser == null)
                 {
                     Debug.Log($"🟢 User signed in: {newUser.UserId}");
+                    // Load user data and update UI
+                    if (newUser.UserId != null)
+                    {
+                        _ = LoadUserData(newUser.UserId);
+                    }
                 }
                 else
                 {
                     Debug.Log($"🔄 User changed from {oldUser.UserId} to {newUser.UserId}");
+                    // Clear previous user data and load new user data
+                    ClearUserUI();
+                    if (newUser.UserId != null)
+                    {
+                        _ = LoadUserData(newUser.UserId);
+                    }
                 }
 
                 // Update our user reference
@@ -613,6 +622,30 @@ if (ChildAccountManager.Instance != null)
         }
     }
 
+    private void ClearUserUI()
+{
+    // Clear all UI fields that contain user information
+    if (usernameText != null)
+    {
+        usernameText.text = "";
+    }
+    
+    if (displayUsernameText != null)
+    {
+        displayUsernameText.text = "";
+    }
+    
+    if (emailText != null)
+    {
+        emailText.text = "";
+    }
+    
+    // Clear the edit name input field too
+    if (editNameInputField != null)
+    {
+        editNameInputField.text = "";
+    }
+}
     void OnDestroy()
     {
         if (auth != null)
@@ -630,6 +663,30 @@ if (ChildAccountManager.Instance != null)
         loginPanel.SetActive(false);
         signupPanel.SetActive(false);
         homePanel.SetActive(true);
+    }
+
+    // Add this method to update the account info panel when it's opened
+    public void OpenAccountInfoPanel()
+    {
+        if (user != null)
+        {
+            // Update the account info panel with current user information
+            if (displayUsernameText != null)
+            {
+                displayUsernameText.text = user.DisplayName ?? "User";
+            }
+            
+            if (emailText != null)
+            {
+                emailText.text = user.Email ?? "";
+            }
+            
+            accountInfoPanel.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("⚠ Cannot open account info panel: User is not logged in.");
+        }
     }
 
     #endregion
@@ -650,5 +707,137 @@ if (ChildAccountManager.Instance != null)
         return user;
     }
 
+    #region Account Name Editing
 
+    public void SaveEditedName()
+{
+    string newName = editNameInputField.text.Trim();
+
+    // Display errors in the edit name panel specifically
+    if (string.IsNullOrEmpty(newName))
+    {
+        DisplayEditNameError("Name cannot be empty.");
+        return;
+    }
+    
+    if (newName.Length < 3)
+    {
+        DisplayEditNameError("Name must be at least 3 characters long.");
+        return;
+    }
+    
+    if (newName.Length > 40)
+    {
+        DisplayEditNameError("Name cannot exceed 40 characters.");
+        return;
+    }
+    
+    if (!System.Text.RegularExpressions.Regex.IsMatch(newName, @"^[a-zA-Z0-9\s\.\-_']+$"))
+    {
+        DisplayEditNameError("Name can only contain letters, numbers, spaces, and common punctuation (. - _ ').");
+        return;
+    }
+
+    UpdateParentDisplayName(newName);
+}
+
+private void DisplayEditNameError(string message)
+{
+    if (editNameErrorText != null)
+    {
+        editNameErrorText.text = message;
+        editNameErrorText.gameObject.SetActive(true);
+    }
+    else
+    {
+        // Fallback to the account error text if the specific one isn't assigned
+        DisplayAccountError(message);
+    }
+    Debug.LogWarning("Edit Name Error: " + message);
+}
+
+    // Actually update it in Firebase Auth and Firestore
+    private async void UpdateParentDisplayName(string newName)
+    {
+        try
+        {
+            // Update Firebase Authentication profile
+            UserProfile profile = new UserProfile { DisplayName = newName };
+            await user.UpdateUserProfileAsync(profile);
+            Debug.Log("✅ Updated display name in Firebase Authentication");
+
+            // Update Firestore database
+            DocumentReference userRef = db.Collection("users").Document(user.UserId);
+            await userRef.UpdateAsync("displayName", newName);
+            Debug.Log("✅ Updated display name in Firestore");
+
+            // Update ALL UI elements that display the username
+            if (displayUsernameText != null)
+            {
+                displayUsernameText.text = newName;
+            }
+            
+            // Update the username in the parent page
+            if (usernameText != null)
+            {
+                usernameText.text = newName;
+            }
+
+            // Close the edit panel
+            editNamePanel.SetActive(false);
+            Debug.Log("🎉 Name updated and edit panel closed");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"❌ Error updating name: {e.Message}");
+            DisplayAccountError("Failed to update name. Try again later.");
+        }
+    }
+
+// Add this method to open and initialize the edit name panel
+public void OpenEditNamePanel()
+{
+    if (user != null)
+    {
+        // Set the input field to current user's name
+        if (editNameInputField != null)
+        {
+            editNameInputField.text = user.DisplayName ?? "";
+        }
+        
+        // Clear any previous error messages
+        if (editNameErrorText != null)
+        {
+            editNameErrorText.text = "";
+            editNameErrorText.gameObject.SetActive(false);
+        }
+        
+        editNamePanel.SetActive(true);
+    }
+    else
+    {
+        Debug.LogWarning("Cannot open edit name panel: User is not logged in");
+    }
+}
+
+// Add this method to your FirebaseController class
+public void InitEditNamePanel()
+{
+    if (user != null)
+    {
+        // Set the input field to current user's name
+        if (editNameInputField != null)
+        {
+            editNameInputField.text = user.DisplayName ?? "";
+        }
+        
+        // Clear any previous error messages
+        if (editNameErrorText != null)
+        {
+            editNameErrorText.text = "";
+            editNameErrorText.gameObject.SetActive(false);
+        }
+    }
+}
+    #endregion
 }
