@@ -618,7 +618,7 @@ public class Ddbmanager : MonoBehaviour
 
     private IEnumerator Fade(float targetAlpha)
     {
-        float duration = 4f;
+        float duration = 2f;
         float startAlpha = fadeGroup.alpha;
         float time = 0;
 
