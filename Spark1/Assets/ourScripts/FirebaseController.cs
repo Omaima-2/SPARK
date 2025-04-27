@@ -480,49 +480,80 @@ public class FirebaseController : MonoBehaviour
     {
         try
         {
-            // Store old user before deletion
-            FirebaseUser oldUser = user;
+            // ✅ Check if password is entered
+            if (deleteConfirmPassword == null || string.IsNullOrEmpty(deleteConfirmPassword.text))
+            {
+                DisplayAccountError("Please enter your password to confirm account deletion.");
+                return;
+            }
 
-            // Clear sensitive fields early
-            if (loginPassword != null)
-                loginPassword.text = "";
-            if (deleteConfirmPassword != null)
-                deleteConfirmPassword.text = "";
+            // ✅ Re-authenticate user first
+            var credential = EmailAuthProvider.GetCredential(user.Email, deleteConfirmPassword.text);
+            await user.ReauthenticateAsync(credential);
+            Debug.Log("✅ Reauthentication successful.");
 
-            // Delete the user from Firebase
+            // ✅ After successful reauthentication, delete user account
             await user.DeleteAsync();
             Debug.Log("✅ User account deleted successfully.");
 
-            // Sign out from Firebase
+            // ✅ Clean up and logout
+            FirebaseUser oldUser = user;
             auth.SignOut();
             user = null;
 
-            // Clear child data before triggering user change
+            // Clear child data if any
             if (ChildAccountManager.Instance != null)
             {
                 ChildAccountManager.Instance.ClearChildData();
-                Debug.Log("✅ Cleared child data manually after delete.");
             }
 
-            // Manually trigger OnUserChanged event
+            // Notify other systems
             if (OnUserChanged != null)
             {
                 OnUserChanged(oldUser, null);
             }
 
-            // Handle UI panels
+            // UI clean-up
             if (accountInfoPanel != null)
                 accountInfoPanel.SetActive(false);
 
             loginPanel.SetActive(false);
             homePanel.SetActive(false);
             welcmePanel.SetActive(true);
+
+            // Clear input fields
+            if (loginPassword != null)
+                loginPassword.text = "";
+            if (deleteConfirmPassword != null)
+                deleteConfirmPassword.text = "";
+
+            // ✅ Hide any previous error messages
+            if (accountErrorText != null)
+                accountErrorText.gameObject.SetActive(false);
         }
-        catch (Exception e)
-        {
-            Debug.LogError("❌ Error during delete/logout: " + e.Message);
-            DisplayAccountError("Something went wrong while deleting your account. Please try again.");
-        }
+        catch (FirebaseException firebaseEx)
+{
+    AuthError errorCode = (AuthError)firebaseEx.ErrorCode;
+
+    if (errorCode == AuthError.WrongPassword)
+    {
+        DisplayAccountError("Incorrect password. Please try again.");
+    }
+    else if (errorCode == AuthError.RequiresRecentLogin)
+    {
+        DisplayAccountError("Please log in again before deleting your account.");
+    }
+    else if (errorCode == AuthError.NetworkRequestFailed)
+    {
+        DisplayAccountError("Network error. Please check your internet connection.");
+    }
+    else
+    {
+       // Debug.LogError($"❌ Firebase internal error during reauthentication or deletion: {firebaseEx.Message}");
+        DisplayAccountError("Oops,Incorrect password. Please try again.");
+    }
+}
+
     }
 }
 
@@ -617,7 +648,7 @@ public class FirebaseController : MonoBehaviour
             accountErrorText.text = message;
             accountErrorText.gameObject.SetActive(true);
         }
-        Debug.LogError("Account Error: " + message);
+       // Debug.LogError("Account Error: " + message);
     }
 
     #endregion
@@ -714,6 +745,7 @@ public class FirebaseController : MonoBehaviour
         loginPanel.SetActive(false);
         signupPanel.SetActive(false);
         homePanel.SetActive(true);
+         accountErrorText.gameObject.SetActive(false);
     }
 
     // Add this method to update the account info panel when it's opened
