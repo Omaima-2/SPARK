@@ -45,12 +45,28 @@ public class exit : MonoBehaviour
         Application.Quit();
     }
 
-    // NEW METHOD to switch scene and target a specific page
-    public void LeaveToSceneWithPage(int pageIndex)
+    // ✅ NEW METHOD: Leave story and go to Start scene safely
+    public void LeaveToSceneWithPage()
     {
-        NavigationData.targetPanelIndex = 4; // Set this to whatever index matches child_Home
-        SceneManager.LoadScene("Start"); // Load the UI scene
-       
-    }
+        // First: Check if child is logged in
+        string currentChildId = PlayerPrefs.GetString("CurrentChildID", "");
+        Debug.Log($"🔵 CurrentChildID when exiting story: {currentChildId}");
 
+
+        if (string.IsNullOrEmpty(currentChildId))
+        {
+            Debug.LogWarning("⚠️ No current child ID found! Going back to default page.");
+            PlayerPrefs.SetInt("CurrentPageIndex", 0); // Default: Welcome page
+        }
+        else
+        {
+            Debug.Log($"🎯 Child '{currentChildId}' exiting story. Setting target page index to 4.");
+            PlayerPrefs.SetInt("CurrentPageIndex", 4); // Child Home page index
+        }
+
+        PlayerPrefs.Save();
+
+        // Now load Start scene
+        SceneManager.LoadScene("Start");
+    }
 }

@@ -287,6 +287,7 @@ public class ChildAccountManager : MonoBehaviour
             
             // Refresh the child list UI
             RefreshChildList();
+
         }
         catch (Exception e)
         {
@@ -528,7 +529,7 @@ public class ChildAccountManager : MonoBehaviour
             Debug.LogException(e);
         }
     }
-    
+
     private void SwitchToChildMode()
     {
         if (selectedChild == null)
@@ -536,13 +537,13 @@ public class ChildAccountManager : MonoBehaviour
             Debug.LogWarning("No child selected.");
             return;
         }
-        
+
         isInChildMode = true;
-        
+
         // Update child mode UI
         childModeNameText.text = selectedChild.name;
         childModeStreakText.text = $"Streak: {selectedChild.streak}";
-        
+
         // Set avatar in child mode
         if (childModeAvatarImage != null)
         {
@@ -555,15 +556,22 @@ public class ChildAccountManager : MonoBehaviour
                 childModeAvatarImage.sprite = avatar1Sprite;
             }
         }
-        
+
         // Hide parent panel and show child panel
         parentPanel.SetActive(false);
         childModePanel.SetActive(true);
         childInfoPopup.SetActive(false);
-        
+
         Debug.Log($"Switched to child mode: {selectedChild.name}");
+
+        // ✅ Save ONLY the child ID here
+        PlayerPrefs.SetString("CurrentChildID", selectedChild.id);
+        PlayerPrefs.Save();
+
+        Debug.Log($"📝 Saved child session. ID: {selectedChild.id}");
     }
-    
+
+
     public void SwitchToParentMode()
     {
         isInChildMode = false;

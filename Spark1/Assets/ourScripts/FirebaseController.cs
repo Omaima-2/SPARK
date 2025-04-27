@@ -176,37 +176,40 @@ public class FirebaseController : MonoBehaviour
         try
         {
             var result = await auth.CreateUserWithEmailAndPasswordAsync(email, password);
-            user = result.User;
+
+            // ✅ Always re-fetch current user after signup to avoid stale data issues
+            user = auth.CurrentUser;
 
             if (user != null)
             {
-                Debug.LogFormat("✅ User created successfully: {0} ({1})", user.Email, user.UserId);
+                Debug.LogFormat("✅ User created and logged in: {0} ({1})", user.Email, user.UserId);
 
                 // Update Firebase Authentication Profile with the display name
                 UserProfile profile = new UserProfile { DisplayName = displayName };
                 await user.UpdateUserProfileAsync(profile);
-                Debug.Log("✅ Display name updated in Firebase Authentication.");
+                Debug.Log("✅ Display name updated.");
 
                 // Store user data in Firestore
                 DocumentReference userRef = db.Collection("users").Document(user.UserId);
                 await userRef.SetAsync(new Dictionary<string, object>
-                {
-                    { "displayName", displayName },
-                    { "email", email },
-                    { "createdAt", FieldValue.ServerTimestamp }
-                });
+            {
+                { "displayName", displayName },
+                { "email", email },
+                { "createdAt", FieldValue.ServerTimestamp }
+            });
+                Debug.Log("✅ User info stored in Firestore.");
 
-                Debug.Log("✅ User information stored in Firestore.");
+                // ✅ Load full user data if needed (just like login)
+                await LoadUserData(user.UserId);
+
+                // Move to home page
                 ShowHomePanel();
 
-                // Fire user change event manually after signup
-                if (OnUserChanged != null)
-                {
-                    OnUserChanged(null, user);
-                    Debug.Log("🆕 Fired OnUserChanged manually after signup.");
-                }
+                // Fire user change event manually
+                OnUserChanged?.Invoke(null, user);
+                Debug.Log("🆕 Fired OnUserChanged after signup.");
 
-                // Force reload child data after signup
+                // Clear and reload children
                 if (ChildAccountManager.Instance != null)
                 {
                     ChildAccountManager.Instance.ClearChildData();
@@ -216,33 +219,40 @@ public class FirebaseController : MonoBehaviour
         }
         catch (FirebaseException firebaseEx)
         {
-            AuthError errorCode = (AuthError)firebaseEx.ErrorCode; // Convert to Firebase AuthError
+            AuthError errorCode = (AuthError)firebaseEx.ErrorCode;
 
             switch (errorCode)
             {
                 case AuthError.EmailAlreadyInUse:
-                    DisplayError("Oops! This email is already taken. Try another one");
+                    DisplayError("Oops! This email is already taken. Try another one.");
                     break;
                 case AuthError.InvalidEmail:
-                    DisplayError("Hmm... That doesn't look like a valid email.try again!✨");
+                    DisplayError("Hmm... That doesn't look like a valid email. Try again!");
                     break;
                 case AuthError.WeakPassword:
                     DisplayError("Oops! Your password is too short. Make it at least 6 characters long!");
                     break;
                 default:
-                    DisplayError("Something went wrong, but don't worry! Try again in a moment. 🌟");
+                    DisplayError("Something went wrong, but don't worry! Try again soon.");
                     break;
             }
         }
         catch (Exception e)
         {
             Debug.LogError("🔥 Unexpected Error: " + e.Message);
-            DisplayError("Uh-oh! Something went wrong. Give it another shot! 🚀");
+            DisplayError("Uh-oh! Something went wrong. Try again!");
         }
     }
 
+
     async void SignInUser(string email, string password)
     {
+        if (!IsFirebaseInitialized)
+        {
+            DisplayError("Please wait a moment, Firebase is still initializing...", true);
+            Debug.LogWarning("⚠ Tried to login before Firebase initialized!");
+            return;
+        }
         try
         {
             var result = await auth.SignInWithEmailAndPasswordAsync(email, password);
@@ -480,80 +490,49 @@ public class FirebaseController : MonoBehaviour
     {
         try
         {
-            // ✅ Check if password is entered
-            if (deleteConfirmPassword == null || string.IsNullOrEmpty(deleteConfirmPassword.text))
-            {
-                DisplayAccountError("Please enter your password to confirm account deletion.");
-                return;
-            }
+            // Store old user before deletion
+            FirebaseUser oldUser = user;
 
-            // ✅ Re-authenticate user first
-            var credential = EmailAuthProvider.GetCredential(user.Email, deleteConfirmPassword.text);
-            await user.ReauthenticateAsync(credential);
-            Debug.Log("✅ Reauthentication successful.");
+            // Clear sensitive fields early
+            if (loginPassword != null)
+                loginPassword.text = "";
+            if (deleteConfirmPassword != null)
+                deleteConfirmPassword.text = "";
 
-            // ✅ After successful reauthentication, delete user account
+            // Delete the user from Firebase
             await user.DeleteAsync();
             Debug.Log("✅ User account deleted successfully.");
 
-            // ✅ Clean up and logout
-            FirebaseUser oldUser = user;
+            // Sign out from Firebase
             auth.SignOut();
             user = null;
 
-            // Clear child data if any
+            // Clear child data before triggering user change
             if (ChildAccountManager.Instance != null)
             {
                 ChildAccountManager.Instance.ClearChildData();
+                Debug.Log("✅ Cleared child data manually after delete.");
             }
 
-            // Notify other systems
+            // Manually trigger OnUserChanged event
             if (OnUserChanged != null)
             {
                 OnUserChanged(oldUser, null);
             }
 
-            // UI clean-up
+            // Handle UI panels
             if (accountInfoPanel != null)
                 accountInfoPanel.SetActive(false);
 
             loginPanel.SetActive(false);
             homePanel.SetActive(false);
             welcmePanel.SetActive(true);
-
-            // Clear input fields
-            if (loginPassword != null)
-                loginPassword.text = "";
-            if (deleteConfirmPassword != null)
-                deleteConfirmPassword.text = "";
-
-            // ✅ Hide any previous error messages
-            if (accountErrorText != null)
-                accountErrorText.gameObject.SetActive(false);
         }
-        catch (FirebaseException firebaseEx)
-{
-    AuthError errorCode = (AuthError)firebaseEx.ErrorCode;
-
-    if (errorCode == AuthError.WrongPassword)
-    {
-        DisplayAccountError("Incorrect password. Please try again.");
-    }
-    else if (errorCode == AuthError.RequiresRecentLogin)
-    {
-        DisplayAccountError("Please log in again before deleting your account.");
-    }
-    else if (errorCode == AuthError.NetworkRequestFailed)
-    {
-        DisplayAccountError("Network error. Please check your internet connection.");
-    }
-    else
-    {
-       // Debug.LogError($"❌ Firebase internal error during reauthentication or deletion: {firebaseEx.Message}");
-        DisplayAccountError("Oops,Incorrect password. Please try again.");
-    }
-}
-
+        catch (Exception e)
+        {
+            Debug.LogError("❌ Error during delete/logout: " + e.Message);
+            DisplayAccountError("Something went wrong while deleting your account. Please try again.");
+        }
     }
 }
 
@@ -648,7 +627,7 @@ public class FirebaseController : MonoBehaviour
             accountErrorText.text = message;
             accountErrorText.gameObject.SetActive(true);
         }
-       // Debug.LogError("Account Error: " + message);
+        Debug.LogError("Account Error: " + message);
     }
 
     #endregion
@@ -745,7 +724,6 @@ public class FirebaseController : MonoBehaviour
         loginPanel.SetActive(false);
         signupPanel.SetActive(false);
         homePanel.SetActive(true);
-         accountErrorText.gameObject.SetActive(false);
     }
 
     // Add this method to update the account info panel when it's opened

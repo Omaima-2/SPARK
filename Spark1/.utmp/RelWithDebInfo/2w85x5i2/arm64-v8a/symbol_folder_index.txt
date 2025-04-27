@@ -1,0 +1,1 @@
+D:\GP2\NewSpark_v2\SPARK\Spark1\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\2w85x5i2\obj\arm64-v8a
