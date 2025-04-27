@@ -474,6 +474,57 @@ public class FirebaseController : MonoBehaviour
             }
         }
     }
+ public async void LogoutAndDeleteUser()
+{
+    if (auth != null && user != null)
+    {
+        try
+        {
+            // Store old user before deletion
+            FirebaseUser oldUser = user;
+
+            // Clear sensitive fields early
+            if (loginPassword != null)
+                loginPassword.text = "";
+            if (deleteConfirmPassword != null)
+                deleteConfirmPassword.text = "";
+
+            // Delete the user from Firebase
+            await user.DeleteAsync();
+            Debug.Log("✅ User account deleted successfully.");
+
+            // Sign out from Firebase
+            auth.SignOut();
+            user = null;
+
+            // Clear child data before triggering user change
+            if (ChildAccountManager.Instance != null)
+            {
+                ChildAccountManager.Instance.ClearChildData();
+                Debug.Log("✅ Cleared child data manually after delete.");
+            }
+
+            // Manually trigger OnUserChanged event
+            if (OnUserChanged != null)
+            {
+                OnUserChanged(oldUser, null);
+            }
+
+            // Handle UI panels
+            if (accountInfoPanel != null)
+                accountInfoPanel.SetActive(false);
+
+            loginPanel.SetActive(false);
+            homePanel.SetActive(false);
+            welcmePanel.SetActive(true);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("❌ Error during delete/logout: " + e.Message);
+            DisplayAccountError("Something went wrong while deleting your account. Please try again.");
+        }
+    }
+}
 
     // Delete user account
     public async void DeleteUserAccount()

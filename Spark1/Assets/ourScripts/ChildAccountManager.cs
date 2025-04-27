@@ -202,7 +202,7 @@ public class ChildAccountManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("User not logged in. Cannot access child accounts.");
+          //  Debug.LogError("User not logged in. Cannot access child accounts.");
         }
     }
     
