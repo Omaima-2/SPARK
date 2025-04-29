@@ -45,6 +45,7 @@ public class ChildAccountManager : MonoBehaviour
     public TMP_InputField childNameInput;
     public Button confirmAddChildButton;
     public Button cancelAddChildButton;
+    public TextMeshProUGUI Error_addChildName;
     
     // UI Elements for Child Info/Switch
     [Header("Child Info UI")]
@@ -452,21 +453,43 @@ public class ChildAccountManager : MonoBehaviour
             return avatar1Sprite;
         }
     }
-    
+
+    void DisplayError(string message , TextMeshProUGUI errorTextUI)
+    {
+        if (errorTextUI != null)
+            {
+                errorTextUI.gameObject.SetActive(false); // Force refresh
+                errorTextUI.text = message;
+                errorTextUI.gameObject.SetActive(true);
+            }
+            else
+            {
+                Debug.LogError("errorTextUI is NULL! Assign it in the Inspector.");
+            }
+    }
+
     private async void AddNewChild()
     {
+        // must add a UI error mesage here! 
         if (childAccounts.Count >= MAX_CHILDREN)
         {
             Debug.LogWarning("Maximum number of child accounts reached.");
+            //DisplayError()
             return;
         }
         
         string childName = childNameInput.text.Trim();
         
-        // must show an error mesage on the ui!
         if (string.IsNullOrEmpty(childName))
         {
             Debug.LogWarning("Child name cannot be empty.");
+            DisplayError("Child name cannot be empty.", Error_addChildName);
+            return;
+        }
+        if (childName.Length > 20)
+        {
+            Debug.LogWarning("Child name cannot be longer than 20 characters.");
+            DisplayError("Child name cannot be longer than 20 characters.", Error_addChildName );
             return;
         }
         

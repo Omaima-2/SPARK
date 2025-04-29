@@ -201,7 +201,15 @@ public class FirebaseController : MonoBehaviour
 
                 // ✅ Load full user data if needed (just like login)
                 await LoadUserData(user.UserId);
-
+               
+               // 🛠️ Fix: Update the parent name immediately after loading
+               if (usernameText != null){
+               usernameText.text = user.DisplayName;
+               }
+               if (displayUsernameText != null){
+               displayUsernameText.text = user.DisplayName;
+               }
+                
                 // Move to home page
                 ShowHomePanel();
 
@@ -470,17 +478,29 @@ public class FirebaseController : MonoBehaviour
                 homePanel.SetActive(false);
                 welcmePanel.SetActive(true);
 
-                // Clear sensitive fields
-                if (loginPassword != null)
-                    loginPassword.text = "";
-                if (deleteConfirmPassword != null)
-                    deleteConfirmPassword.text = "";
+        
+                // Clear all sensitive fields
+if (loginEmail != null)
+    loginEmail.text = "";
+if (loginPassword != null)
+    loginPassword.text = "";
+if (signupName != null)
+    signupName.text = "";
+if (signupEmail != null)
+    signupEmail.text = "";
+if (signupPassword != null)
+    signupPassword.text = "";
+if (signupCPassword != null)
+    signupCPassword.text = "";
+if (deleteConfirmPassword != null)
+    deleteConfirmPassword.text = "";
+
                 
             }
             catch (Exception e)
             {
                 Debug.LogError("❌ Error signing out: " + e.Message);
-                DisplayAccountError("Something went wrong while signing out. Please try again.");
+                DisplayError("Something went wrong while signing out. Please try again." , accountErrorText);
             }
         }
     }
@@ -531,7 +551,7 @@ public class FirebaseController : MonoBehaviour
         catch (Exception e)
         {
             Debug.LogError("❌ Error during delete/logout: " + e.Message);
-            DisplayAccountError("Something went wrong while deleting your account. Please try again.");
+            DisplayError("Something went wrong while deleting your account. Please try again." , accountErrorText );
         }
     }
 }
@@ -541,14 +561,14 @@ public class FirebaseController : MonoBehaviour
     {
         if (user == null || auth == null)
         {
-            DisplayAccountError("You need to be logged in to delete your account.");
+            DisplayError( "You need to be logged in to delete your account.", accountErrorText );
             return;
         }
 
         // Check if password confirmation was provided
         if (deleteConfirmPassword == null || string.IsNullOrEmpty(deleteConfirmPassword.text))
         {
-            DisplayAccountError("Please enter your password to confirm account deletion.");
+            DisplayError( "Please enter your password to confirm account deletion.", accountErrorText );
             return;
         }
 
@@ -588,18 +608,18 @@ public class FirebaseController : MonoBehaviour
             
             if (errorCode == AuthError.WrongPassword)
             {
-                DisplayAccountError("Incorrect password. Please try again.");
+                DisplayError("Incorrect password. Please try again." , accountErrorText );
             }
             else
             {
                 Debug.LogError("❌ Firebase error deleting account: " + ex.Message);
-                DisplayAccountError("Error deleting account: " + ex.Message);
+                DisplayError( "Error deleting account: " + ex.Message , accountErrorText );
             }
         }
         catch (Exception e)
         {
             Debug.LogError("❌ Error deleting account: " + e.Message);
-            DisplayAccountError("Something went wrong while deleting your account. Please try again.");
+            DisplayError("Something went wrong while deleting your account. Please try again." , accountErrorText );
         }
     }
     
@@ -617,17 +637,6 @@ public class FirebaseController : MonoBehaviour
         {
             Debug.LogError("❌ Error deleting user data from Firestore: " + e.Message);
         }
-    }
-    
-    // Display error message in the account info panel
-    void DisplayAccountError(string message)
-    {
-        if (accountErrorText != null)
-        {
-            accountErrorText.text = message;
-            accountErrorText.gameObject.SetActive(true);
-        }
-        Debug.LogError("Account Error: " + message);
     }
 
     #endregion
@@ -771,50 +780,34 @@ public class FirebaseController : MonoBehaviour
     #region Account Name Editing
 
     public void SaveEditedName()
-{
+    {
     string newName = editNameInputField.text.Trim();
-
-    // Display errors in the edit name panel specifically
+ 
     if (string.IsNullOrEmpty(newName))
     {
-        DisplayEditNameError("Name cannot be empty.");
+        DisplayError("Name cannot be empty.", editNameErrorText);
         return;
     }
     
     if (newName.Length < 3)
     {
-        DisplayEditNameError("Name must be at least 3 characters long.");
+        DisplayError("Name must be at least 3 characters long.", editNameErrorText);
         return;
     }
     
     if (newName.Length > 20)
     {
-        DisplayEditNameError("Name cannot exceed 20 characters.");
+        DisplayError("Name cannot exceed 20 characters.", editNameErrorText);
         return;
     }
     
     if (!System.Text.RegularExpressions.Regex.IsMatch(newName, @"^[a-zA-Z0-9\s\.\-_']+$"))
     {
-        DisplayEditNameError("Name can only contain letters, numbers, spaces, and common punctuation (. - _ ').");
+        DisplayError("Name can only contain letters, numbers, spaces, and common punctuation (. - _ ').", editNameErrorText);
         return;
     }
 
     UpdateParentDisplayName(newName);
-}
-
-private void DisplayEditNameError(string message)
-{
-    if (editNameErrorText != null)
-    {
-        editNameErrorText.text = message;
-        editNameErrorText.gameObject.SetActive(true);
-    }
-    else
-    {
-        // Fallback to the account error text if the specific one isn't assigned
-        DisplayAccountError(message);
-    }
-    Debug.LogWarning("Edit Name Error: " + message);
 }
 
     // Actually update it in Firebase Auth and Firestore
@@ -851,7 +844,7 @@ private void DisplayEditNameError(string message)
         catch (Exception e)
         {
             Debug.LogError($"❌ Error updating name: {e.Message}");
-            DisplayAccountError("Failed to update name. Try again later.");
+            DisplayError("Failed to update name. Try again later.", accountErrorText );
         }
     }
 
@@ -901,4 +894,18 @@ public void InitEditNamePanel()
     }
 }
     #endregion
+
+    private void DisplayError(string message , TextMeshProUGUI ErrorMesagge)
+    {
+        Debug.LogError(message);
+        if (ErrorMesagge != null){
+        ErrorMesagge.text = message;
+        ErrorMesagge.gameObject.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("errorTextUI is NULL! Assign it in the Inspector.");
+        }
+    }
+
 }
