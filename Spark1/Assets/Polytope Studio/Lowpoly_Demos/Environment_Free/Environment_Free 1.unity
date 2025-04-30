@@ -8137,8 +8137,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 13.8918, y: -284.75}
-  m_SizeDelta: {x: 244.6789, y: 121.42}
+  m_AnchoredPosition: {x: -0.0000085831, y: -267}
+  m_SizeDelta: {x: 252.7463, y: 125.4538}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &598096477
 MonoBehaviour:
@@ -10379,7 +10379,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -7.61261, y: -0.0000076293945}
+  m_AnchoredPosition: {x: -7.6125946, y: -0.0000076293945}
   m_SizeDelta: {x: 15.225, y: 38.063}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &778251700
@@ -16826,7 +16826,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1356583873
 RectTransform:
   m_ObjectHideFlags: 0
@@ -16844,10 +16844,10 @@ RectTransform:
   - {fileID: 1462750367}
   m_Father: {fileID: 452454306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 22.288086, y: 41.428955}
-  m_SizeDelta: {x: -1475.7881, y: -905.66}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 57.582886, y: 47.479465}
+  m_SizeDelta: {x: 794.8015, y: 586.7781}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1356583874
 MonoBehaviour:
@@ -19825,8 +19825,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 3.1130066, y: 7.910904}
-  m_SizeDelta: {x: -48.383, y: -48.8655}
+  m_AnchoredPosition: {x: -0.2592926, y: 4.1170044}
+  m_SizeDelta: {x: -41.6384, y: -56.4533}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1603745010
 MonoBehaviour:
@@ -27356,7 +27356,7 @@ MonoBehaviour:
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
-  m_lineSpacing: 0
+  m_lineSpacing: 10
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
