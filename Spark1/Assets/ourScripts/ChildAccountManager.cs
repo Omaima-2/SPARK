@@ -420,7 +420,17 @@ public class ChildAccountManager : MonoBehaviour
     
     private void HideAddChildPopup()
     {
+
         addChildPopup.SetActive(false);
+        // Clear the input field
+    childNameInput.text = "";
+
+    // Clear and hide the error message
+    if (Error_addChildName != null)
+    {
+        Error_addChildName.text = "";
+        Error_addChildName.gameObject.SetActive(false);
+    }
     }
     
     private void SelectAvatar(int avatarId)
@@ -489,7 +499,7 @@ public class ChildAccountManager : MonoBehaviour
         if (childName.Length > 20)
         {
             Debug.LogWarning("Child name cannot be longer than 20 characters.");
-            DisplayError("Child name cannot be longer than 20 characters.", Error_addChildName );
+            DisplayError("Oops! Names can’t be longer than 20 characters.", Error_addChildName );
             return;
         }
         
