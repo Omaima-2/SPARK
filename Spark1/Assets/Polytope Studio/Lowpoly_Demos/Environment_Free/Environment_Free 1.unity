@@ -10582,6 +10582,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dialogPanel: {fileID: 150020136}
   Homebutton: {fileID: 869970691}
+  startSceneRoot: {fileID: 0}
 --- !u!4 &787799309
 Transform:
   m_ObjectHideFlags: 0
@@ -30814,7 +30815,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 787799308}
         m_TargetAssemblyTypeName: exit, Assembly-CSharp
-        m_MethodName: LeaveToSceneWithPage
+        m_MethodName: LeaveToStartScene
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
