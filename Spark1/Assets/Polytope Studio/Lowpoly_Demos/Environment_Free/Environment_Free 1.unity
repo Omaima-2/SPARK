@@ -753,7 +753,7 @@ GameObject:
   - component: {fileID: 80328427}
   - component: {fileID: 80328426}
   m_Layer: 5
-  m_Name: CanvasPath2
+  m_Name: PlantingCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9344,7 +9344,7 @@ GameObject:
   - component: {fileID: 668304220}
   - component: {fileID: 668304219}
   m_Layer: 5
-  m_Name: Panel1
+  m_Name: Path1Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10281,7 +10281,7 @@ GameObject:
   - component: {fileID: 759223068}
   - component: {fileID: 759223067}
   m_Layer: 5
-  m_Name: Panel2
+  m_Name: Path2Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17088,7 +17088,6 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -50}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 539.219, y: -135.578}
   m_SizeDelta: {x: 150, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &1406941709
@@ -17943,7 +17942,7 @@ GameObject:
   - component: {fileID: 1484901589}
   - component: {fileID: 1484901588}
   m_Layer: 5
-  m_Name: CanvasForPath1
+  m_Name: 'ButterflyCanvas '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
