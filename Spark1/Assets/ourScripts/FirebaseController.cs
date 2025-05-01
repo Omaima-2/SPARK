@@ -897,7 +897,7 @@ public void InitEditNamePanel()
 
     private void DisplayError(string message , TextMeshProUGUI ErrorMesagge)
     {
-        Debug.LogError(message);
+      //  Debug.LogError(message);
         if (ErrorMesagge != null){
         ErrorMesagge.text = message;
         ErrorMesagge.gameObject.SetActive(true);
