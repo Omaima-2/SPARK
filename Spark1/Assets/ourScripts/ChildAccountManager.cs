@@ -206,7 +206,7 @@ public class ChildAccountManager : MonoBehaviour
           //  Debug.LogError("User not logged in. Cannot access child accounts.");
         }
     }
-    
+     
     public async void LoadChildAccounts()
     {
         try
@@ -295,6 +295,8 @@ public class ChildAccountManager : MonoBehaviour
             Debug.LogError($"Error loading child accounts: {e.Message}");
             Debug.LogException(e);
         }
+
+
     }
     
     void RefreshChildList()

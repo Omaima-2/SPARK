@@ -1,30 +1,23 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using System.Collections; // 👈 This gives access to IEnumerator
-
+using UnityEngine.UI;
+using System.Collections;
 
 public class exit : MonoBehaviour
 {
-    public GameObject dialogPanel; // Assign in Inspector
+    public GameObject dialogPanel;
     public Button Homebutton;
+    private GameObject startSceneRoot;
 
     IEnumerator Start()
     {
-        yield return new WaitForSeconds(0.1f); // Allow other scripts to run
+        yield return new WaitForSeconds(0.1f);
 
-        if (Homebutton == null)
-        {
-            Debug.LogError("❌ Homebutton is NOT assigned in the Inspector!");
-        }
-        else
-        {
+        if (dialogPanel != null)
             dialogPanel.SetActive(false);
-            Debug.Log("🧹 Forced home panel to deactivate after delay.");
-            Homebutton.interactable = true;
-        }
 
-        Debug.Log("👋 Start() coroutine finished in Exit.cs");
+        if (Homebutton != null)
+            Homebutton.interactable = true;
     }
 
     public void ShowDialog()
@@ -41,32 +34,49 @@ public class exit : MonoBehaviour
 
     public void ExitGame()
     {
-        Debug.Log("Exiting Game...");
         Application.Quit();
     }
 
-    // ✅ NEW METHOD: Leave story and go to Start scene safely
-    public void LeaveToSceneWithPage()
+    public void LeaveToStartScene()
     {
-        // First: Check if child is logged in
-        string currentChildId = PlayerPrefs.GetString("CurrentChildID", "");
-        Debug.Log($"🔵 CurrentChildID when exiting story: {currentChildId}");
+        Debug.Log("↩️ Exiting story and restoring Start scene...");
 
-
-        if (string.IsNullOrEmpty(currentChildId))
+        // ✅ Use cached reference from LoadEnvironmentScene.cs
+        if (startSceneRoot == null)
         {
-            Debug.LogWarning("⚠️ No current child ID found! Going back to default page.");
-            PlayerPrefs.SetInt("CurrentPageIndex", 0); // Default: Welcome page
+            startSceneRoot = LoadEnvironmentScene.cachedStartRoot;
+        }
+
+        if (startSceneRoot != null)
+        {
+            startSceneRoot.SetActive(true);
+
+            // Refresh all Canvas components to fix any rendering glitches
+            Canvas[] canvases = startSceneRoot.GetComponentsInChildren<Canvas>(true);
+            foreach (Canvas c in canvases)
+            {
+                c.enabled = false;
+                c.enabled = true;
+            }
+
+            Debug.Log("✅ Start scene reactivated.");
         }
         else
         {
-            Debug.Log($"🎯 Child '{currentChildId}' exiting story. Setting target page index to 4.");
-            PlayerPrefs.SetInt("CurrentPageIndex", 4); // Child Home page index
+            Debug.LogWarning("⚠️ StartSceneRoot is missing. Cannot restore Start scene.");
         }
 
-        PlayerPrefs.Save();
+        // ✅ Unload the story scene
+        if (SceneManager.GetSceneByName("Environment_Free 1").isLoaded)
+        {
+            SceneManager.UnloadSceneAsync("Environment_Free 1");
+        }
 
-        // Now load Start scene
-        SceneManager.LoadScene("Start");
+        // ✅ Make Start the active scene again
+        Scene startScene = SceneManager.GetSceneByName("Start");
+        if (startScene.IsValid())
+        {
+            SceneManager.SetActiveScene(startScene);
+        }
     }
 }
