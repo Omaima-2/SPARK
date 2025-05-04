@@ -28,7 +28,6 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -189,25 +188,6 @@ public class GameManager : MonoBehaviour
         }
     }
     
-public void RestartStory()
-{
-    StartCoroutine(RestartWithFade());
-}
-
-private IEnumerator RestartWithFade()
-{
-    // Fade to black
-    yield return StartCoroutine(Fade(1));
-
-    // Wait a moment (optional)
-    yield return new WaitForSeconds(0.5f);
-
-    // Reload current scene
-    UnityEngine.SceneManagement.SceneManager.LoadScene(
-        UnityEngine.SceneManagement.SceneManager.GetActiveScene().name
-    
-    );
-}
 
 
 }
