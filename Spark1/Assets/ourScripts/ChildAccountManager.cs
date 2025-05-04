@@ -7,6 +7,9 @@ using Firebase.Firestore;
 using System.Threading.Tasks;
 using System;
 using System.Collections;
+using UnityEngine.SceneManagement;
+using System.Threading.Tasks;
+
 
 // Helper class to store child reference data
 public class ChildReference : MonoBehaviour
@@ -65,6 +68,8 @@ public class ChildAccountManager : MonoBehaviour
     public TextMeshProUGUI childModeStreakText;
     public Image childModeAvatarImage; // New: Image to show avatar in child mode
     public Button switchToParentButton;
+    public Button storyButton;
+
     
     [Header("Avatar Selection")]
     public Button avatar0Button;  // Button with avatar0 image
@@ -208,96 +213,95 @@ public class ChildAccountManager : MonoBehaviour
     }
      
     public async void LoadChildAccounts()
+{
+    try
     {
-        try
+        if (auth.CurrentUser == null)
         {
-            // Make sure user is still valid
-            if (auth.CurrentUser == null)
-            {
-                Debug.LogError("User authentication lost. Cannot load child accounts.");
-                return;
-            }
-            
-            user = auth.CurrentUser;
-            string parentUserId = user.UserId;
-            
-            Debug.Log($"📥 LoadChildAccounts for Firebase user: {parentUserId}");
+            Debug.LogError("User authentication lost. Cannot load child accounts.");
+            return;
+        }
 
+        user = auth.CurrentUser;
+        string parentUserId = user.UserId;
 
-            // Debug parent ID and authentication
-            Debug.Log($"Loading child accounts for parent: {parentUserId}");
-            
-            // First check if the parent document exists (debugging parent retrieval issue)
-            DocumentSnapshot parentDoc = await db.Collection("users").Document(parentUserId).GetSnapshotAsync();
-            if (!parentDoc.Exists)
+        Debug.Log($"📥 LoadChildAccounts for Firebase user: {parentUserId}");
+
+        DocumentSnapshot parentDoc = await db.Collection("users").Document(parentUserId).GetSnapshotAsync();
+        if (!parentDoc.Exists)
+        {
+            Debug.LogError($"Parent document does not exist for ID: {parentUserId}");
+            return;
+        }
+
+        childAccounts.Clear();
+
+        QuerySnapshot querySnapshot = await db.Collection("users")
+            .Document(parentUserId)
+            .Collection("children")
+            .GetSnapshotAsync();
+
+        Debug.Log($"Found {querySnapshot.Count} child accounts");
+
+        foreach (DocumentSnapshot childDoc in querySnapshot.Documents)
+        {
+            var childData = childDoc.ToDictionary();
+
+            ChildAccount child = new ChildAccount
             {
-                Debug.LogError($"Parent document does not exist for ID: {parentUserId}");
-                return;
+                id = childDoc.Id,
+                name = childData.TryGetValue("name", out object nameObj) ? nameObj.ToString() : "Unknown",
+                streak = 0,
+                avatarId = 0
+            };
+
+            // Load streak
+            if (childData.TryGetValue("streak", out object streakObj) && streakObj is long streakLong)
+            {
+                child.streak = (int)streakLong;
             }
-            
-            // Clear existing data before loading new data
-            childAccounts.Clear();
-            
-            // Query for all child accounts linked to this parent
-            QuerySnapshot querySnapshot = await db.Collection("users")
+           
+            if (childData.TryGetValue("lastVisitTime", out object visitObj) && visitObj is Timestamp lastVisitTimestamp)
+{
+    DateTime lastVisit = lastVisitTimestamp.ToDateTime().Date;
+    DateTime today = DateTime.UtcNow.Date;
+
+    if (lastVisit < today.AddDays(-1))
+    {
+        if (child.streak != 0)
+        {
+            DocumentReference childRef = db.Collection("users")
                 .Document(parentUserId)
                 .Collection("children")
-                .GetSnapshotAsync();
-                
-            Debug.Log($"Found {querySnapshot.Count} child accounts");
-                
-            foreach (DocumentSnapshot childDoc in querySnapshot.Documents)
-            {
-                var childData = childDoc.ToDictionary();
-                
-                ChildAccount child = new ChildAccount
-                {
-                    id = childDoc.Id,
-                    name = childData.TryGetValue("name", out object nameObj) ? nameObj.ToString() : "Unknown"
-                };
-                
-                // Get streak if it exists
-                if (childData.TryGetValue("streak", out object streakObj) && streakObj is long streakLong)
-                {
-                    child.streak = (int)streakLong;
-                }
-                
-                // Get avatarId if it exists, default to 0 if not found
-                if (childData.TryGetValue("avatarId", out object avatarObj) && avatarObj is long avatarLong)
-                {
-                    child.avatarId = (int)avatarLong;
-                }
-                else
-                {
-                    child.avatarId = 0; // Default to first avatar
-                }
-                
-                // Log the parent ID from child document (debugging parent retrieval issue)
-                if (childData.TryGetValue("parentId", out object parentIdObj))
-                {
-                    string storedParentId = parentIdObj.ToString();
-                    if (storedParentId != parentUserId)
-                    {
-                        Debug.LogWarning($"Child '{child.name}' has parentId {storedParentId} but is stored under parent {parentUserId}");
-                    }
-                }
-                
-                childAccounts.Add(child);
-                Debug.Log($"Added child: {child.name} with ID: {child.id}, avatar: {child.avatarId}");
-            }
-            
-            // Refresh the child list UI
-            RefreshChildList();
+                .Document(child.id);
 
+            await childRef.UpdateAsync("streak", 0);
+            child.streak = 0;
+            Debug.Log($"⏳ Reset streak for child {child.name}");
         }
-        catch (Exception e)
-        {
-            Debug.LogError($"Error loading child accounts: {e.Message}");
-            Debug.LogException(e);
-        }
-
-
     }
+}
+
+            // Load avatar
+            if (childData.TryGetValue("avatarId", out object avatarObj) && avatarObj is long avatarLong)
+            {
+                child.avatarId = (int)avatarLong;
+            }
+
+            childAccounts.Add(child);
+            Debug.Log($"Added child: {child.name} with ID: {child.id}, avatar: {child.avatarId}");
+        }
+
+        // Refresh UI
+        RefreshChildList();
+    }
+    catch (Exception e)
+    {
+        Debug.LogError($"Error loading child accounts: {e.Message}");
+        Debug.LogException(e);
+    }
+}
+
     
     void RefreshChildList()
     {
@@ -425,14 +429,13 @@ public class ChildAccountManager : MonoBehaviour
 
         addChildPopup.SetActive(false);
         // Clear the input field
-    childNameInput.text = "";
+        childNameInput.text = "";
 
-    // Clear and hide the error message
-    if (Error_addChildName != null)
-    {
-        Error_addChildName.text = "";
-        Error_addChildName.gameObject.SetActive(false);
-    }
+         if (Error_addChildName != null)
+         {
+          Error_addChildName.text = "";
+          Error_addChildName.gameObject.SetActive(false);
+       }
     }
     
     private void SelectAvatar(int avatarId)
@@ -453,7 +456,6 @@ public class ChildAccountManager : MonoBehaviour
     Debug.Log($"Avatar {avatarId} selected");
 }
 
-    // Get avatar sprite by ID - allows ChildItemUI to get sprites without direct references
     public Sprite GetAvatarSprite(int avatarId)
     {
         if (avatarId == 0)
@@ -533,7 +535,9 @@ public class ChildAccountManager : MonoBehaviour
                 { "createdAt", FieldValue.ServerTimestamp },
                 { "parentId", parentUserId }, // Explicitly store the parent ID for verification
                 { "avatarId", selectedAvatarId }, // Use the selected avatar ID
-                { "parentAuth", auth.CurrentUser.UserId } // Store auth user ID for debugging
+                { "parentAuth", auth.CurrentUser.UserId }, // Store auth user ID for debugging
+                { "lastVisitTime", FieldValue.ServerTimestamp },
+
             };
             
             await newChildRef.SetAsync(childData);
@@ -618,48 +622,92 @@ public class ChildAccountManager : MonoBehaviour
         Debug.Log("Switched back to parent mode");
     }
     
-    // Call this method to increment the streak for the current child
-    public async Task IncrementStreak()
+    public async Task<bool> CheckAndUpdateStreak()
+{
+    Debug.Log("📍 CheckAndUpdateStreak() started");
+
+    if (!isInChildMode || selectedChild == null)
     {
-        if (!isInChildMode || selectedChild == null)
-        {
-            Debug.LogWarning("Not in child mode or no child selected.");
-            return;
-        }
-        
-        try
-        {
-            // Make sure user is still valid
-            if (auth.CurrentUser == null)
-            {
-                Debug.LogError("User authentication lost. Cannot update streak.");
-                return;
-            }
-            
-            int newStreak = selectedChild.streak + 1;
-            
-            // Update in Firestore
-            DocumentReference childRef = db.Collection("users")
-                .Document(user.UserId)
-                .Collection("children")
-                .Document(selectedChild.id);
-                
-            await childRef.UpdateAsync("streak", newStreak);
-            
-            // Update local data
-            selectedChild.streak = newStreak;
-            
-            // Update UI
-            childModeStreakText.text = $"{newStreak}";
-            
-            Debug.Log($"Incremented streak for {selectedChild.name}: {newStreak}");
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Error updating streak: {e.Message}");
-        }
+        Debug.LogWarning("❌ Not in child mode or no selected child");
+        return false;
     }
-    
+
+    string parentId = auth.CurrentUser.UserId;
+    DocumentReference childRef = db.Collection("users")
+        .Document(parentId)
+        .Collection("children")
+        .Document(selectedChild.id);
+
+    DocumentSnapshot snapshot = await childRef.GetSnapshotAsync();
+
+    if (!snapshot.Exists)
+    {
+        Debug.LogWarning("❌ Child document not found in Firestore.");
+        return false;
+    }
+
+    var data = snapshot.ToDictionary();
+    DateTime now = DateTime.UtcNow.Date;
+    DateTime? lastVisitDate = null;
+
+    if (data.TryGetValue("lastVisitTime", out object lastVisitObj) && lastVisitObj is Timestamp ts)
+    {
+        lastVisitDate = ts.ToDateTime().Date;
+        Debug.Log("📅 Last visit: " + lastVisitDate);
+    }
+
+    Debug.Log("📅 Today: " + now);
+
+    if (selectedChild.streak == 0)
+    {
+        selectedChild.streak = 1;
+        Debug.Log("🔥 First time, streak = 1");
+    }
+    else if (lastVisitDate < now.AddDays(-1))
+    {
+        selectedChild.streak = 0;
+        Debug.Log("❌ Missed a day, reset to 0");
+    }
+    else if (lastVisitDate < now)
+    {
+        selectedChild.streak += 1;
+        Debug.Log("🔥 New day! Streak increased to " + selectedChild.streak);
+    }
+    else
+    {
+        Debug.Log("✅ Already visited today. No increment.");
+    }
+
+    await childRef.UpdateAsync(new Dictionary<string, object>
+    {
+        { "streak", selectedChild.streak },
+        { "lastVisitTime", Timestamp.FromDateTime(DateTime.UtcNow) }
+    });
+
+    Debug.Log("💾 Firestore updated");
+
+    childModeStreakText.text = $"Streak: {selectedChild.streak}";
+    return true;
+}
+
+
+
+public async void StoryButtonClicked()
+{
+    Debug.Log("🟢 StoryButtonClicked triggered");
+
+    if (selectedChild == null)
+    {
+        Debug.LogWarning("❌ No selected child");
+        return;
+    }
+
+    await CheckAndUpdateStreak(); // ✅ Update the streak safely
+}
+
+
+
+
     // Call this to get the currently active child (or null if in parent mode)
     public ChildAccount GetActiveChild()
     {
@@ -727,7 +775,7 @@ public class ChildAccountManager : MonoBehaviour
             Debug.LogException(e);
         }
     }
-   
+
 
     // Call this method to clear all child data (useful when logging out)
     public void ClearChildData()
@@ -755,6 +803,5 @@ public class ChildAccountManager : MonoBehaviour
         
         Debug.Log("Child account data cleared");
     }
-
 
 }
