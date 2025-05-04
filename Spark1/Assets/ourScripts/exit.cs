@@ -41,6 +41,9 @@ public class exit : MonoBehaviour
     {
         Debug.Log("↩️ Exiting story and restoring Start scene...");
 
+        // ✅ Resume time scale (in case it was paused)
+        Time.timeScale = 1f;
+
         // ✅ Use cached reference from LoadEnvironmentScene.cs
         if (startSceneRoot == null)
         {
@@ -79,4 +82,5 @@ public class exit : MonoBehaviour
             SceneManager.SetActiveScene(startScene);
         }
     }
+
 }
