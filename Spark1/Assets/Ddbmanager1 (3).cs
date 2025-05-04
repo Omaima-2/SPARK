@@ -50,9 +50,11 @@ public class Ddbmanager : MonoBehaviour
 
     public RawImage definitionImage;
     public GameObject storyEndingPanel; // 🎉 Assign in Inspector
-    public GameObject celeprationSparkles; // 🎉 Assign in Inspector
+    //public GameObject celeprationSparkles; // 🎉 Assign in Inspector
 
-    public Animator sparklesAnimator;
+    /// <summary>
+    /// public Animator sparklesAnimator;
+    /// </summary>
     private bool isAfterActivity = false;
 
 
@@ -514,7 +516,7 @@ public class Ddbmanager : MonoBehaviour
         {
             storyEndingPanel.SetActive(true); // Show the ending popup
             //celeprationSparkles.SetActive(true); // Show the ending sparkles 
-            sparklesAnimator.SetTrigger("end");
+            //sparklesAnimator.SetTrigger("end");
         }
         else
         {
