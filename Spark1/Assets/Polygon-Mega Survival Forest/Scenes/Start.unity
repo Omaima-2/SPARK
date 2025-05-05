@@ -1098,6 +1098,7 @@ MonoBehaviour:
   childModeStreakText: {fileID: 805125103}
   childModeAvatarImage: {fileID: 1273714802}
   switchToParentButton: {fileID: 1670602154}
+  storyButton: {fileID: 246669888}
   avatar0Button: {fileID: 4366793}
   avatar1Button: {fileID: 1278102813}
   avatar0Sprite: {fileID: 21300000, guid: cd0c6adf2a537aa4ebf3349df71e0c8c, type: 3}
@@ -1515,6 +1516,18 @@ MonoBehaviour:
       - m_Target: {fileID: 1912902324}
         m_TargetAssemblyTypeName: LoadEnvironmentScene, Assembly-CSharp
         m_MethodName: LoadStoryScene
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 170132640}
+        m_TargetAssemblyTypeName: ChildAccountManager, Assembly-CSharp
+        m_MethodName: StoryButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -11885,6 +11898,7 @@ MonoBehaviour:
   deleteAccountButton: {fileID: 1562432994}
   deleteConfirmPassword: {fileID: 1507201015}
   accountErrorText: {fileID: 61916882}
+  popupDelete: {fileID: 956591471}
 --- !u!4 &1413561152
 Transform:
   m_ObjectHideFlags: 0
@@ -13955,7 +13969,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1413561151}
         m_TargetAssemblyTypeName: FirebaseController, Assembly-CSharp
-        m_MethodName: LogoutAndDeleteUser
+        m_MethodName: DeleteUser
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

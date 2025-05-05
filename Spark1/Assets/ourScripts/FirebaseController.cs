@@ -42,6 +42,7 @@ public class FirebaseController : MonoBehaviour
     public Button deleteAccountButton;
     public InputField deleteConfirmPassword;
     public TextMeshProUGUI accountErrorText;
+    public GameObject popupDelete;
     
     // User change delegate and event
     public delegate void UserChangedEventHandler(FirebaseUser oldUser, FirebaseUser newUser);
@@ -504,140 +505,133 @@ if (deleteConfirmPassword != null)
             }
         }
     }
- public async void LogoutAndDeleteUser()
+
+
+public async void DeleteUser()
 {
-    if (auth != null && user != null)
+    if (user == null || auth == null)
     {
-        try
+        DisplayError("You need to be logged in to delete your account.", accountErrorText);
+        return;
+    }
+
+    // 1. Make sure password field is filled
+    if (string.IsNullOrEmpty(deleteConfirmPassword.text))
+    {
+        DisplayError("Please enter your password to confirm account deletion.", accountErrorText);
+        return;
+    }
+
+    // 2. Re-authenticate
+    try
+    {
+        var credential = EmailAuthProvider.GetCredential(user.Email, deleteConfirmPassword.text);
+        await user.ReauthenticateAsync(credential);
+    }
+    catch (FirebaseException ex)
+    {
+        if ((AuthError)ex.ErrorCode == AuthError.WrongPassword)
         {
-            // Store old user before deletion
-            FirebaseUser oldUser = user;
-
-            // Clear sensitive fields early
-            if (loginPassword != null)
-                loginPassword.text = "";
-            if (deleteConfirmPassword != null)
-                deleteConfirmPassword.text = "";
-
-            // Delete the user from Firebase
-            await user.DeleteAsync();
-            Debug.Log("✅ User account deleted successfully.");
-
-            // Sign out from Firebase
-            auth.SignOut();
-            user = null;
-
-            // Clear child data before triggering user change
-            if (ChildAccountManager.Instance != null)
-            {
-                ChildAccountManager.Instance.ClearChildData();
-                Debug.Log("✅ Cleared child data manually after delete.");
-            }
-
-            // Manually trigger OnUserChanged event
-            if (OnUserChanged != null)
-            {
-                OnUserChanged(oldUser, null);
-            }
-
-            // Handle UI panels
-            if (accountInfoPanel != null)
-                accountInfoPanel.SetActive(false);
-
-            loginPanel.SetActive(false);
-            homePanel.SetActive(false);
-            welcmePanel.SetActive(true);
+            DisplayError("Incorrect password. Please try again.", accountErrorText);
         }
-        catch (Exception e)
+        else
         {
-            Debug.LogError("❌ Error during delete/logout: " + e.Message);
-            DisplayError("Something went wrong while deleting your account. Please try again." , accountErrorText );
+            DisplayError("Failed to verify your password. Try again.", accountErrorText);
         }
+        return;
+    }
+
+    try
+    {
+        string userId = user.UserId;
+
+        // 3. Delete children documents (subcollection)
+        var childrenRef = db.Collection("users").Document(userId).Collection("children");
+        var childrenSnapshot = await childrenRef.GetSnapshotAsync();
+        foreach (var doc in childrenSnapshot.Documents)
+        {
+            await doc.Reference.DeleteAsync();
+        }
+
+        // 4. Delete user document
+        await db.Collection("users").Document(userId).DeleteAsync();
+
+        // 5. Delete Firebase Authentication account
+        await user.DeleteAsync();
+        Debug.Log("✅ Deleted user account and data.");
+
+        // 6. Clear everything like logout
+        user = null;
+        auth.SignOut();
+
+        // 🧹 Clear child data
+        if (ChildAccountManager.Instance != null)
+        {
+            ChildAccountManager.Instance.ClearChildData();
+        }
+
+        // 🧼 UI Cleanup
+        if (accountInfoPanel != null)
+            accountInfoPanel.SetActive(false);
+        if (editNamePanel != null)
+            editNamePanel.SetActive(false);
+
+        // Hide and reset all panels
+        homePanel.SetActive(false);
+        signupPanel.SetActive(false);
+        loginPanel.SetActive(true);
+        welcmePanel.SetActive(true);
+        popupDelete.SetActive(false);
+
+        // 🧼 Clear all input fields
+        if (loginEmail != null) loginEmail.text = "";
+        if (loginPassword != null) loginPassword.text = "";
+        if (signupEmail != null) signupEmail.text = "";
+        if (signupPassword != null) signupPassword.text = "";
+        if (signupCPassword != null) signupCPassword.text = "";
+        if (signupName != null) signupName.text = "";
+        if (deleteConfirmPassword != null) deleteConfirmPassword.text = "";
+
+        Debug.Log("✅ UI and data cleanup completed.");
+    }
+    catch (Exception e)
+    {
+        Debug.LogError("❌ Error during full account deletion: " + e.Message);
+        DisplayError("Something went wrong while deleting your account.", accountErrorText);
     }
 }
 
-    // Delete user account
-    public async void DeleteUserAccount()
-    {
-        if (user == null || auth == null)
-        {
-            DisplayError( "You need to be logged in to delete your account.", accountErrorText );
-            return;
-        }
 
-        // Check if password confirmation was provided
-        if (deleteConfirmPassword == null || string.IsNullOrEmpty(deleteConfirmPassword.text))
-        {
-            DisplayError( "Please enter your password to confirm account deletion.", accountErrorText );
-            return;
-        }
 
-        try
-        {
-            // Re-authenticate user before deletion (required by Firebase)
-            var credential = EmailAuthProvider.GetCredential(user.Email, deleteConfirmPassword.text);
-            await user.ReauthenticateAsync(credential);
-            
-            // Get user ID to delete Firestore data after auth account deletion
-            string userId = user.UserId;
-            
-            // Delete from Firebase Authentication
-            await user.DeleteAsync();
-            
-            // Delete user data from Firestore
-            await DeleteUserData(userId);
-            
-            Debug.Log("✅ User account deleted successfully");
-            
-            // Return to login screen
-            loginPanel.SetActive(true);
-            homePanel.SetActive(false);
-            if (accountInfoPanel != null)
-                accountInfoPanel.SetActive(false);
-                
-            // Clear sensitive fields
-            if (loginPassword != null)
-                loginPassword.text = "";
-            if (deleteConfirmPassword != null)
-                deleteConfirmPassword.text = "";
-        }
-        catch (FirebaseException ex)
-        {
-            // Handle specific Firebase errors
-            AuthError errorCode = (AuthError)ex.ErrorCode;
-            
-            if (errorCode == AuthError.WrongPassword)
-            {
-                DisplayError("Incorrect password. Please try again." , accountErrorText );
-            }
-            else
-            {
-                Debug.LogError("❌ Firebase error deleting account: " + ex.Message);
-                DisplayError( "Error deleting account: " + ex.Message , accountErrorText );
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("❌ Error deleting account: " + e.Message);
-            DisplayError("Something went wrong while deleting your account. Please try again." , accountErrorText );
-        }
-    }
-    
-    // Delete user data from Firestore
-    private async Task DeleteUserData(string userId)
-    {
-        try
-        {
-            // Delete user document
-            await db.Collection("users").Document(userId).DeleteAsync();
-            
-            Debug.Log("✅ User data deleted from Firestore");
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("❌ Error deleting user data from Firestore: " + e.Message);
-        }
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     #endregion
 
